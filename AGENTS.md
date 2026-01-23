@@ -1,3 +1,6 @@
+使用 drafts 目录用作临时记忆存储，它不会被提交到 git 中，可以用于存放临时计划和文档。
+
+# Toolchain
 
 Default to using Bun instead of Node.js.
 
