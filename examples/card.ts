@@ -14,7 +14,7 @@ async function main() {
 
   const canvas = await createCanvasAsync({
     width: 400,
-    height: 280,
+    height: 320,
     pixelRatio: 2,
   });
 
