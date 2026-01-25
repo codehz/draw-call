@@ -9,5 +9,6 @@ export default defineConfig({
   dts: true,
   clean: true,
   treeshake: true,
+  hash: false,
   external: ["@napi-rs/canvas"],
 });
