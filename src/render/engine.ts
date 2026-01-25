@@ -198,8 +198,8 @@ function renderText(ctx: CanvasRenderingContext2D, node: LayoutNode): void {
   else if (element.align === "right") textAlign = "right";
   ctx.textAlign = textAlign;
 
-  // 垂直基线
-  ctx.textBaseline = "top";
+  // 垂直基线 - 使用 middle 以获得更准确的垂直对齐
+  ctx.textBaseline = "middle";
 
   // 计算文本块的总高度
   const totalTextHeight = lines.length * lineHeightPx;
@@ -227,17 +227,29 @@ function renderText(ctx: CanvasRenderingContext2D, node: LayoutNode): void {
 
   // 绘制每行文本
   for (let i = 0; i < lines.length; i++) {
-    const lineY = contentY + verticalOffset + i * lineHeightPx;
+    // 使用 middle 基线时，y 坐标应该是行的中心位置
+    const lineY = contentY + verticalOffset + i * lineHeightPx + lineHeightPx / 2;
+
+    // 使用文本度量值修正 middle 基线的偏差
+    // Canvas 的 middle 基线可能不准确，使用实际度量值进行修正
+    const metrics = ctx.measureText(lines[i]);
+    const actualAscent = metrics.actualBoundingBoxAscent;
+    const actualDescent = metrics.actualBoundingBoxDescent;
+
+    // 计算实际垂直中心与 middle 基线的偏差
+    // middle 基线假设 ascent = descent，但实际字体可能不是这样
+    const middleBaselineOffset = (actualAscent - actualDescent) / 2;
+    const correctedLineY = lineY + middleBaselineOffset;
 
     // 绘制描边
     if (element.stroke) {
       ctx.strokeStyle = resolveColor(ctx, element.stroke.color, contentX, contentY, contentWidth, contentHeight);
       ctx.lineWidth = element.stroke.width;
-      ctx.strokeText(lines[i], textX, lineY);
+      ctx.strokeText(lines[i], textX, correctedLineY);
     }
 
     // 绘制填充
-    ctx.fillText(lines[i], textX, lineY);
+    ctx.fillText(lines[i], textX, correctedLineY);
   }
 
   // 清除阴影
