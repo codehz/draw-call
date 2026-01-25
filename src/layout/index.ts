@@ -1,9 +1,4 @@
-export { computeLayout, printLayout, layoutToString } from "./engine";
+export { computeLayout, layoutToString, printLayout } from "./engine";
 export type { LayoutNode } from "./engine";
-export {
-  createCanvasMeasureContext,
-  buildFontString,
-  wrapText,
-  truncateText,
-} from "./measure";
+export { buildFontString, createCanvasMeasureContext, truncateText, wrapText } from "./measure";
 export type { MeasureContext } from "./measure";

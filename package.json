@@ -2,9 +2,33 @@
   "name": "@codehz/draw-call",
   "module": "src/index.ts",
   "type": "module",
+  "scripts": {
+    "lint": "eslint --ext .ts,.tsx,.js --quiet",
+    "lint:fix": "eslint --ext .ts,.tsx,.js --fix",
+    "format": "prettier --write .",
+    "test": "bun test",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "prettier --write",
+      "eslint --fix"
+    ],
+    "*.{json,md}": [
+      "prettier --write"
+    ]
+  },
   "devDependencies": {
     "@fontpkg/unifont": "^15.0.1",
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "@typescript-eslint/eslint-plugin": "^8.0.0",
+    "@typescript-eslint/parser": "^8.0.0",
+    "eslint": "^9.0.0",
+    "eslint-plugin-prettier": "^5.0.0",
+    "husky": "^9.0.0",
+    "lint-staged": "^15.0.0",
+    "prettier": "^3.0.0",
+    "prettier-plugin-organize-imports": "^4.0.0"
   },
   "peerDependencies": {
     "typescript": "^5"

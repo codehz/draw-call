@@ -1,5 +1,5 @@
-import { test, expect, describe } from "bun:test";
-import { createCanvasAsync, Box, Text, Stack } from "./index";
+import { describe, expect, test } from "bun:test";
+import { Box, createCanvasAsync, Stack, Text } from "./index";
 
 describe("draw-call", () => {
   describe("createCanvasAsync", () => {
@@ -37,10 +37,7 @@ describe("draw-call", () => {
 
     test("should support children", () => {
       const box = Box({
-        children: [
-          Box({ width: 50, height: 50 }),
-          Box({ width: 30, height: 30 }),
-        ],
+        children: [Box({ width: 50, height: 50 }), Box({ width: 30, height: 30 })],
       });
       expect(box.children?.length).toBe(2);
     });
@@ -62,10 +59,7 @@ describe("draw-call", () => {
   describe("Stack component", () => {
     test("should create stack element", () => {
       const stack = Stack({
-        children: [
-          Box({ width: 100, height: 100, background: "#f00" }),
-          Text({ content: "Overlay" }),
-        ],
+        children: [Box({ width: 100, height: 100, background: "#f00" }), Text({ content: "Overlay" })],
       });
       expect(stack.type).toBe("stack");
       expect(stack.children.length).toBe(2);

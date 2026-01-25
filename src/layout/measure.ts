@@ -15,15 +15,12 @@ export function buildFontString(font: FontProps): string {
 }
 
 // 创建基于 Canvas 的测量上下文
-export function createCanvasMeasureContext(
-  ctx: CanvasRenderingContext2D
-): MeasureContext {
+export function createCanvasMeasureContext(ctx: CanvasRenderingContext2D): MeasureContext {
   return {
     measureText(text: string, font: FontProps) {
       ctx.font = buildFontString(font);
       const metrics = ctx.measureText(text);
-      const height =
-        metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
+      const height = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
       return {
         width: metrics.width,
         height: height || font.size || 16,
@@ -33,12 +30,7 @@ export function createCanvasMeasureContext(
 }
 
 // 文本换行
-export function wrapText(
-  ctx: MeasureContext,
-  text: string,
-  maxWidth: number,
-  font: FontProps
-): string[] {
+export function wrapText(ctx: MeasureContext, text: string, maxWidth: number, font: FontProps): string[] {
   if (maxWidth <= 0) {
     return [text];
   }

@@ -3,15 +3,12 @@
  * 运行: bun examples/card.ts
  */
 import { GlobalFonts } from "@napi-rs/canvas";
-import { createCanvasAsync, Box, Text, linearGradient } from "../src";
-import { printLayout } from "../src/layout";
 import { fileURLToPath } from "bun";
+import { Box, Text, createCanvasAsync, linearGradient } from "../src";
+import { printLayout } from "../src/layout";
 
 async function main() {
-  GlobalFonts.registerFromPath(
-    fileURLToPath(import.meta.resolve("@fontpkg/unifont/unifont-15.0.01.ttf")),
-    "unifont",
-  );
+  GlobalFonts.registerFromPath(fileURLToPath(import.meta.resolve("@fontpkg/unifont/unifont-15.0.01.ttf")), "unifont");
 
   const canvas = await createCanvasAsync({
     width: 400,
@@ -71,8 +68,7 @@ async function main() {
                   color: "#333333",
                 }),
                 Text({
-                  content:
-                    "使用类似 UI 框架的方式来绘制 Canvas 内容，支持 Flexbox 布局、文本自动换行等特性。",
+                  content: "使用类似 UI 框架的方式来绘制 Canvas 内容，支持 Flexbox 布局、文本自动换行等特性。",
                   font: { size: 14, family: "unifont" },
                   color: "#666666",
                   lineHeight: 1.6,
@@ -126,7 +122,7 @@ async function main() {
           ],
         }),
       ],
-    }),
+    })
   );
 
   // 保存到文件

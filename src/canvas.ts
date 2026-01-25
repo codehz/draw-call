@@ -1,8 +1,8 @@
-import type { Element } from "./types/components";
 import type { LayoutNode } from "./layout/engine";
 import { computeLayout } from "./layout/engine";
 import { createCanvasMeasureContext } from "./layout/measure";
 import { renderNode } from "./render/engine";
+import type { Element } from "./types/components";
 
 export interface CanvasOptions {
   width: number;
@@ -33,6 +33,7 @@ export interface DrawCallCanvas {
 }
 
 // 动态导入 @napi-rs/canvas
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
 async function loadNapiCanvas(): Promise<typeof import("@napi-rs/canvas") | null> {
   try {
     return await import("@napi-rs/canvas");
@@ -125,9 +126,7 @@ export function createCanvas(options: CanvasOptions): DrawCallCanvas {
 }
 
 // 异步创建 canvas - 用于 Node.js/Bun 环境
-export async function createCanvasAsync(
-  options: Omit<CanvasOptions, "canvas">
-): Promise<DrawCallCanvas> {
+export async function createCanvasAsync(options: Omit<CanvasOptions, "canvas">): Promise<DrawCallCanvas> {
   const { width, height, pixelRatio = 1 } = options;
 
   if (isBrowser()) {
@@ -137,15 +136,10 @@ export async function createCanvasAsync(
   // Node.js/Bun 环境，尝试加载 @napi-rs/canvas
   const napiCanvas = await loadNapiCanvas();
   if (!napiCanvas) {
-    throw new Error(
-      "@napi-rs/canvas is required in Node.js/Bun environment. Install it with: bun add @napi-rs/canvas"
-    );
+    throw new Error("@napi-rs/canvas is required in Node.js/Bun environment. Install it with: bun add @napi-rs/canvas");
   }
 
-  const canvas = napiCanvas.createCanvas(
-    width * pixelRatio,
-    height * pixelRatio
-  );
+  const canvas = napiCanvas.createCanvas(width * pixelRatio, height * pixelRatio);
   const ctx = canvas.getContext("2d");
 
   // 应用像素比缩放

@@ -4,13 +4,7 @@ import type { Size, Spacing } from "./base";
 export type FlexDirection = "row" | "column" | "row-reverse" | "column-reverse";
 
 // 主轴对齐
-export type JustifyContent =
-  | "start"
-  | "end"
-  | "center"
-  | "space-between"
-  | "space-around"
-  | "space-evenly";
+export type JustifyContent = "start" | "end" | "center" | "space-between" | "space-around" | "space-evenly";
 
 // 交叉轴对齐
 export type AlignItems = "start" | "end" | "center" | "stretch" | "baseline";
@@ -62,11 +56,7 @@ export interface LayoutConstraints {
 }
 
 // 计算可用空间大小
-export function resolveSize(
-  size: Size | undefined,
-  available: number,
-  auto: number
-): number {
+export function resolveSize(size: Size | undefined, available: number, auto: number): number {
   if (size === undefined || size === "auto") {
     return auto;
   }

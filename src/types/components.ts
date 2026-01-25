@@ -1,5 +1,5 @@
-import type { Color, Border, Shadow, FontProps, StrokeProps } from "./base";
-import type { LayoutProps, ContainerLayoutProps } from "./layout";
+import type { Border, Color, FontProps, Shadow, StrokeProps } from "./base";
+import type { ContainerLayoutProps, LayoutProps } from "./layout";
 
 // 元素类型标识
 export type ElementType = "box" | "text" | "image" | "shape" | "stack";
@@ -60,13 +60,7 @@ export interface ImageElement extends ElementBase, ImageProps {
 }
 
 // Shape 类型
-export type ShapeType =
-  | "rect"
-  | "circle"
-  | "ellipse"
-  | "line"
-  | "polygon"
-  | "path";
+export type ShapeType = "rect" | "circle" | "ellipse" | "line" | "polygon" | "path";
 
 // Shape 组件属性
 export interface ShapeProps extends LayoutProps {
@@ -97,12 +91,7 @@ export interface StackElement extends ElementBase, StackProps {
 }
 
 // 所有元素类型联合
-export type Element =
-  | BoxElement
-  | TextElement
-  | ImageElement
-  | ShapeElement
-  | StackElement;
+export type Element = BoxElement | TextElement | ImageElement | ShapeElement | StackElement;
 
 // 组件工厂函数类型
 export type ComponentFactory<Props, El extends Element> = (props: Props) => El;

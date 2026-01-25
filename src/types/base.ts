@@ -35,10 +35,7 @@ export type GradientDescriptor = LinearGradientDescriptor | RadialGradientDescri
 export type Color = string | CanvasGradient | CanvasPattern | GradientDescriptor;
 
 // 辅助函数：创建线性渐变描述符
-export function linearGradient(
-  angle: number,
-  ...stops: (string | [number, string])[]
-): LinearGradientDescriptor {
+export function linearGradient(angle: number, ...stops: (string | [number, string])[]): LinearGradientDescriptor {
   const colorStops: ColorStop[] = stops.map((stop, index) => {
     if (typeof stop === "string") {
       // 自动计算偏移量
@@ -143,9 +140,7 @@ export interface NormalizedSpacing {
 }
 
 // 辅助函数：规范化 Spacing
-export function normalizeSpacing(
-  value: number | Spacing | undefined
-): NormalizedSpacing {
+export function normalizeSpacing(value: number | Spacing | undefined): NormalizedSpacing {
   if (value === undefined) {
     return { top: 0, right: 0, bottom: 0, left: 0 };
   }
