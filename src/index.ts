@@ -5,6 +5,9 @@ export type { CanvasOptions, DrawCallCanvas, LayoutSize } from "./canvas";
 // 组件
 export { Box, Text, Stack } from "./components";
 
+// 渐变辅助函数
+export { linearGradient, radialGradient } from "./types/base";
+
 // 类型导出
 export type {
   Size,
@@ -15,6 +18,10 @@ export type {
   FontProps,
   StrokeProps,
   Bounds,
+  ColorStop,
+  LinearGradientDescriptor,
+  RadialGradientDescriptor,
+  GradientDescriptor,
 } from "./types/base";
 
 export type {

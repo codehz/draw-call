@@ -1,8 +1,90 @@
 // 尺寸单位
 export type Size = number | `${number}%` | "auto" | "fill";
 
+// 渐变色标
+export interface ColorStop {
+  offset: number; // 0-1
+  color: string;
+}
+
+// 线性渐变描述符
+export interface LinearGradientDescriptor {
+  type: "linear-gradient";
+  angle: number; // 角度（度）
+  stops: ColorStop[];
+}
+
+// 径向渐变描述符
+export interface RadialGradientDescriptor {
+  type: "radial-gradient";
+  // 起始圆（可选，默认为中心点半径0）
+  startX?: number; // 0-1，相对于元素宽度
+  startY?: number; // 0-1，相对于元素高度
+  startRadius?: number; // 相对于元素对角线长度的比例
+  // 结束圆
+  endX?: number; // 0-1，相对于元素宽度
+  endY?: number; // 0-1，相对于元素高度
+  endRadius?: number; // 相对于元素对角线长度的比例
+  stops: ColorStop[];
+}
+
+// 渐变描述符
+export type GradientDescriptor = LinearGradientDescriptor | RadialGradientDescriptor;
+
 // 颜色类型 - 使用 string 以兼容浏览器和 Node
-export type Color = string | CanvasGradient | CanvasPattern;
+export type Color = string | CanvasGradient | CanvasPattern | GradientDescriptor;
+
+// 辅助函数：创建线性渐变描述符
+export function linearGradient(
+  angle: number,
+  ...stops: (string | [number, string])[]
+): LinearGradientDescriptor {
+  const colorStops: ColorStop[] = stops.map((stop, index) => {
+    if (typeof stop === "string") {
+      // 自动计算偏移量
+      return {
+        offset: stops.length > 1 ? index / (stops.length - 1) : 0,
+        color: stop,
+      };
+    }
+    return { offset: stop[0], color: stop[1] };
+  });
+
+  return {
+    type: "linear-gradient",
+    angle,
+    stops: colorStops,
+  };
+}
+
+// 辅助函数：创建径向渐变描述符
+export function radialGradient(
+  options: {
+    startX?: number;
+    startY?: number;
+    startRadius?: number;
+    endX?: number;
+    endY?: number;
+    endRadius?: number;
+  },
+  ...stops: (string | [number, string])[]
+): RadialGradientDescriptor {
+  const colorStops: ColorStop[] = stops.map((stop, index) => {
+    if (typeof stop === "string") {
+      return {
+        offset: stops.length > 1 ? index / (stops.length - 1) : 0,
+        color: stop,
+      };
+    }
+    return { offset: stop[0], color: stop[1] };
+  });
+
+  return {
+    type: "radial-gradient",
+    ...options,
+    stops: colorStops,
+  };
+}
 
 // 边距/内边距
 export interface Spacing {

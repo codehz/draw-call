@@ -3,7 +3,7 @@
  * 运行: bun examples/card.ts
  */
 import { GlobalFonts } from "@napi-rs/canvas";
-import { createCanvasAsync, Box, Text } from "../src";
+import { createCanvasAsync, Box, Text, linearGradient } from "../src";
 import { fileURLToPath } from "bun";
 
 async function main() {
@@ -40,7 +40,7 @@ async function main() {
             // 卡片头部
             Box({
               height: 100,
-              background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+              background: linearGradient(135, "#667eea", "#764ba2"),
               padding: 20,
               justify: "end",
               align: "end",
