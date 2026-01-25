@@ -2,7 +2,7 @@
  * draw-call 网页演示
  * 展示库的各项功能：逐句布局、样式、文本排版等
  */
-import { Box, Stack, Text, createCanvas, linearGradient } from "../src";
+import { Box, Text, createCanvas, linearGradient } from "../src";
 
 // 获取 canvas 元素并设置尺寸
 const canvasEl = document.getElementById("canvas") as HTMLCanvasElement;
@@ -44,7 +44,7 @@ canvas.render(
         align: "start",
         children: [
           // 标题部分
-          Stack({
+          Box({
             direction: "column",
             gap: 8,
             children: [
@@ -62,7 +62,7 @@ canvas.render(
           }),
 
           // 功能列表
-          Stack({
+          Box({
             direction: "column",
             gap: 12,
             children: [
