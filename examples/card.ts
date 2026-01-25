@@ -4,10 +4,11 @@
  */
 import { GlobalFonts } from "@napi-rs/canvas";
 import { createCanvasAsync, Box, Text, linearGradient } from "../src";
+import { printLayout } from "../src/layout";
 import { fileURLToPath } from "bun";
 
 async function main() {
-  const fontRegister = GlobalFonts.registerFromPath(
+  GlobalFonts.registerFromPath(
     fileURLToPath(import.meta.resolve("@fontpkg/unifont/unifont-15.0.01.ttf")),
     "unifont",
   );
@@ -19,7 +20,7 @@ async function main() {
   });
 
   // 绘制背景
-  canvas.render(
+  const layout = canvas.render(
     Box({
       width: "fill",
       height: "fill",
@@ -132,6 +133,10 @@ async function main() {
   const buffer = await canvas.toBuffer("image/png");
   await Bun.write("examples/card.png", buffer);
   console.log("Card saved to examples/card.png");
+
+  // 美观打印布局树
+  console.log("\n=== Layout Tree ===");
+  printLayout(layout);
 }
 
 main().catch(console.error);

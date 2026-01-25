@@ -1,4 +1,4 @@
-export { computeLayout } from "./engine";
+export { computeLayout, printLayout, layoutToString } from "./engine";
 export type { LayoutNode } from "./engine";
 export {
   createCanvasMeasureContext,
