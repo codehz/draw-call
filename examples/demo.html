@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>draw-call 演示</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial,
+          "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
+          "Noto Color Emoji";
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+      }
+
+      .container {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        padding: 40px;
+        max-width: 800px;
+        width: 100%;
+      }
+
+      h1 {
+        margin-bottom: 10px;
+        color: #333;
+        font-size: 28px;
+      }
+
+      .subtitle {
+        color: #666;
+        margin-bottom: 30px;
+        font-size: 14px;
+      }
+
+      .canvas-wrapper {
+        background: #f9f9f9;
+        border-radius: 12px;
+        padding: 20px;
+        border: 1px solid #e0e0e0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: 30px;
+        min-height: 420px;
+      }
+
+      canvas {
+        max-width: 100%;
+        height: auto;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+
+      .features {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin-top: 30px;
+      }
+
+      .feature-item {
+        background: #f5f5f5;
+        padding: 12px;
+        border-radius: 8px;
+        font-size: 12px;
+        color: #666;
+        border-left: 3px solid #667eea;
+      }
+
+      .feature-item strong {
+        color: #333;
+      }
+
+      .loading {
+        text-align: center;
+        color: #999;
+        font-size: 14px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🎨 draw-call 演示</h1>
+      <p class="subtitle">使用声明式 Canvas 绘图库展示现代 UI 绘制能力</p>
+
+      <div class="canvas-wrapper">
+        <canvas id="canvas"></canvas>
+      </div>
+
+      <div class="features">
+        <div class="feature-item">
+          <strong>📐 Flexbox 布局</strong><br />支持现代化布局引擎
+        </div>
+        <div class="feature-item">
+          <strong>🎨 丰富样式</strong><br />背景、边框、阴影、渐变等
+        </div>
+        <div class="feature-item">
+          <strong>📝 文本排版</strong><br />支持换行、对齐、字体自定义
+        </div>
+        <div class="feature-item">
+          <strong>🎯 声明式 API</strong><br />类似 React 的组件化方式
+        </div>
+        <div class="feature-item">
+          <strong>✨ 高清显示</strong><br />支持高 DPI 设备自适应
+        </div>
+        <div class="feature-item">
+          <strong>🚀 TypeScript</strong><br />完整的类型支持和开发体验
+        </div>
+      </div>
+    </div>
+
+    <script src="demo.ts"></script>
+  </body>
+</html>
