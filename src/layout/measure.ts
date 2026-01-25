@@ -2,7 +2,7 @@ import type { FontProps } from "../types/base";
 
 // 测量上下文接口 - 抽象 Canvas 测量 API
 export interface MeasureContext {
-  measureText(text: string, font: FontProps): { width: number; height: number };
+  measureText(text: string, font: FontProps): { width: number; height: number; offset: number };
 }
 
 // 构建字体字符串
@@ -19,28 +19,40 @@ export function createCanvasMeasureContext(ctx: CanvasRenderingContext2D): Measu
   return {
     measureText(text: string, font: FontProps) {
       ctx.font = buildFontString(font);
+      // 使用 middle 基线测量，与渲染阶段保持一致
+      ctx.textBaseline = "middle";
       const metrics = ctx.measureText(text);
       const height = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
       return {
         width: metrics.width,
         height: height || font.size || 16,
+        offset: (metrics.actualBoundingBoxAscent - metrics.actualBoundingBoxDescent) / 2,
       };
     },
   };
 }
 
+// 文本换行结果
+export interface WrapTextResult {
+  lines: string[];
+  offsets: number[];
+}
+
 // 文本换行
-export function wrapText(ctx: MeasureContext, text: string, maxWidth: number, font: FontProps): string[] {
+export function wrapText(ctx: MeasureContext, text: string, maxWidth: number, font: FontProps): WrapTextResult {
   if (maxWidth <= 0) {
-    return [text];
+    const { offset } = ctx.measureText(text, font);
+    return { lines: [text], offsets: [offset] };
   }
 
   const lines: string[] = [];
+  const offsets: number[] = [];
   const paragraphs = text.split("\n");
 
   for (const paragraph of paragraphs) {
     if (paragraph === "") {
       lines.push("");
+      offsets.push(0);
       continue;
     }
 
@@ -52,7 +64,9 @@ export function wrapText(ctx: MeasureContext, text: string, maxWidth: number, fo
       const { width } = ctx.measureText(testLine, font);
 
       if (width > maxWidth && currentLine !== "") {
-        lines.push(currentLine.trim());
+        const trimmed = currentLine.trim();
+        lines.push(trimmed);
+        offsets.push(ctx.measureText(trimmed, font).offset);
         currentLine = word.trimStart();
       } else {
         currentLine = testLine;
@@ -60,11 +74,19 @@ export function wrapText(ctx: MeasureContext, text: string, maxWidth: number, fo
     }
 
     if (currentLine) {
-      lines.push(currentLine.trim());
+      const trimmed = currentLine.trim();
+      lines.push(trimmed);
+      offsets.push(ctx.measureText(trimmed, font).offset);
     }
   }
 
-  return lines.length > 0 ? lines : [""];
+  return lines.length > 0 ? { lines, offsets } : { lines: [""], offsets: [0] };
+}
+
+// 截断文本结果
+export interface TruncateTextResult {
+  text: string;
+  offset: number;
 }
 
 // 截断文本
@@ -74,17 +96,18 @@ export function truncateText(
   maxWidth: number,
   font: FontProps,
   ellipsis: string = "..."
-): string {
-  const { width } = ctx.measureText(text, font);
-  if (width <= maxWidth) {
-    return text;
+): TruncateTextResult {
+  const measured = ctx.measureText(text, font);
+  if (measured.width <= maxWidth) {
+    return { text, offset: measured.offset };
   }
 
   const ellipsisWidth = ctx.measureText(ellipsis, font).width;
   const availableWidth = maxWidth - ellipsisWidth;
 
   if (availableWidth <= 0) {
-    return ellipsis;
+    const { offset } = ctx.measureText(ellipsis, font);
+    return { text: ellipsis, offset };
   }
 
   let left = 0;
@@ -102,5 +125,7 @@ export function truncateText(
     }
   }
 
-  return text.slice(0, left) + ellipsis;
+  const result = text.slice(0, left) + ellipsis;
+  const { offset } = ctx.measureText(result, font);
+  return { text: result, offset };
 }

@@ -230,15 +230,9 @@ function renderText(ctx: CanvasRenderingContext2D, node: LayoutNode): void {
     // 使用 middle 基线时，y 坐标应该是行的中心位置
     const lineY = contentY + verticalOffset + i * lineHeightPx + lineHeightPx / 2;
 
-    // 使用文本度量值修正 middle 基线的偏差
+    // 使用布局阶段计算的基线偏移量修正 middle 基线的偏差
     // Canvas 的 middle 基线可能不准确，使用实际度量值进行修正
-    const metrics = ctx.measureText(lines[i]);
-    const actualAscent = metrics.actualBoundingBoxAscent;
-    const actualDescent = metrics.actualBoundingBoxDescent;
-
-    // 计算实际垂直中心与 middle 基线的偏差
-    // middle 基线假设 ascent = descent，但实际字体可能不是这样
-    const middleBaselineOffset = (actualAscent - actualDescent) / 2;
+    const middleBaselineOffset = node.lineOffsets?.[i] ?? 0;
     const correctedLineY = lineY + middleBaselineOffset;
 
     // 绘制描边

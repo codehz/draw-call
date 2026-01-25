@@ -13,6 +13,8 @@ export interface LayoutNode {
   children: LayoutNode[];
   // 文本特有属性
   lines?: string[];
+  // 每行文本的基线偏移量（用于修正 middle 基线）
+  lineOffsets?: number[];
 }
 
 // 计算元素的固有尺寸（不依赖父容器的尺寸）
@@ -30,7 +32,7 @@ function measureIntrinsicSize(
 
       // 如果设置了 wrap 且有可用宽度，进行换行计算
       if (element.wrap && availableWidth > 0 && availableWidth < Infinity) {
-        const lines = wrapText(ctx, element.content, availableWidth, font);
+        const { lines } = wrapText(ctx, element.content, availableWidth, font);
         const { width: maxLineWidth } = lines.reduce(
           (max, line) => {
             const { width } = ctx.measureText(line, font);
@@ -187,20 +189,28 @@ export function computeLayout(
   if (element.type === "text") {
     const font = element.font ?? {};
     if (element.wrap && contentWidth > 0) {
-      let lines = wrapText(ctx, element.content, contentWidth, font);
+      let { lines, offsets } = wrapText(ctx, element.content, contentWidth, font);
       if (element.maxLines && lines.length > element.maxLines) {
         lines = lines.slice(0, element.maxLines);
+        offsets = offsets.slice(0, element.maxLines);
         if (element.ellipsis && lines.length > 0) {
-          lines[lines.length - 1] = truncateText(ctx, lines[lines.length - 1], contentWidth, font);
+          const lastIdx = lines.length - 1;
+          const truncated = truncateText(ctx, lines[lastIdx], contentWidth, font);
+          lines[lastIdx] = truncated.text;
+          offsets[lastIdx] = truncated.offset;
         }
       }
       node.lines = lines;
+      node.lineOffsets = offsets;
     } else {
-      let text = element.content;
-      if (element.ellipsis && contentWidth > 0) {
-        text = truncateText(ctx, text, contentWidth, font);
-      }
+      const { text, offset } = truncateText(
+        ctx,
+        element.content,
+        contentWidth > 0 && element.ellipsis ? contentWidth : Infinity,
+        font
+      );
       node.lines = [text];
+      node.lineOffsets = [offset];
     }
   }
 
