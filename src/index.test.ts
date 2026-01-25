@@ -1,17 +1,18 @@
 import { describe, expect, test } from "bun:test";
-import { Box, createCanvasAsync, Stack, Text } from "./index";
+import { Box, Stack, Text } from "./index";
+import { createCanvas } from "./node";
 
 describe("draw-call", () => {
-  describe("createCanvasAsync", () => {
+  describe("createCanvas", () => {
     test("should create canvas with specified dimensions", async () => {
-      const canvas = await createCanvasAsync({ width: 800, height: 600 });
+      const canvas = await createCanvas({ width: 800, height: 600 });
       expect(canvas.width).toBe(800);
       expect(canvas.height).toBe(600);
       expect(canvas.pixelRatio).toBe(1);
     });
 
     test("should support pixel ratio", async () => {
-      const canvas = await createCanvasAsync({
+      const canvas = await createCanvas({
         width: 400,
         height: 300,
         pixelRatio: 2,
@@ -68,7 +69,7 @@ describe("draw-call", () => {
 
   describe("render", () => {
     test("should render simple box", async () => {
-      const canvas = await createCanvasAsync({ width: 200, height: 200 });
+      const canvas = await createCanvas({ width: 200, height: 200 });
       canvas.render(
         Box({
           width: 100,
@@ -81,7 +82,7 @@ describe("draw-call", () => {
     });
 
     test("should render nested boxes", async () => {
-      const canvas = await createCanvasAsync({ width: 400, height: 300 });
+      const canvas = await createCanvas({ width: 400, height: 300 });
       canvas.render(
         Box({
           width: "fill",
@@ -106,7 +107,7 @@ describe("draw-call", () => {
     });
 
     test("should render text", async () => {
-      const canvas = await createCanvasAsync({ width: 300, height: 100 });
+      const canvas = await createCanvas({ width: 300, height: 100 });
       canvas.render(
         Box({
           width: "fill",
@@ -125,7 +126,7 @@ describe("draw-call", () => {
     });
 
     test("should render card layout", async () => {
-      const canvas = await createCanvasAsync({ width: 400, height: 300 });
+      const canvas = await createCanvas({ width: 400, height: 300 });
       canvas.render(
         Box({
           width: 360,
@@ -164,7 +165,7 @@ describe("draw-call", () => {
     });
 
     test("should support flex justify content", async () => {
-      const canvas = await createCanvasAsync({ width: 400, height: 100 });
+      const canvas = await createCanvas({ width: 400, height: 100 });
       canvas.render(
         Box({
           width: "fill",
@@ -183,7 +184,7 @@ describe("draw-call", () => {
     });
 
     test("should support flex align items", async () => {
-      const canvas = await createCanvasAsync({ width: 200, height: 200 });
+      const canvas = await createCanvas({ width: 200, height: 200 });
       canvas.render(
         Box({
           width: "fill",
@@ -203,7 +204,7 @@ describe("draw-call", () => {
     });
 
     test("should output to buffer", async () => {
-      const canvas = await createCanvasAsync({ width: 100, height: 100 });
+      const canvas = await createCanvas({ width: 100, height: 100 });
       canvas.render(
         Box({
           width: "fill",
