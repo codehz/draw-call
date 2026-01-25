@@ -111,9 +111,13 @@ function measureIntrinsicSize(
         }
       }
 
+      // 如果明确设置了数值尺寸，优先使用
+      const intrinsicWidth = contentWidth + padding.left + padding.right;
+      const intrinsicHeight = contentHeight + padding.top + padding.bottom;
+
       return {
-        width: contentWidth + padding.left + padding.right,
-        height: contentHeight + padding.top + padding.bottom,
+        width: typeof element.width === "number" ? element.width : intrinsicWidth,
+        height: typeof element.height === "number" ? element.height : intrinsicHeight,
       };
     }
 
@@ -149,7 +153,7 @@ export function computeLayout(
   const availableHeight = constraints.maxHeight - margin.top - margin.bottom;
 
   // 测量固有尺寸
-  const intrinsic = measureIntrinsicSize(element, ctx, availableWidth - padding.left - padding.right);
+  const intrinsic = measureIntrinsicSize(element, ctx, availableWidth);
 
   // 解析宽高
   // 当 minWidth === maxWidth 时，说明父容器（Flex）强制了宽度，应该直接使用约束值
