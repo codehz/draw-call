@@ -2,9 +2,16 @@
  * 示例：使用 draw-call 绘制一个卡片
  * 运行: bun examples/card.ts
  */
+import { GlobalFonts } from "@napi-rs/canvas";
 import { createCanvasAsync, Box, Text } from "../src";
+import { fileURLToPath } from "bun";
 
 async function main() {
+  const fontRegister = GlobalFonts.registerFromPath(
+    fileURLToPath(import.meta.resolve("@fontpkg/unifont/unifont-15.0.01.ttf")),
+    "unifont",
+  );
+
   const canvas = await createCanvasAsync({
     width: 400,
     height: 280,
@@ -40,9 +47,14 @@ async function main() {
               children: [
                 Text({
                   content: "draw-call",
-                  font: { size: 28, weight: "bold", family: "sans-serif" },
+                  font: { size: 28, weight: "bold", family: "unifont" },
                   color: "#ffffff",
-                  shadow: { offsetX: 1, offsetY: 1, blur: 2, color: "rgba(0,0,0,0.3)" },
+                  shadow: {
+                    offsetX: 1,
+                    offsetY: 1,
+                    blur: 2,
+                    color: "rgba(0,0,0,0.3)",
+                  },
                 }),
               ],
             }),
@@ -54,13 +66,13 @@ async function main() {
               children: [
                 Text({
                   content: "声明式 Canvas 绘图",
-                  font: { size: 18, weight: "bold" },
+                  font: { size: 18, weight: "bold", family: "unifont" },
                   color: "#333333",
                 }),
                 Text({
                   content:
                     "使用类似 UI 框架的方式来绘制 Canvas 内容，支持 Flexbox 布局、文本自动换行等特性。",
-                  font: { size: 14 },
+                  font: { size: 14, family: "unifont" },
                   color: "#666666",
                   lineHeight: 1.6,
                   wrap: true,
@@ -77,7 +89,7 @@ async function main() {
                       children: [
                         Text({
                           content: "Canvas",
-                          font: { size: 12 },
+                          font: { size: 12, family: "unifont" },
                           color: "#1890ff",
                         }),
                       ],
@@ -89,7 +101,7 @@ async function main() {
                       children: [
                         Text({
                           content: "TypeScript",
-                          font: { size: 12 },
+                          font: { size: 12, family: "unifont" },
                           color: "#52c41a",
                         }),
                       ],
@@ -101,7 +113,7 @@ async function main() {
                       children: [
                         Text({
                           content: "声明式",
-                          font: { size: 12 },
+                          font: { size: 12, family: "unifont" },
                           color: "#fa8c16",
                         }),
                       ],
@@ -113,7 +125,7 @@ async function main() {
           ],
         }),
       ],
-    })
+    }),
   );
 
   // 保存到文件

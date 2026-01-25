@@ -3,6 +3,7 @@
   "module": "src/index.ts",
   "type": "module",
   "devDependencies": {
+    "@fontpkg/unifont": "^15.0.1",
     "@types/bun": "latest"
   },
   "peerDependencies": {
