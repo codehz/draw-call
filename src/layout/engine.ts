@@ -152,8 +152,13 @@ export function computeLayout(
   const intrinsic = measureIntrinsicSize(element, ctx, availableWidth - padding.left - padding.right);
 
   // 解析宽高
-  let width = resolveSize(element.width, availableWidth, intrinsic.width);
-  let height = resolveSize(element.height, availableHeight, intrinsic.height);
+  // 当 minWidth === maxWidth 时，说明父容器（Flex）强制了宽度，应该直接使用约束值
+  let width = constraints.minWidth === constraints.maxWidth && constraints.minWidth > 0
+    ? constraints.maxWidth - margin.left - margin.right
+    : resolveSize(element.width, availableWidth, intrinsic.width);
+  let height = constraints.minHeight === constraints.maxHeight && constraints.minHeight > 0
+    ? constraints.maxHeight - margin.top - margin.bottom
+    : resolveSize(element.height, availableHeight, intrinsic.height);
 
   // 应用 min/max 约束
   if (element.minWidth !== undefined) width = Math.max(width, element.minWidth);
@@ -241,7 +246,7 @@ export function computeLayout(
       // Box: Flex 布局
       const direction = element.direction ?? "row";
       const justify = element.justify ?? "start";
-      const align = element.align ?? "start";
+      const align = element.align ?? "stretch";
       const gap = element.gap ?? 0;
       const isRow = direction === "row" || direction === "row-reverse";
       const isReverse =
@@ -283,13 +288,26 @@ export function computeLayout(
               : contentWidth - childMargin.left - childMargin.right
           );
 
+          // 判断是否需要在交叉轴 stretch
+          // 当元素在交叉轴上没有指定尺寸且 align="stretch" 时，应该拉伸
+          const shouldStretchWidth = !isRow && child.width === undefined && align === "stretch";
+          const shouldStretchHeight = isRow && child.height === undefined && align === "stretch";
+
           // 解析明确指定的尺寸
-          const w = sizeNeedsParent(child.width)
+          let w = sizeNeedsParent(child.width)
             ? resolveSize(child.width, contentWidth - childMargin.left - childMargin.right, size.width)
             : resolveSize(child.width, 0, size.width);
-          const h = sizeNeedsParent(child.height)
+          let h = sizeNeedsParent(child.height)
             ? resolveSize(child.height, contentHeight - childMargin.top - childMargin.bottom, size.height)
             : resolveSize(child.height, 0, size.height);
+
+          // 应用 stretch
+          if (shouldStretchWidth) {
+            w = contentWidth - childMargin.left - childMargin.right;
+          }
+          if (shouldStretchHeight) {
+            h = contentHeight - childMargin.top - childMargin.bottom;
+          }
 
           if (isRow) {
             totalFixed += w + childMargin.left + childMargin.right;
@@ -429,14 +447,22 @@ export function computeLayout(
           ? contentY + crossOffset + info.margin.top
           : contentY + mainOffset + info.margin.top;
 
+        // 处理 stretch 对约束的影响
+        const stretchWidth = !isRow && info.element.width === undefined && align === "stretch" 
+          ? contentWidth - info.margin.left - info.margin.right
+          : null;
+        const stretchHeight = isRow && info.element.height === undefined && align === "stretch"
+          ? contentHeight - info.margin.top - info.margin.bottom
+          : null;
+
         const childNode = computeLayout(
           info.element,
           ctx,
           {
-            minWidth: 0,
-            maxWidth: info.width,
-            minHeight: 0,
-            maxHeight: info.height,
+            minWidth: stretchWidth ?? 0,
+            maxWidth: stretchWidth ?? info.width,
+            minHeight: stretchHeight ?? 0,
+            maxHeight: stretchHeight ?? info.height,
           },
           childX - info.margin.left,
           childY - info.margin.top
