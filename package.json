@@ -41,5 +41,6 @@
   },
   "optionalDependencies": {
     "@napi-rs/canvas": "^0.1.88"
-  }
+  },
+  "version": "0.1.0"
 }
