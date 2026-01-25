@@ -11,15 +11,29 @@ pkg.main = "./index.cjs";
 pkg.module = "./index.mjs";
 pkg.types = "./index.d.cts";
 pkg.exports = {
-  require: {
-    types: "./index.d.cts",
-    import: "./index.cjs",
-    default: "./index.cjs",
+  ".": {
+    require: {
+      types: "./index.d.cts",
+      import: "./index.cjs",
+      default: "./index.cjs",
+    },
+    import: {
+      types: "./index.d.mts",
+      import: "./index.mjs",
+      default: "./index.mjs",
+    },
   },
-  import: {
-    types: "./index.d.mts",
-    import: "./index.mjs",
-    default: "./index.mjs",
+  "./node": {
+    require: {
+      types: "./node.d.cts",
+      import: "./node.cjs",
+      default: "./node.cjs",
+    },
+    import: {
+      types: "./node.d.mts",
+      import: "./node.mjs",
+      default: "./node.mjs",
+    },
   },
 };
 

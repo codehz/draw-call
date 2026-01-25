@@ -1,5 +1,5 @@
-// 主入口文件
-export { createCanvas, createCanvasAsync } from "./canvas";
+// 主入口文件 - 浏览器环境
+export { createCanvas } from "./canvas";
 export type { CanvasOptions, DrawCallCanvas, LayoutSize } from "./canvas";
 
 // 组件

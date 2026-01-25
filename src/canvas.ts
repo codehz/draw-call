@@ -32,22 +32,11 @@ export interface DrawCallCanvas {
   toBuffer(type?: "image/png" | "image/jpeg"): Promise<Buffer>;
 }
 
-// 动态导入 @napi-rs/canvas
-// eslint-disable-next-line @typescript-eslint/consistent-type-imports
-async function loadNapiCanvas(): Promise<typeof import("@napi-rs/canvas") | null> {
-  try {
-    return await import("@napi-rs/canvas");
-  } catch {
-    return null;
-  }
-}
-
-// 检测是否在浏览器环境
-function isBrowser(): boolean {
-  return typeof window !== "undefined" && typeof document !== "undefined";
-}
-
-// 同步创建 canvas - 用于已有 canvas 实例的场景
+/**
+ * 创建适用于浏览器环境的 Canvas
+ *
+ * 在浏览器环境中使用，支持传入已有的 canvas 实例
+ */
 export function createCanvas(options: CanvasOptions): DrawCallCanvas {
   const { width, height, pixelRatio = 1 } = options;
 
@@ -61,16 +50,12 @@ export function createCanvas(options: CanvasOptions): DrawCallCanvas {
 
   if (options.canvas) {
     canvas = options.canvas;
-  } else if (isBrowser()) {
-    // 浏览器环境
+  } else {
+    // 浏览器环境，创建新的 canvas 元素
     const el = document.createElement("canvas");
     el.width = width * pixelRatio;
     el.height = height * pixelRatio;
     canvas = el;
-  } else {
-    throw new Error(
-      "No canvas provided. In Node.js/Bun environment, use createCanvasAsync() or provide a canvas instance."
-    );
   }
 
   const ctx = canvas.getContext("2d");
@@ -121,65 +106,6 @@ export function createCanvas(options: CanvasOptions): DrawCallCanvas {
         return canvas.toBuffer(type);
       }
       throw new Error("toBuffer not supported in this environment");
-    },
-  };
-}
-
-// 异步创建 canvas - 用于 Node.js/Bun 环境
-export async function createCanvasAsync(options: Omit<CanvasOptions, "canvas">): Promise<DrawCallCanvas> {
-  const { width, height, pixelRatio = 1 } = options;
-
-  if (isBrowser()) {
-    return createCanvas(options);
-  }
-
-  // Node.js/Bun 环境，尝试加载 @napi-rs/canvas
-  const napiCanvas = await loadNapiCanvas();
-  if (!napiCanvas) {
-    throw new Error("@napi-rs/canvas is required in Node.js/Bun environment. Install it with: bun add @napi-rs/canvas");
-  }
-
-  const canvas = napiCanvas.createCanvas(width * pixelRatio, height * pixelRatio);
-  const ctx = canvas.getContext("2d");
-
-  // 应用像素比缩放
-  if (pixelRatio !== 1) {
-    ctx.scale(pixelRatio, pixelRatio);
-  }
-
-  const measureCtx = createCanvasMeasureContext(ctx as unknown as CanvasRenderingContext2D);
-
-  return {
-    width,
-    height,
-    pixelRatio,
-
-    render(element: Element): LayoutNode {
-      const layoutTree = computeLayout(element, measureCtx, {
-        minWidth: 0,
-        maxWidth: width,
-        minHeight: 0,
-        maxHeight: height,
-      });
-      renderNode(ctx as unknown as CanvasRenderingContext2D, layoutTree);
-      return layoutTree;
-    },
-
-    clear(): void {
-      ctx.clearRect(0, 0, width, height);
-    },
-
-    getContext(): CanvasRenderingContext2D {
-      return ctx as unknown as CanvasRenderingContext2D;
-    },
-
-    toDataURL(type?: string, quality?: number): string {
-      return canvas.toDataURL(type as "image/png", quality);
-    },
-
-    async toBuffer(type: "image/png" | "image/jpeg" = "image/png"): Promise<Buffer> {
-      // @ts-expect-error 类型不匹配问题，强制转换
-      return canvas.toBuffer(type);
     },
   };
 }
