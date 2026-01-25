@@ -15,11 +15,16 @@ export interface CanvasOptions {
   };
 }
 
+export interface LayoutSize {
+  width: number;
+  height: number;
+}
+
 export interface DrawCallCanvas {
   readonly width: number;
   readonly height: number;
   readonly pixelRatio: number;
-  render(element: Element): void;
+  render(element: Element): LayoutSize;
   clear(): void;
   getContext(): CanvasRenderingContext2D;
   toDataURL(type?: string, quality?: number): string;
@@ -83,7 +88,7 @@ export function createCanvas(options: CanvasOptions): DrawCallCanvas {
     height,
     pixelRatio,
 
-    render(element: Element): void {
+    render(element: Element): LayoutSize {
       const layoutTree = computeLayout(element, measureCtx, {
         minWidth: 0,
         maxWidth: width,
@@ -91,6 +96,10 @@ export function createCanvas(options: CanvasOptions): DrawCallCanvas {
         maxHeight: height,
       });
       renderNode(ctx, layoutTree);
+      return {
+        width: layoutTree.layout.width,
+        height: layoutTree.layout.height,
+      };
     },
 
     clear(): void {
@@ -153,7 +162,7 @@ export async function createCanvasAsync(
     height,
     pixelRatio,
 
-    render(element: Element): void {
+    render(element: Element): LayoutSize {
       const layoutTree = computeLayout(element, measureCtx, {
         minWidth: 0,
         maxWidth: width,
@@ -161,6 +170,10 @@ export async function createCanvasAsync(
         maxHeight: height,
       });
       renderNode(ctx as unknown as CanvasRenderingContext2D, layoutTree);
+      return {
+        width: layoutTree.layout.width,
+        height: layoutTree.layout.height,
+      };
     },
 
     clear(): void {

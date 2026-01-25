@@ -1,6 +1,6 @@
 // 主入口文件
 export { createCanvas, createCanvasAsync } from "./canvas";
-export type { CanvasOptions, DrawCallCanvas } from "./canvas";
+export type { CanvasOptions, DrawCallCanvas, LayoutSize } from "./canvas";
 
 // 组件
 export { Box, Text, Stack } from "./components";
