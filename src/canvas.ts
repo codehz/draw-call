@@ -1,4 +1,5 @@
 import type { Element } from "./types/components";
+import type { LayoutNode } from "./layout/engine";
 import { computeLayout } from "./layout/engine";
 import { createCanvasMeasureContext } from "./layout/measure";
 import { renderNode } from "./render/engine";
@@ -24,7 +25,7 @@ export interface DrawCallCanvas {
   readonly width: number;
   readonly height: number;
   readonly pixelRatio: number;
-  render(element: Element): LayoutSize;
+  render(element: Element): LayoutNode;
   clear(): void;
   getContext(): CanvasRenderingContext2D;
   toDataURL(type?: string, quality?: number): string;
@@ -88,7 +89,7 @@ export function createCanvas(options: CanvasOptions): DrawCallCanvas {
     height,
     pixelRatio,
 
-    render(element: Element): LayoutSize {
+    render(element: Element): LayoutNode {
       const layoutTree = computeLayout(element, measureCtx, {
         minWidth: 0,
         maxWidth: width,
@@ -96,10 +97,7 @@ export function createCanvas(options: CanvasOptions): DrawCallCanvas {
         maxHeight: height,
       });
       renderNode(ctx, layoutTree);
-      return {
-        width: layoutTree.layout.width,
-        height: layoutTree.layout.height,
-      };
+      return layoutTree;
     },
 
     clear(): void {
@@ -162,7 +160,7 @@ export async function createCanvasAsync(
     height,
     pixelRatio,
 
-    render(element: Element): LayoutSize {
+    render(element: Element): LayoutNode {
       const layoutTree = computeLayout(element, measureCtx, {
         minWidth: 0,
         maxWidth: width,
@@ -170,10 +168,7 @@ export async function createCanvasAsync(
         maxHeight: height,
       });
       renderNode(ctx as unknown as CanvasRenderingContext2D, layoutTree);
-      return {
-        width: layoutTree.layout.width,
-        height: layoutTree.layout.height,
-      };
+      return layoutTree;
     },
 
     clear(): void {
