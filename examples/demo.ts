@@ -50,12 +50,12 @@ canvas.render(
             children: [
               Text({
                 content: "draw-call",
-                font: { size: 32, weight: "bold", family: "system-ui" },
+                font: { size: 32, weight: "bold", family: "sans-serif" },
                 color: "#ffffff",
               }),
               Text({
                 content: "声明式 Canvas 绘图",
-                font: { size: 14, family: "system-ui" },
+                font: { size: 14, family: "sans-serif" },
                 color: "rgba(255,255,255,0.8)",
               }),
             ],
@@ -80,7 +80,7 @@ canvas.render(
                   }),
                   Text({
                     content: "Flexbox 布局引擎",
-                    font: { size: 12, family: "system-ui" },
+                    font: { size: 12, family: "sans-serif" },
                     color: "#ffffff",
                   }),
                 ],
@@ -99,7 +99,7 @@ canvas.render(
                   }),
                   Text({
                     content: "丰富的样式支持",
-                    font: { size: 12, family: "system-ui" },
+                    font: { size: 12, family: "sans-serif" },
                     color: "#ffffff",
                   }),
                 ],
@@ -118,7 +118,7 @@ canvas.render(
                   }),
                   Text({
                     content: "自动换行 & 排版",
-                    font: { size: 12, family: "system-ui" },
+                    font: { size: 12, family: "sans-serif" },
                     color: "#ffffff",
                   }),
                 ],
@@ -150,7 +150,7 @@ canvas.render(
             children: [
               Text({
                 content: "渐变背景示例",
-                font: { size: 12, weight: "bold", family: "system-ui" },
+                font: { size: 12, weight: "bold", family: "sans-serif" },
                 color: "#333",
               }),
               Box({
@@ -173,7 +173,7 @@ canvas.render(
             children: [
               Text({
                 content: "多彩标签",
-                font: { size: 12, weight: "bold", family: "system-ui" },
+                font: { size: 12, weight: "bold", family: "sans-serif" },
                 color: "#333",
               }),
               Box({
@@ -187,7 +187,7 @@ canvas.render(
                     children: [
                       Text({
                         content: "Canvas",
-                        font: { size: 11, family: "system-ui" },
+                        font: { size: 11, family: "sans-serif" },
                         color: "#1890ff",
                       }),
                     ],
@@ -199,7 +199,7 @@ canvas.render(
                     children: [
                       Text({
                         content: "TypeScript",
-                        font: { size: 11, family: "system-ui" },
+                        font: { size: 11, family: "sans-serif" },
                         color: "#52c41a",
                       }),
                     ],
@@ -211,7 +211,7 @@ canvas.render(
                     children: [
                       Text({
                         content: "声明式",
-                        font: { size: 11, family: "system-ui" },
+                        font: { size: 11, family: "sans-serif" },
                         color: "#fa8c16",
                       }),
                     ],
@@ -233,12 +233,12 @@ canvas.render(
             children: [
               Text({
                 content: "自动换行示例",
-                font: { size: 12, weight: "bold", family: "system-ui" },
+                font: { size: 12, weight: "bold", family: "sans-serif" },
                 color: "#333",
               }),
               Text({
                 content: "draw-call 支持自动换行和文本排版，可以创建专业的 Canvas 内容。",
-                font: { size: 10, family: "system-ui" },
+                font: { size: 10, family: "sans-serif" },
                 color: "#666",
                 wrap: true,
                 lineHeight: 1.4,
