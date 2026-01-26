@@ -44,7 +44,7 @@ export interface TextElement extends ElementBase, TextProps {
 
 // Image 组件属性
 export interface ImageProps extends LayoutProps {
-  src: string | ImageBitmap | CanvasImageSource;
+  src: ImageBitmap | CanvasImageSource;
   fit?: "contain" | "cover" | "fill" | "none" | "scale-down";
   position?: {
     x?: "left" | "center" | "right" | number;
