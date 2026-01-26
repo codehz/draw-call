@@ -1,7 +1,7 @@
 import type { LayoutNode } from "./layout/engine";
 import { computeLayout } from "./layout/engine";
 import { createCanvasMeasureContext } from "./layout/measure";
-import { renderNode } from "./render/engine";
+import { renderNode } from "./render";
 import type { Element } from "./types/components";
 
 export interface CanvasOptions {
