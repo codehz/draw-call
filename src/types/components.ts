@@ -77,7 +77,7 @@ export interface ShapeElement extends ElementBase, ShapeProps {
 }
 
 // Stack 组件属性
-export interface StackProps extends ContainerLayoutProps {
+export interface StackProps extends LayoutProps {
   children: Element[];
   background?: Color;
   border?: Border;
