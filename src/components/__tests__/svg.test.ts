@@ -1,4 +1,5 @@
-import { Svg, svg } from "@/index";
+import { Box, Svg, svg } from "@/index";
+import { createCanvas } from "@/node";
 import { describe, expect, test } from "bun:test";
 
 describe("Svg component", () => {
@@ -118,5 +119,58 @@ describe("Svg component", () => {
     expect(rect.transform?.translate).toEqual([10, 20]);
     expect(rect.transform?.rotate).toBe(45);
     expect(rect.transform?.scale).toEqual([2, 1]);
+  });
+
+  test("should render svg as child of Box", () => {
+    const canvas = createCanvas({ width: 300, height: 400 });
+
+    const node = canvas.render(
+      Box({
+        width: 300,
+        background: "#f5f5f5",
+        padding: 20,
+        direction: "column",
+        gap: 10,
+        children: [
+          Box({
+            width: "fill",
+            height: 100,
+            background: "#3498db",
+          }),
+          Svg({
+            width: "fill",
+            height: 150,
+            children: [
+              svg.rect({
+                x: 0,
+                y: 0,
+                width: 260,
+                height: 150,
+                fill: "#f1c40f",
+              }),
+              svg.circle({
+                cx: 130,
+                cy: 75,
+                r: 40,
+                fill: "#e74c3c",
+              }),
+            ],
+          }),
+        ],
+      })
+    );
+
+    // 验证根节点布局（高度由子元素撑开：100 + 10 + 150 + 20*2 = 300）
+    expect(node.layout.width).toBe(300);
+    expect(node.layout.height).toBe(300);
+    expect(node.children.length).toBe(2);
+
+    // 验证第一个子节点（蓝色 Box）
+    expect(node.children[0].layout.width).toBe(260); // 300 - 20*2 padding
+    expect(node.children[0].layout.height).toBe(100);
+
+    // 验证第二个子节点（Svg）
+    expect(node.children[1].layout.width).toBe(260); // 300 - 20*2 padding
+    expect(node.children[1].layout.height).toBe(150);
   });
 });
