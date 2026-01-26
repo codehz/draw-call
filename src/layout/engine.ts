@@ -431,11 +431,12 @@ export function computeLayout(
             // Flex 子元素：在主轴方向强制使用计算出的尺寸
             if (isRow) {
               minWidth = maxWidth = info.width;
-              // 在交叉轴方向，不再强制高度，而是设置最小高度为 stretch 高度
-              // 允许子元素根据内容扩展（例如内部有 wrap 元素）
+              // 在交叉轴方向，设置最小高度为 stretch 高度
+              // 如果父容器高度固定，强制使用 stretch 高度
+              // 如果父容器高度 auto，允许子元素根据内容扩展（例如内部有 wrap 元素）
               if (info.element.height === undefined && align === "stretch") {
                 minHeight = info.height;
-                maxHeight = Infinity;
+                maxHeight = element.height !== undefined ? info.height : Infinity;
                 shouldStretchCross = true;
               }
             } else {
@@ -443,7 +444,7 @@ export function computeLayout(
               // 同理处理 column 方向
               if (info.element.width === undefined && align === "stretch") {
                 minWidth = info.width;
-                maxWidth = Infinity;
+                maxWidth = element.width !== undefined ? info.width : Infinity;
                 shouldStretchCross = true;
               }
             }
@@ -472,12 +473,15 @@ export function computeLayout(
 
           // 对于需要 stretch 的 flex 子元素，确保高度至少为 stretch 高度
           if (shouldStretchCross && info.flex > 0) {
+            // 获取子元素的 padding 用于计算 contentHeight/contentWidth
+            const childPadding = normalizeSpacing("padding" in info.element ? info.element.padding : undefined);
+
             if (isRow && childNode.layout.height < info.height) {
               childNode.layout.height = info.height;
-              childNode.layout.contentHeight = info.height - padding.top - padding.bottom;
+              childNode.layout.contentHeight = info.height - childPadding.top - childPadding.bottom;
             } else if (!isRow && childNode.layout.width < info.width) {
               childNode.layout.width = info.width;
-              childNode.layout.contentWidth = info.width - padding.left - padding.right;
+              childNode.layout.contentWidth = info.width - childPadding.left - childPadding.right;
             }
           }
 
