@@ -3,7 +3,7 @@
  * 运行: bun examples/richtext.ts
  */
 import { Box, RichText, Text } from "@/index";
-import { createCanvas as createNodeCanvas } from "@/node";
+import { createNodeCanvas } from "@/node";
 import { GlobalFonts } from "@napi-rs/canvas";
 import { fileURLToPath } from "bun";
 

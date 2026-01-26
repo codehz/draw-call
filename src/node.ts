@@ -15,7 +15,7 @@ import { createCanvas as createNapiCanvas } from "@napi-rs/canvas";
  * 此函数需要 @napi-rs/canvas 作为依赖
  * 安装: bun add @napi-rs/canvas
  */
-export function createCanvas(options: Omit<CanvasOptions, "canvas">): DrawCallCanvas {
+export function createNodeCanvas(options: Omit<CanvasOptions, "canvas">): DrawCallCanvas {
   const { width, height, pixelRatio = 1 } = options;
 
   const canvas = createNapiCanvas(width * pixelRatio, height * pixelRatio);

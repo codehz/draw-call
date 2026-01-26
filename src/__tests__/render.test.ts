@@ -1,10 +1,10 @@
 import { Box, Svg, svg, Text } from "@/index";
-import { createCanvas } from "@/node";
+import { createNodeCanvas } from "@/node";
 import { describe, expect, test } from "bun:test";
 
 describe("render", () => {
   test("should render simple box", () => {
-    const canvas = createCanvas({ width: 200, height: 200 });
+    const canvas = createNodeCanvas({ width: 200, height: 200 });
     canvas.render(
       Box({
         width: 100,
@@ -17,7 +17,7 @@ describe("render", () => {
   });
 
   test("should render nested boxes", () => {
-    const canvas = createCanvas({ width: 400, height: 300 });
+    const canvas = createNodeCanvas({ width: 400, height: 300 });
     canvas.render(
       Box({
         width: "fill",
@@ -42,7 +42,7 @@ describe("render", () => {
   });
 
   test("should render text", () => {
-    const canvas = createCanvas({ width: 300, height: 100 });
+    const canvas = createNodeCanvas({ width: 300, height: 100 });
     canvas.render(
       Box({
         width: "fill",
@@ -61,7 +61,7 @@ describe("render", () => {
   });
 
   test("should render card layout", () => {
-    const canvas = createCanvas({ width: 400, height: 300 });
+    const canvas = createNodeCanvas({ width: 400, height: 300 });
     canvas.render(
       Box({
         width: 360,
@@ -100,7 +100,7 @@ describe("render", () => {
   });
 
   test("should support flex justify content", () => {
-    const canvas = createCanvas({ width: 400, height: 100 });
+    const canvas = createNodeCanvas({ width: 400, height: 100 });
     canvas.render(
       Box({
         width: "fill",
@@ -119,7 +119,7 @@ describe("render", () => {
   });
 
   test("should support flex align items", () => {
-    const canvas = createCanvas({ width: 200, height: 200 });
+    const canvas = createNodeCanvas({ width: 200, height: 200 });
     canvas.render(
       Box({
         width: "fill",
@@ -139,7 +139,7 @@ describe("render", () => {
   });
 
   test("should output to buffer", () => {
-    const canvas = createCanvas({ width: 100, height: 100 });
+    const canvas = createNodeCanvas({ width: 100, height: 100 });
     canvas.render(
       Box({
         width: "fill",
@@ -154,7 +154,7 @@ describe("render", () => {
   });
 
   test("should render simple svg", () => {
-    const canvas = createCanvas({ width: 100, height: 100 });
+    const canvas = createNodeCanvas({ width: 100, height: 100 });
     canvas.render(
       Svg({
         width: 100,
@@ -166,7 +166,7 @@ describe("render", () => {
   });
 
   test("should render svg with viewBox", () => {
-    const canvas = createCanvas({ width: 200, height: 200 });
+    const canvas = createNodeCanvas({ width: 200, height: 200 });
     canvas.render(
       Svg({
         width: 200,
@@ -185,7 +185,7 @@ describe("render", () => {
   });
 
   test("should render svg with multiple shapes", () => {
-    const canvas = createCanvas({ width: 200, height: 200 });
+    const canvas = createNodeCanvas({ width: 200, height: 200 });
     canvas.render(
       Svg({
         width: 200,
@@ -203,7 +203,7 @@ describe("render", () => {
   });
 
   test("should render svg with group and transforms", () => {
-    const canvas = createCanvas({ width: 200, height: 200 });
+    const canvas = createNodeCanvas({ width: 200, height: 200 });
     canvas.render(
       Svg({
         width: 200,
@@ -224,7 +224,7 @@ describe("render", () => {
   });
 
   test("should render svg with polygon and polyline", () => {
-    const canvas = createCanvas({ width: 200, height: 200 });
+    const canvas = createNodeCanvas({ width: 200, height: 200 });
     canvas.render(
       Svg({
         width: 200,
@@ -256,7 +256,7 @@ describe("render", () => {
   });
 
   test("should render svg with text", () => {
-    const canvas = createCanvas({ width: 200, height: 100 });
+    const canvas = createNodeCanvas({ width: 200, height: 100 });
     canvas.render(
       Svg({
         width: 200,
@@ -278,7 +278,7 @@ describe("render", () => {
   });
 
   test("should render svg with preserveAspectRatio", () => {
-    const canvas = createCanvas({ width: 300, height: 150 });
+    const canvas = createNodeCanvas({ width: 300, height: 150 });
     canvas.render(
       Svg({
         width: 300,

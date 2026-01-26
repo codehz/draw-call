@@ -1,5 +1,5 @@
 import { Box } from "@/index";
-import { createCanvas } from "@/node";
+import { createNodeCanvas } from "@/node";
 import { describe, expect, test } from "bun:test";
 
 describe("Box component", () => {
@@ -24,7 +24,7 @@ describe("Box component", () => {
 
   describe("Horizontal layout (direction: row)", () => {
     test("should layout children in row direction", () => {
-      const canvas = createCanvas({ width: 300, height: 100 });
+      const canvas = createNodeCanvas({ width: 300, height: 100 });
       const node = canvas.render(
         Box({
           width: 300,
@@ -47,7 +47,7 @@ describe("Box component", () => {
     });
 
     test("should respect justify-content space-between in row", () => {
-      const canvas = createCanvas({ width: 300, height: 100 });
+      const canvas = createNodeCanvas({ width: 300, height: 100 });
       const node = canvas.render(
         Box({
           width: 300,
@@ -71,7 +71,7 @@ describe("Box component", () => {
     });
 
     test("should respect justify-content center in row", () => {
-      const canvas = createCanvas({ width: 300, height: 100 });
+      const canvas = createNodeCanvas({ width: 300, height: 100 });
       const node = canvas.render(
         Box({
           width: 300,
@@ -91,7 +91,7 @@ describe("Box component", () => {
     });
 
     test("should stretch children in row direction", () => {
-      const canvas = createCanvas({ width: 200, height: 100 });
+      const canvas = createNodeCanvas({ width: 200, height: 100 });
       const node = canvas.render(
         Box({
           width: 200,
@@ -110,7 +110,7 @@ describe("Box component", () => {
 
   describe("Vertical layout (direction: column)", () => {
     test("should layout children in column direction", () => {
-      const canvas = createCanvas({ width: 100, height: 300 });
+      const canvas = createNodeCanvas({ width: 100, height: 300 });
       const node = canvas.render(
         Box({
           width: 100,
@@ -133,7 +133,7 @@ describe("Box component", () => {
     });
 
     test("should respect justify-content space-between in column", () => {
-      const canvas = createCanvas({ width: 100, height: 300 });
+      const canvas = createNodeCanvas({ width: 100, height: 300 });
       const node = canvas.render(
         Box({
           width: 100,
@@ -157,7 +157,7 @@ describe("Box component", () => {
     });
 
     test("should respect justify-content center in column", () => {
-      const canvas = createCanvas({ width: 100, height: 300 });
+      const canvas = createNodeCanvas({ width: 100, height: 300 });
       const node = canvas.render(
         Box({
           width: 100,
@@ -177,7 +177,7 @@ describe("Box component", () => {
     });
 
     test("should stretch children in column direction", () => {
-      const canvas = createCanvas({ width: 200, height: 200 });
+      const canvas = createNodeCanvas({ width: 200, height: 200 });
       const node = canvas.render(
         Box({
           width: 200,
@@ -196,7 +196,7 @@ describe("Box component", () => {
 
   describe("Gap", () => {
     test("should apply gap in row direction", () => {
-      const canvas = createCanvas({ width: 300, height: 100 });
+      const canvas = createNodeCanvas({ width: 300, height: 100 });
       const node = canvas.render(
         Box({
           width: 300,
@@ -220,7 +220,7 @@ describe("Box component", () => {
     });
 
     test("should apply gap in column direction", () => {
-      const canvas = createCanvas({ width: 100, height: 300 });
+      const canvas = createNodeCanvas({ width: 100, height: 300 });
       const node = canvas.render(
         Box({
           width: 100,
@@ -246,7 +246,7 @@ describe("Box component", () => {
 
   describe("Padding", () => {
     test("should apply uniform padding", () => {
-      const canvas = createCanvas({ width: 200, height: 200 });
+      const canvas = createNodeCanvas({ width: 200, height: 200 });
       const node = canvas.render(
         Box({
           width: 200,
@@ -270,7 +270,7 @@ describe("Box component", () => {
     });
 
     test("should apply individual padding", () => {
-      const canvas = createCanvas({ width: 300, height: 300 });
+      const canvas = createNodeCanvas({ width: 300, height: 300 });
       const node = canvas.render(
         Box({
           width: 300,
@@ -295,7 +295,7 @@ describe("Box component", () => {
     });
 
     test("should apply padding with flex children", () => {
-      const canvas = createCanvas({ width: 200, height: 200 });
+      const canvas = createNodeCanvas({ width: 200, height: 200 });
       const node = canvas.render(
         Box({
           width: 200,
@@ -318,7 +318,7 @@ describe("Box component", () => {
 
   describe("Wrap", () => {
     test("should wrap children in row direction", () => {
-      const canvas = createCanvas({ width: 150, height: 200 });
+      const canvas = createNodeCanvas({ width: 150, height: 200 });
       const node = canvas.render(
         Box({
           width: 150,
@@ -345,7 +345,7 @@ describe("Box component", () => {
     });
 
     test("should wrap children in column direction", () => {
-      const canvas = createCanvas({ width: 200, height: 150 });
+      const canvas = createNodeCanvas({ width: 200, height: 150 });
       const node = canvas.render(
         Box({
           width: 200,
@@ -372,7 +372,7 @@ describe("Box component", () => {
     });
 
     test("should wrap with gap", () => {
-      const canvas = createCanvas({ width: 160, height: 200 });
+      const canvas = createNodeCanvas({ width: 160, height: 200 });
       const node = canvas.render(
         Box({
           width: 160,
@@ -396,7 +396,7 @@ describe("Box component", () => {
     });
 
     test("should calculate correct height when parent has fixed width and auto height with wrap", () => {
-      const canvas = createCanvas({ width: 200, height: 400 });
+      const canvas = createNodeCanvas({ width: 200, height: 400 });
       const node = canvas.render(
         Box({
           width: 200, // 固定宽度
@@ -434,7 +434,7 @@ describe("Box component", () => {
 
   describe("Space-between justification", () => {
     test("should handle space-between in row with auto height", () => {
-      const canvas = createCanvas({ width: 300, height: 500 });
+      const canvas = createNodeCanvas({ width: 300, height: 500 });
       const node = canvas.render(
         Box({
           width: 300,
@@ -463,7 +463,7 @@ describe("Box component", () => {
     });
 
     test("should handle space-between in column with auto width", () => {
-      const canvas = createCanvas({ width: 500, height: 300 });
+      const canvas = createNodeCanvas({ width: 500, height: 300 });
       const node = canvas.render(
         Box({
           // 自动宽度
@@ -492,7 +492,7 @@ describe("Box component", () => {
     });
 
     test("should handle space-between with different sized children", () => {
-      const canvas = createCanvas({ width: 400, height: 200 });
+      const canvas = createNodeCanvas({ width: 400, height: 200 });
       const node = canvas.render(
         Box({
           width: 400,
@@ -520,7 +520,7 @@ describe("Box component", () => {
     });
 
     test("should handle space-between with padding", () => {
-      const canvas = createCanvas({ width: 300, height: 200 });
+      const canvas = createNodeCanvas({ width: 300, height: 200 });
       const node = canvas.render(
         Box({
           width: 300,
@@ -552,7 +552,7 @@ describe("Box component", () => {
 
     test("should handle space-between in column like demo.ts", () => {
       // 模拟 demo.ts 中的场景：左侧列使用 space-between 在顶部和底部分布内容
-      const canvas = createCanvas({ width: 300, height: 400 });
+      const canvas = createNodeCanvas({ width: 300, height: 400 });
       const node = canvas.render(
         Box({
           width: 300,
@@ -603,7 +603,7 @@ describe("Box component", () => {
 
     test("should handle space-between with only one child", () => {
       // space-between 只有一个子元素时，应该在开始位置
-      const canvas = createCanvas({ width: 300, height: 200 });
+      const canvas = createNodeCanvas({ width: 300, height: 200 });
       const node = canvas.render(
         Box({
           width: 300,
@@ -619,7 +619,7 @@ describe("Box component", () => {
     });
 
     test("should handle space-between with two children", () => {
-      const canvas = createCanvas({ width: 300, height: 200 });
+      const canvas = createNodeCanvas({ width: 300, height: 200 });
       const node = canvas.render(
         Box({
           width: 300,
@@ -642,7 +642,7 @@ describe("Box component", () => {
 
     test("should handle space-between with gap", () => {
       // gap 应该被包含在 space-between 的计算中
-      const canvas = createCanvas({ width: 300, height: 200 });
+      const canvas = createNodeCanvas({ width: 300, height: 200 });
       const node = canvas.render(
         Box({
           width: 300,
@@ -672,7 +672,7 @@ describe("Box component", () => {
       // 父容器横向布局，子元素使用 flex 分配宽度
       // 左侧 flex 子元素没有指定高度，应该被 stretch 到父容器高度
       // 然后在拉伸后的高度内，使用 space-between 分布内容
-      const canvas = createCanvas({ width: 720, height: 600 });
+      const canvas = createNodeCanvas({ width: 720, height: 600 });
       const node = canvas.render(
         Box({
           width: 720,
@@ -754,7 +754,7 @@ describe("Box component", () => {
 
   describe("Combined layout properties", () => {
     test("should handle padding + gap + column direction", () => {
-      const canvas = createCanvas({ width: 200, height: 300 });
+      const canvas = createNodeCanvas({ width: 200, height: 300 });
       const node = canvas.render(
         Box({
           width: 200,
@@ -779,7 +779,7 @@ describe("Box component", () => {
     });
 
     test("should handle flex with padding and gap", () => {
-      const canvas = createCanvas({ width: 200, height: 200 });
+      const canvas = createNodeCanvas({ width: 200, height: 200 });
       const node = canvas.render(
         Box({
           width: 200,
@@ -816,7 +816,7 @@ describe("Box component", () => {
       // 标签数量刚好在flex分配的空间后触发换行
       // 如果错误地按全宽度计算，则不会换行
 
-      const canvas = createCanvas({ width: 300, height: 200 });
+      const canvas = createNodeCanvas({ width: 300, height: 200 });
       const node = canvas.render(
         Box({
           width: 300,
@@ -882,7 +882,7 @@ describe("Box component", () => {
       // 容器高度应该自动撑开到足以容纳所有换行后的标签
       // 如果高度计算错误，可能会导致内容溢出
 
-      const canvas = createCanvas({ width: 300, height: 500 });
+      const canvas = createNodeCanvas({ width: 300, height: 500 });
       const node = canvas.render(
         Box({
           width: 300,
@@ -933,7 +933,7 @@ describe("Box component", () => {
 
     test("should auto-expand height with simple wrap (no flex)", () => {
       // 更简单的情况：直接在根容器上使用 wrap
-      const canvas = createCanvas({ width: 200, height: 500 });
+      const canvas = createNodeCanvas({ width: 200, height: 500 });
       const node = canvas.render(
         Box({
           width: 200,
@@ -964,7 +964,7 @@ describe("Box component", () => {
     });
 
     test("should auto-expand height with wrap and padding", () => {
-      const canvas = createCanvas({ width: 220, height: 500 });
+      const canvas = createNodeCanvas({ width: 220, height: 500 });
       const node = canvas.render(
         Box({
           width: 220,
@@ -993,7 +993,7 @@ describe("Box component", () => {
     });
 
     test("should auto-expand width with column wrap", () => {
-      const canvas = createCanvas({ width: 500, height: 150 });
+      const canvas = createNodeCanvas({ width: 500, height: 150 });
       const node = canvas.render(
         Box({
           // 自动宽度
@@ -1022,7 +1022,7 @@ describe("Box component", () => {
     });
 
     test("should handle single row that fits (no actual wrap needed)", () => {
-      const canvas = createCanvas({ width: 300, height: 100 });
+      const canvas = createNodeCanvas({ width: 300, height: 100 });
       const node = canvas.render(
         Box({
           width: 300,
@@ -1048,7 +1048,7 @@ describe("Box component", () => {
     });
 
     test("should handle deeply nested flex + wrap", () => {
-      const canvas = createCanvas({ width: 400, height: 500 });
+      const canvas = createNodeCanvas({ width: 400, height: 500 });
       const node = canvas.render(
         Box({
           width: 400,

@@ -3,13 +3,13 @@
  * 运行: bun examples/card.ts
  */
 import { Box, linearGradient, printLayout, Svg, svg, Text } from "@/index";
-import { createCanvas } from "@/node";
+import { createNodeCanvas } from "@/node";
 import { GlobalFonts } from "@napi-rs/canvas";
 import { fileURLToPath } from "bun";
 
 GlobalFonts.registerFromPath(fileURLToPath(import.meta.resolve("@fontpkg/unifont/unifont-15.0.01.ttf")), "unifont");
 
-const canvas = createCanvas({
+const canvas = createNodeCanvas({
   width: 400,
   height: 320,
   pixelRatio: 2,

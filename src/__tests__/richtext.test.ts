@@ -1,10 +1,10 @@
 import { Box, RichText } from "@/index";
-import { createCanvas } from "@/node";
+import { createNodeCanvas } from "@/node";
 import { describe, expect, test } from "bun:test";
 
 describe("RichText", () => {
   test("should render rich text with multiple spans", () => {
-    const canvas = createCanvas({ width: 400, height: 200 });
+    const canvas = createNodeCanvas({ width: 400, height: 200 });
     canvas.render(
       Box({
         width: "fill",
@@ -26,7 +26,7 @@ describe("RichText", () => {
   });
 
   test("should handle rich text wrapping", () => {
-    const canvas = createCanvas({ width: 200, height: 200 });
+    const canvas = createNodeCanvas({ width: 200, height: 200 });
     canvas.render(
       Box({
         width: "fill",
@@ -48,7 +48,7 @@ describe("RichText", () => {
   });
 
   test("should handle rich text alignment", () => {
-    const canvas = createCanvas({ width: 400, height: 300 });
+    const canvas = createNodeCanvas({ width: 400, height: 300 });
     canvas.render(
       Box({
         width: "fill",
@@ -77,7 +77,7 @@ describe("RichText", () => {
   });
 
   test("should handle rich text decoration", () => {
-    const canvas = createCanvas({ width: 400, height: 100 });
+    const canvas = createNodeCanvas({ width: 400, height: 100 });
     canvas.render(
       RichText({
         spans: [
@@ -91,7 +91,7 @@ describe("RichText", () => {
   });
 
   test("should handle maxLines and ellipsis", () => {
-    const canvas = createCanvas({ width: 100, height: 100 });
+    const canvas = createNodeCanvas({ width: 100, height: 100 });
     canvas.render(
       RichText({
         width: 100,
