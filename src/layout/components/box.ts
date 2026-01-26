@@ -22,10 +22,24 @@ export function measureBoxSize(
 
   const children = element.children ?? [];
 
-  // 如果启用了 wrap 且有固定宽度，需要模拟换行来计算正确的高度
-  if (wrap && isRow && typeof element.width === "number") {
+  // 计算可用于换行计算的宽度
+  // element.width 是总宽度（包含 padding），所以需要减去 padding
+  // availableWidth 已经是内容区域宽度，不需要减去 padding
+  const effectiveWidth =
+    typeof element.width === "number"
+      ? element.width - padding.left - padding.right
+      : availableWidth > 0
+        ? availableWidth
+        : 0;
+
+  // 计算可用于换行计算的高度
+  // 同理，element.height 是总高度，availableWidth 的使用场景中不涉及高度的传入
+  const effectiveHeight = typeof element.height === "number" ? element.height - padding.top - padding.bottom : 0;
+
+  // 如果启用了 wrap 且有可用宽度，需要模拟换行来计算正确的高度
+  if (wrap && isRow && effectiveWidth > 0) {
     // 计算内容区域的可用宽度
-    const contentAvailableWidth = element.width - padding.left - padding.right;
+    const contentAvailableWidth = effectiveWidth;
 
     // 测量所有子元素
     const childSizes: Array<{
@@ -95,9 +109,9 @@ export function measureBoxSize(
 
     contentWidth = maxWidth;
     contentHeight = totalHeight;
-  } else if (wrap && !isRow && typeof element.height === "number") {
+  } else if (wrap && !isRow && effectiveHeight > 0) {
     // 列方向的换行
-    const contentAvailableHeight = element.height - padding.top - padding.bottom;
+    const contentAvailableHeight = effectiveHeight;
 
     // 测量所有子元素
     const childSizes: Array<{

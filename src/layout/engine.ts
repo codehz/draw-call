@@ -424,19 +424,28 @@ export function computeLayout(
           let maxWidth = info.width;
           let minHeight = 0;
           let maxHeight = info.height;
+          // 记录是否需要在布局后应用 stretch
+          let shouldStretchCross = false;
 
           if (info.flex > 0) {
             // Flex 子元素：在主轴方向强制使用计算出的尺寸
             if (isRow) {
               minWidth = maxWidth = info.width;
+              // 在交叉轴方向，不再强制高度，而是设置最小高度为 stretch 高度
+              // 允许子元素根据内容扩展（例如内部有 wrap 元素）
+              if (info.element.height === undefined && align === "stretch") {
+                minHeight = info.height;
+                maxHeight = Infinity;
+                shouldStretchCross = true;
+              }
             } else {
               minHeight = maxHeight = info.height;
-            }
-            // 在交叉轴方向，如果没有指定尺寸且 align="stretch"，也要强制拉伸
-            if (isRow && info.element.height === undefined && align === "stretch") {
-              minHeight = maxHeight = info.height;
-            } else if (!isRow && info.element.width === undefined && align === "stretch") {
-              minWidth = maxWidth = info.width;
+              // 同理处理 column 方向
+              if (info.element.width === undefined && align === "stretch") {
+                minWidth = info.width;
+                maxWidth = Infinity;
+                shouldStretchCross = true;
+              }
             }
           } else {
             // 非 flex 元素：处理 stretch
@@ -461,6 +470,17 @@ export function computeLayout(
             childY - info.margin.top
           );
 
+          // 对于需要 stretch 的 flex 子元素，确保高度至少为 stretch 高度
+          if (shouldStretchCross && info.flex > 0) {
+            if (isRow && childNode.layout.height < info.height) {
+              childNode.layout.height = info.height;
+              childNode.layout.contentHeight = info.height - padding.top - padding.bottom;
+            } else if (!isRow && childNode.layout.width < info.width) {
+              childNode.layout.width = info.width;
+              childNode.layout.contentWidth = info.width - padding.left - padding.right;
+            }
+          }
+
           node.children.push(childNode);
 
           // 更新主轴偏移
@@ -477,6 +497,52 @@ export function computeLayout(
         // 行与行之间也应该有 gap（除了最后一行）
         if (lineIndex < lines.length - 1) {
           crossOffset += gap;
+        }
+      }
+
+      // 如果容器的尺寸是 auto 且启用了 wrap，需要根据实际内容更新容器尺寸
+      // 这是因为在布局开始时计算的 intrinsic 尺寸可能不包含 flex 子元素的实际换行
+      if (wrap && element.height === undefined && isRow) {
+        const actualContentHeight = crossOffset;
+        const actualHeight = actualContentHeight + padding.top + padding.bottom;
+        node.layout.height = actualHeight;
+        node.layout.contentHeight = actualContentHeight;
+      } else if (wrap && element.width === undefined && !isRow) {
+        const actualContentWidth = crossOffset;
+        const actualWidth = actualContentWidth + padding.left + padding.right;
+        node.layout.width = actualWidth;
+        node.layout.contentWidth = actualContentWidth;
+      }
+
+      // 对于非 wrap 的容器，如果交叉轴尺寸是 auto，也需要根据子元素实际高度更新
+      // 这是因为 flex 子元素的高度可能在布局后发生变化（例如内部有 wrap 元素）
+      if (!wrap) {
+        // 收集所有子节点的实际交叉轴尺寸
+        let maxChildCrossSize = 0;
+        for (const childNode of node.children) {
+          const childMargin = normalizeSpacing(childNode.element.margin);
+          if (isRow) {
+            const childOuterHeight = childNode.layout.height + childMargin.top + childMargin.bottom;
+            maxChildCrossSize = Math.max(maxChildCrossSize, childOuterHeight);
+          } else {
+            const childOuterWidth = childNode.layout.width + childMargin.left + childMargin.right;
+            maxChildCrossSize = Math.max(maxChildCrossSize, childOuterWidth);
+          }
+        }
+
+        // 如果容器的交叉轴尺寸是 auto，更新它
+        if (isRow && element.height === undefined) {
+          const actualHeight = maxChildCrossSize + padding.top + padding.bottom;
+          if (actualHeight > node.layout.height) {
+            node.layout.height = actualHeight;
+            node.layout.contentHeight = maxChildCrossSize;
+          }
+        } else if (!isRow && element.width === undefined) {
+          const actualWidth = maxChildCrossSize + padding.left + padding.right;
+          if (actualWidth > node.layout.width) {
+            node.layout.width = actualWidth;
+            node.layout.contentWidth = maxChildCrossSize;
+          }
         }
       }
 

@@ -489,4 +489,300 @@ describe("Box component", () => {
       expect(node.children[2].layout.x).toBeCloseTo(10 + 2 * (expectedWidth + 10), 1);
     });
   });
+
+  describe("Flex wrap in nested layout", () => {
+    test("should wrap tags based on allocated flex space, not full container width", () => {
+      // 测试场景：顶层两列flex布局（1:2），右侧有可换行的标签
+      // 标签数量刚好在flex分配的空间后触发换行
+      // 如果错误地按全宽度计算，则不会换行
+
+      const canvas = createCanvas({ width: 300, height: 200 });
+      const node = canvas.render(
+        Box({
+          width: 300,
+          height: 200,
+          direction: "row",
+          gap: 0,
+          children: [
+            // 左侧：flex: 1，占宽度 100
+            Box({
+              width: "fill",
+              flex: 1,
+              height: 200,
+              background: "#f0f0f0",
+            }),
+            // 右侧：flex: 2，占宽度 200，包含可换行的标签
+            Box({
+              width: "fill",
+              flex: 2,
+              height: 200,
+              background: "#ffffff",
+              direction: "row",
+              gap: 6,
+              wrap: true,
+              children: [
+                // 创建5个宽度40的标签，加上4个间隙(6px)
+                // 总宽度 = 5*40 + 4*6 = 200 + 24 = 224
+                // 分配给右侧的宽度是 300 * 2/3 = 200，所以应该换行
+                // 如果错误地使用全宽 300，则总共可容纳 (300-24)/40 = 6.9，即6个标签，不会换行
+                Box({ width: 40, height: 20, background: "#e8f4ff" }),
+                Box({ width: 40, height: 20, background: "#e8f4ff" }),
+                Box({ width: 40, height: 20, background: "#e8f4ff" }),
+                Box({ width: 40, height: 20, background: "#e8f4ff" }),
+                Box({ width: 40, height: 20, background: "#e8f4ff" }),
+                Box({ width: 40, height: 20, background: "#f6ffed" }),
+              ],
+            }),
+          ],
+        })
+      );
+
+      // 右侧容器的实际分配宽度应该是 200
+      const rightContainer = node.children[1];
+      expect(rightContainer.layout.width).toBeCloseTo(200, 0);
+
+      // 验证换行：第一行应该最多容纳4个标签（4*40 + 3*6 = 178）或5个标签（5*40 + 4*6 = 224，超出）
+      // 实际应该只有4个标签在第一行（y=0），第5、6个在第二行（y=20）
+      const child0Y = rightContainer.children[0].layout.y;
+      const child1Y = rightContainer.children[1].layout.y;
+      const child4Y = rightContainer.children[4].layout.y;
+      const child5Y = rightContainer.children[5].layout.y;
+
+      // 前4个标签应在第一行
+      expect(child0Y).toBe(0);
+      expect(child1Y).toBe(0);
+
+      // 第5、6个标签应在第二行
+      expect(child4Y).toBeGreaterThan(0);
+      expect(child5Y).toBe(child4Y);
+    });
+
+    test("should auto-expand height when wrap causes multiple rows", () => {
+      // 测试场景：自动高度的flex容器，内部有wrap标签
+      // 容器高度应该自动撑开到足以容纳所有换行后的标签
+      // 如果高度计算错误，可能会导致内容溢出
+
+      const canvas = createCanvas({ width: 300, height: 500 });
+      const node = canvas.render(
+        Box({
+          width: 300,
+          // 自动高度，顶层容器有足够空间
+          direction: "row",
+          gap: 0,
+          children: [
+            // 左侧：flex: 1，固定高度 20
+            Box({
+              flex: 1,
+              height: 20,
+              background: "#f0f0f0",
+            }),
+            // 右侧：flex: 2，自动高度，包含会换行的标签
+            Box({
+              flex: 2,
+              // 不指定高度，应该自动撑开
+              background: "#ffffff",
+              direction: "row",
+              gap: 6,
+              wrap: true,
+              children: [
+                // 6个40px宽的标签，总宽度 = 6*40 + 5*6 = 270
+                // 右侧分配 300*2/3 = 200，所以必定换行
+                // 应该分成多行：4个在第一行（4*40+3*6=178），2个在第二行（2*40+6=86）
+                Box({ width: 40, height: 20, background: "#e8f4ff" }),
+                Box({ width: 40, height: 20, background: "#e8f4ff" }),
+                Box({ width: 40, height: 20, background: "#e8f4ff" }),
+                Box({ width: 40, height: 20, background: "#e8f4ff" }),
+                Box({ width: 40, height: 20, background: "#e8f4ff" }),
+                Box({ width: 40, height: 20, background: "#f6ffed" }),
+              ],
+            }),
+          ],
+        })
+      );
+
+      const rightContainer = node.children[1];
+
+      // 右侧容器应该自动扩展到足以容纳两行（每行高20）加上行间隙
+      // 预期高度应该是 20 + 6 (gap) + 20 = 46
+      expect(rightContainer.layout.height).toBeCloseTo(46, 0);
+
+      // 验证标签确实分成两行
+      expect(rightContainer.children[0].layout.y).toBe(0);
+      expect(rightContainer.children[4].layout.y).toBeGreaterThan(0);
+    });
+
+    test("should auto-expand height with simple wrap (no flex)", () => {
+      // 更简单的情况：直接在根容器上使用 wrap
+      const canvas = createCanvas({ width: 200, height: 500 });
+      const node = canvas.render(
+        Box({
+          width: 200,
+          // 自动高度
+          direction: "row",
+          gap: 10,
+          wrap: true,
+          children: [
+            Box({ width: 60, height: 30, background: "#f00" }),
+            Box({ width: 60, height: 30, background: "#0f0" }),
+            Box({ width: 60, height: 30, background: "#00f" }),
+            Box({ width: 60, height: 30, background: "#ff0" }),
+          ],
+        })
+      );
+
+      // 宽度 200，每个元素 60，gap 10
+      // 第一行：60 + 10 + 60 + 10 + 60 = 200，刚好放下 3 个
+      // 第四个元素换行到第二行
+      // 高度 = 30 + 10 + 30 = 70
+      expect(node.layout.height).toBe(70);
+
+      // 验证换行位置
+      expect(node.children[0].layout.y).toBe(0);
+      expect(node.children[1].layout.y).toBe(0);
+      expect(node.children[2].layout.y).toBe(0); // 第三个也在第一行
+      expect(node.children[3].layout.y).toBe(40); // 30 + 10
+    });
+
+    test("should auto-expand height with wrap and padding", () => {
+      const canvas = createCanvas({ width: 220, height: 500 });
+      const node = canvas.render(
+        Box({
+          width: 220,
+          // 自动高度
+          padding: 10,
+          direction: "row",
+          gap: 10,
+          wrap: true,
+          children: [
+            Box({ width: 60, height: 30, background: "#f00" }),
+            Box({ width: 60, height: 30, background: "#0f0" }),
+            Box({ width: 60, height: 30, background: "#00f" }),
+            Box({ width: 60, height: 30, background: "#ff0" }),
+          ],
+        })
+      );
+
+      // 内容宽度 = 220 - 10 - 10 = 200
+      // 每个元素 60+10=70，每行最多 2 个
+      // 高度 = padding.top + 行高 + gap + 行高 + padding.bottom = 10 + 30 + 10 + 30 + 10 = 90
+      expect(node.layout.height).toBe(90);
+
+      // 验证子元素位置（应该相对于 contentX, contentY）
+      expect(node.children[0].layout.x).toBe(10);
+      expect(node.children[0].layout.y).toBe(10);
+    });
+
+    test("should auto-expand width with column wrap", () => {
+      const canvas = createCanvas({ width: 500, height: 150 });
+      const node = canvas.render(
+        Box({
+          // 自动宽度
+          height: 150,
+          direction: "column",
+          gap: 10,
+          wrap: true,
+          children: [
+            Box({ width: 40, height: 50, background: "#f00" }),
+            Box({ width: 40, height: 50, background: "#0f0" }),
+            Box({ width: 40, height: 50, background: "#00f" }),
+            Box({ width: 40, height: 50, background: "#ff0" }),
+          ],
+        })
+      );
+
+      // 高度 150，每个元素 50+10=60，每列最多 2 个（110 < 150）
+      // 4 个元素分成 2 列，宽度 = 40 + 10 + 40 = 90
+      expect(node.layout.width).toBe(90);
+
+      // 验证换列位置
+      expect(node.children[0].layout.x).toBe(0);
+      expect(node.children[1].layout.x).toBe(0);
+      expect(node.children[2].layout.x).toBe(50); // 40 + 10
+      expect(node.children[3].layout.x).toBe(50);
+    });
+
+    test("should handle single row that fits (no actual wrap needed)", () => {
+      const canvas = createCanvas({ width: 300, height: 100 });
+      const node = canvas.render(
+        Box({
+          width: 300,
+          direction: "row",
+          gap: 10,
+          wrap: true,
+          children: [
+            Box({ width: 50, height: 30, background: "#f00" }),
+            Box({ width: 50, height: 30, background: "#0f0" }),
+            Box({ width: 50, height: 30, background: "#00f" }),
+          ],
+        })
+      );
+
+      // 总宽度 = 50*3 + 10*2 = 170 < 300，不需要换行
+      // 高度应该是单行高度 = 30
+      expect(node.layout.height).toBe(30);
+
+      // 所有元素应该在同一行
+      expect(node.children[0].layout.y).toBe(0);
+      expect(node.children[1].layout.y).toBe(0);
+      expect(node.children[2].layout.y).toBe(0);
+    });
+
+    test("should handle deeply nested flex + wrap", () => {
+      const canvas = createCanvas({ width: 400, height: 500 });
+      const node = canvas.render(
+        Box({
+          width: 400,
+          direction: "row",
+          children: [
+            // 左侧 flex: 1 = 100
+            Box({
+              flex: 1,
+              height: 50,
+              background: "#ccc",
+            }),
+            // 中间 flex: 2 = 200，包含嵌套 wrap
+            Box({
+              flex: 2,
+              direction: "column",
+              gap: 5,
+              children: [
+                Box({ height: 20, background: "#eee" }),
+                // 这个 wrap 容器在 200px 宽度内
+                Box({
+                  direction: "row",
+                  gap: 5,
+                  wrap: true,
+                  children: [
+                    Box({ width: 50, height: 25, background: "#f00" }),
+                    Box({ width: 50, height: 25, background: "#0f0" }),
+                    Box({ width: 50, height: 25, background: "#00f" }),
+                    Box({ width: 50, height: 25, background: "#ff0" }),
+                    Box({ width: 50, height: 25, background: "#f0f" }),
+                  ],
+                }),
+              ],
+            }),
+            // 右侧 flex: 1 = 100
+            Box({
+              flex: 1,
+              height: 50,
+              background: "#ccc",
+            }),
+          ],
+        })
+      );
+
+      // 中间容器的 wrap 部分应该正确计算高度
+      // 200px 宽度，每个元素 50+5=55，每行最多 3 个（165 < 200）
+      // 5 个元素分成 2 行，wrap 高度 = 25 + 5 + 25 = 55
+      // 中间容器总高度 = 20 + 5 + 55 = 80
+      const middleContainer = node.children[1];
+      expect(middleContainer.layout.width).toBeCloseTo(200, 0);
+      expect(middleContainer.layout.height).toBeCloseTo(80, 0);
+
+      // wrap 容器
+      const wrapContainer = middleContainer.children[1];
+      expect(wrapContainer.layout.height).toBeCloseTo(55, 0);
+    });
+  });
 });
