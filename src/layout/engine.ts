@@ -128,7 +128,7 @@ function measureIntrinsicSize(
       return { width: 0, height: 0 };
     }
 
-    case "shape": {
+    case "svg": {
       return { width: 0, height: 0 };
     }
 
@@ -542,8 +542,8 @@ function getElementType(element: Element): string {
       return "Stack";
     case "image":
       return "Image";
-    case "shape":
-      return "Shape";
+    case "svg":
+      return "Svg";
     default:
       // @ts-expect-error: 未知类型兜底
       return element.type;

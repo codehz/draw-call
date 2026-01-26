@@ -3,6 +3,7 @@ import { buildFontString } from "../layout/measure";
 import type { Color, GradientDescriptor, Shadow } from "../types/base";
 import { normalizeBorderRadius } from "../types/base";
 import type { BoxElement, StackElement, TextElement } from "../types/components";
+import { renderSvg } from "./svg";
 
 // 判断是否为渐变描述符
 function isGradientDescriptor(color: Color): color is GradientDescriptor {
@@ -292,8 +293,8 @@ export function renderNode(ctx: CanvasRenderingContext2D, node: LayoutNode): voi
       break;
     }
 
-    case "shape": {
-      // TODO: 实现图形渲染
+    case "svg": {
+      renderSvg(ctx, node);
       break;
     }
   }

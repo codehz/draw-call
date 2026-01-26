@@ -2,7 +2,7 @@ import type { Border, Color, FontProps, Shadow, StrokeProps } from "./base";
 import type { ContainerLayoutProps, LayoutProps } from "./layout";
 
 // 元素类型标识
-export type ElementType = "box" | "text" | "image" | "shape" | "stack";
+export type ElementType = "box" | "text" | "image" | "svg" | "stack";
 
 // 元素基础接口
 export interface ElementBase {
@@ -59,21 +59,143 @@ export interface ImageElement extends ElementBase, ImageProps {
   type: "image";
 }
 
-// Shape 类型
-export type ShapeType = "rect" | "circle" | "ellipse" | "line" | "polygon" | "path";
+// ============== SVG 图形相关类型 ==============
 
-// Shape 组件属性
-export interface ShapeProps extends LayoutProps {
-  shape: ShapeType;
-  fill?: Color;
+// 通用的图形样式属性
+export interface SvgStyleProps {
+  fill?: Color | "none";
   stroke?: StrokeProps;
-  shadow?: Shadow;
-  points?: [number, number][];
-  path?: string;
+  opacity?: number;
 }
 
-export interface ShapeElement extends ElementBase, ShapeProps {
-  type: "shape";
+// 变换属性
+export interface SvgTransformProps {
+  transform?: {
+    translate?: [number, number];
+    rotate?: number | [number, number, number]; // angle 或 [angle, cx, cy]
+    scale?: number | [number, number];
+    skewX?: number;
+    skewY?: number;
+    matrix?: [number, number, number, number, number, number];
+  };
+}
+
+// 矩形
+export interface SvgRectChild extends SvgStyleProps, SvgTransformProps {
+  type: "rect";
+  x?: number;
+  y?: number;
+  width: number;
+  height: number;
+  rx?: number;
+  ry?: number;
+}
+
+// 圆形
+export interface SvgCircleChild extends SvgStyleProps, SvgTransformProps {
+  type: "circle";
+  cx: number;
+  cy: number;
+  r: number;
+}
+
+// 椭圆
+export interface SvgEllipseChild extends SvgStyleProps, SvgTransformProps {
+  type: "ellipse";
+  cx: number;
+  cy: number;
+  rx: number;
+  ry: number;
+}
+
+// 线段
+export interface SvgLineChild extends SvgStyleProps, SvgTransformProps {
+  type: "line";
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
+}
+
+// 折线
+export interface SvgPolylineChild extends SvgStyleProps, SvgTransformProps {
+  type: "polyline";
+  points: [number, number][];
+}
+
+// 多边形
+export interface SvgPolygonChild extends SvgStyleProps, SvgTransformProps {
+  type: "polygon";
+  points: [number, number][];
+}
+
+// 路径
+export interface SvgPathChild extends SvgStyleProps, SvgTransformProps {
+  type: "path";
+  d: string;
+}
+
+// 文本
+export interface SvgTextChild extends SvgStyleProps, SvgTransformProps {
+  type: "text";
+  x?: number;
+  y?: number;
+  content: string;
+  font?: FontProps;
+  textAnchor?: "start" | "middle" | "end";
+  dominantBaseline?: "auto" | "middle" | "hanging";
+}
+
+// 分组
+export interface SvgGroupChild extends SvgStyleProps, SvgTransformProps {
+  type: "g";
+  children: SvgChild[];
+}
+
+// 所有图形原语的联合类型
+export type SvgChild =
+  | SvgRectChild
+  | SvgCircleChild
+  | SvgEllipseChild
+  | SvgLineChild
+  | SvgPolylineChild
+  | SvgPolygonChild
+  | SvgPathChild
+  | SvgTextChild
+  | SvgGroupChild;
+
+// preserveAspectRatio 对齐值
+export type SvgAlign =
+  | "none"
+  | "xMinYMin"
+  | "xMidYMin"
+  | "xMaxYMin"
+  | "xMinYMid"
+  | "xMidYMid"
+  | "xMaxYMid"
+  | "xMinYMax"
+  | "xMidYMax"
+  | "xMaxYMax";
+
+// Svg 根组件属性
+export interface SvgProps extends LayoutProps {
+  viewBox?: {
+    x?: number;
+    y?: number;
+    width: number;
+    height: number;
+  };
+  preserveAspectRatio?: {
+    align?: SvgAlign;
+    meetOrSlice?: "meet" | "slice";
+  };
+  children: SvgChild[];
+  background?: Color;
+  shadow?: Shadow;
+}
+
+export interface SvgElement extends ElementBase, SvgProps {
+  type: "svg";
 }
 
 // Stack 对齐方式
@@ -98,7 +220,7 @@ export interface StackElement extends ElementBase, StackProps {
 }
 
 // 所有元素类型联合
-export type Element = BoxElement | TextElement | ImageElement | ShapeElement | StackElement;
+export type Element = BoxElement | TextElement | ImageElement | SvgElement | StackElement;
 
 // 组件工厂函数类型
 export type ComponentFactory<Props, El extends Element> = (props: Props) => El;
