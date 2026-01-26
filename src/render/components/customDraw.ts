@@ -26,11 +26,10 @@ export function renderCustomDraw(ctx: CanvasRenderingContext2D, node: LayoutNode
   // 定义 inner 函数，当调用时，如果存在子元素，进行渲染
   const inner = () => {
     if (node.children && node.children.length > 0) {
-      // 临时恢复坐标系统以使用绝对位置渲染子元素
-      ctx.restore();
-      renderNode(ctx, node.children[0]);
       ctx.save();
-      ctx.translate(node.layout.x, node.layout.y);
+      ctx.translate(-node.layout.x, -node.layout.y);
+      renderNode(ctx, node.children[0]);
+      ctx.restore();
     }
   };
 

@@ -97,6 +97,7 @@ export class ProxiedCanvasContext {
    */
   destroy(): void {
     while (this.saveCount > 0) {
+      console.log("destroy restore", this.saveCount);
       this.saveCount--;
       this.ctx.restore();
     }
@@ -125,7 +126,7 @@ export function createProxiedCanvasContext(
         prop === "getTransform" ||
         prop === "destroy"
       ) {
-        return Reflect.get(target, prop, receiver);
+        return Reflect.get(target, prop, receiver).bind(proxy);
       }
 
       // 对于其他属性和方法，尝试从代理对象获取，否则从真实上下文获取

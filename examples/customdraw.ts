@@ -12,7 +12,7 @@ GlobalFonts.registerFromPath(fileURLToPath(import.meta.resolve("@fontpkg/unifont
 
 const canvas = createNodeCanvas({
   width: 800,
-  height: 900,
+  height: 1000,
   pixelRatio: 2,
 });
 
@@ -55,8 +55,8 @@ function PieChart(data: Array<{ label: string; value: number; color: string }>) 
 // 绘制网格背景
 function GridBackground() {
   return CustomDraw({
-    width: "fill",
-    height: "fill",
+    width: 100,
+    height: 100,
     draw(ctx, { width, height }) {
       const gridSize = 20;
 
@@ -87,7 +87,7 @@ function ProgressRing(percentage: number, color: string) {
   return CustomDraw({
     width: 120,
     height: 120,
-    draw(ctx, { width, height }) {
+    draw(ctx, { inner, width, height }) {
       const centerX = width / 2;
       const centerY = height / 2;
       const radius = Math.min(width, height) / 2 - 8;
@@ -111,8 +111,10 @@ function ProgressRing(percentage: number, color: string) {
       ctx.save();
       ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
       ctx.globalAlpha = 0.1;
-      ctx.clearRect(centerX - 30, centerY - 20, 60, 40);
+      ctx.fillRect(centerX - 30, centerY - 20, 60, 40);
       ctx.restore();
+
+      inner?.();
     },
     children: Box({
       width: "fill",
