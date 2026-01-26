@@ -13,6 +13,7 @@ import type {
   SvgPolygonChild,
   SvgPolylineChild,
   SvgRectChild,
+  SvgStyleProps,
   SvgTextChild,
   SvgTransformProps,
 } from "../types/components";
@@ -177,111 +178,65 @@ function applyTransform(base: Matrix, transform?: SvgTransformProps["transform"]
   return result;
 }
 
-// 应用描边样式
-function applyStroke(
-  ctx: CanvasRenderingContext2D,
-  stroke: StrokeProps,
-  bounds: { x: number; y: number; width: number; height: number }
-): void {
+type Bounds = { x: number; y: number; width: number; height: number };
+
+function applyStroke(ctx: CanvasRenderingContext2D, stroke: StrokeProps, bounds: Bounds): void {
   ctx.strokeStyle = resolveColor(ctx, stroke.color, bounds.x, bounds.y, bounds.width, bounds.height);
   ctx.lineWidth = stroke.width;
-  if (stroke.dash) {
-    ctx.setLineDash(stroke.dash);
-  } else {
-    ctx.setLineDash([]);
+  ctx.setLineDash(stroke.dash ?? []);
+  if (stroke.cap) ctx.lineCap = stroke.cap;
+  if (stroke.join) ctx.lineJoin = stroke.join;
+}
+
+function applyFill(ctx: CanvasRenderingContext2D, fill: Color, bounds: Bounds): void {
+  ctx.fillStyle = resolveColor(ctx, fill, bounds.x, bounds.y, bounds.width, bounds.height);
+  ctx.fill();
+}
+
+function applyFillAndStroke(ctx: CanvasRenderingContext2D, shape: SvgStyleProps, bounds: Bounds): void {
+  if (shape.fill && shape.fill !== "none") {
+    applyFill(ctx, shape.fill, bounds);
   }
-  if (stroke.cap) {
-    ctx.lineCap = stroke.cap;
-  }
-  if (stroke.join) {
-    ctx.lineJoin = stroke.join;
+  if (shape.stroke) {
+    applyStroke(ctx, shape.stroke, bounds);
+    ctx.stroke();
   }
 }
 
-// 渲染矩形
-function renderSvgRect(
-  ctx: CanvasRenderingContext2D,
-  rect: SvgRectChild,
-  bounds: { x: number; y: number; width: number; height: number }
-): void {
+function renderSvgRect(ctx: CanvasRenderingContext2D, rect: SvgRectChild, bounds: Bounds): void {
   const { x = 0, y = 0, width, height, rx = 0, ry = 0 } = rect;
   ctx.beginPath();
   if (rx || ry) {
-    const r = Math.max(rx, ry);
-    ctx.roundRect(x, y, width, height, r);
+    ctx.roundRect(x, y, width, height, Math.max(rx, ry));
   } else {
     ctx.rect(x, y, width, height);
   }
-  if (rect.fill && rect.fill !== "none") {
-    ctx.fillStyle = resolveColor(ctx, rect.fill, bounds.x, bounds.y, bounds.width, bounds.height);
-    ctx.fill();
-  }
-  if (rect.stroke) {
-    applyStroke(ctx, rect.stroke, bounds);
-    ctx.stroke();
-  }
+  applyFillAndStroke(ctx, rect, bounds);
 }
 
-// 渲染圆形
-function renderSvgCircle(
-  ctx: CanvasRenderingContext2D,
-  circle: SvgCircleChild,
-  bounds: { x: number; y: number; width: number; height: number }
-): void {
-  const { cx, cy, r } = circle;
+function renderSvgCircle(ctx: CanvasRenderingContext2D, circle: SvgCircleChild, bounds: Bounds): void {
   ctx.beginPath();
-  ctx.arc(cx, cy, r, 0, Math.PI * 2);
-  if (circle.fill && circle.fill !== "none") {
-    ctx.fillStyle = resolveColor(ctx, circle.fill, bounds.x, bounds.y, bounds.width, bounds.height);
-    ctx.fill();
-  }
-  if (circle.stroke) {
-    applyStroke(ctx, circle.stroke, bounds);
-    ctx.stroke();
-  }
+  ctx.arc(circle.cx, circle.cy, circle.r, 0, Math.PI * 2);
+  applyFillAndStroke(ctx, circle, bounds);
 }
 
-// 渲染椭圆
-function renderSvgEllipse(
-  ctx: CanvasRenderingContext2D,
-  ellipse: SvgEllipseChild,
-  bounds: { x: number; y: number; width: number; height: number }
-): void {
-  const { cx, cy, rx, ry } = ellipse;
+function renderSvgEllipse(ctx: CanvasRenderingContext2D, ellipse: SvgEllipseChild, bounds: Bounds): void {
   ctx.beginPath();
-  ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
-  if (ellipse.fill && ellipse.fill !== "none") {
-    ctx.fillStyle = resolveColor(ctx, ellipse.fill, bounds.x, bounds.y, bounds.width, bounds.height);
-    ctx.fill();
-  }
-  if (ellipse.stroke) {
-    applyStroke(ctx, ellipse.stroke, bounds);
-    ctx.stroke();
-  }
+  ctx.ellipse(ellipse.cx, ellipse.cy, ellipse.rx, ellipse.ry, 0, 0, Math.PI * 2);
+  applyFillAndStroke(ctx, ellipse, bounds);
 }
 
-// 渲染线段
-function renderSvgLine(
-  ctx: CanvasRenderingContext2D,
-  line: SvgLineChild,
-  bounds: { x: number; y: number; width: number; height: number }
-): void {
-  const { x1, y1, x2, y2 } = line;
+function renderSvgLine(ctx: CanvasRenderingContext2D, line: SvgLineChild, bounds: Bounds): void {
   ctx.beginPath();
-  ctx.moveTo(x1, y1);
-  ctx.lineTo(x2, y2);
+  ctx.moveTo(line.x1, line.y1);
+  ctx.lineTo(line.x2, line.y2);
   if (line.stroke) {
     applyStroke(ctx, line.stroke, bounds);
     ctx.stroke();
   }
 }
 
-// 渲染折线
-function renderSvgPolyline(
-  ctx: CanvasRenderingContext2D,
-  polyline: SvgPolylineChild,
-  bounds: { x: number; y: number; width: number; height: number }
-): void {
+function renderSvgPolyline(ctx: CanvasRenderingContext2D, polyline: SvgPolylineChild, bounds: Bounds): void {
   const { points } = polyline;
   if (points.length === 0) return;
 
@@ -290,22 +245,10 @@ function renderSvgPolyline(
   for (let i = 1; i < points.length; i++) {
     ctx.lineTo(points[i][0], points[i][1]);
   }
-  if (polyline.fill && polyline.fill !== "none") {
-    ctx.fillStyle = resolveColor(ctx, polyline.fill, bounds.x, bounds.y, bounds.width, bounds.height);
-    ctx.fill();
-  }
-  if (polyline.stroke) {
-    applyStroke(ctx, polyline.stroke, bounds);
-    ctx.stroke();
-  }
+  applyFillAndStroke(ctx, polyline, bounds);
 }
 
-// 渲染多边形
-function renderSvgPolygon(
-  ctx: CanvasRenderingContext2D,
-  polygon: SvgPolygonChild,
-  bounds: { x: number; y: number; width: number; height: number }
-): void {
+function renderSvgPolygon(ctx: CanvasRenderingContext2D, polygon: SvgPolygonChild, bounds: Bounds): void {
   const { points } = polygon;
   if (points.length === 0) return;
 
@@ -315,14 +258,7 @@ function renderSvgPolygon(
     ctx.lineTo(points[i][0], points[i][1]);
   }
   ctx.closePath();
-  if (polygon.fill && polygon.fill !== "none") {
-    ctx.fillStyle = resolveColor(ctx, polygon.fill, bounds.x, bounds.y, bounds.width, bounds.height);
-    ctx.fill();
-  }
-  if (polygon.stroke) {
-    applyStroke(ctx, polygon.stroke, bounds);
-    ctx.stroke();
-  }
+  applyFillAndStroke(ctx, polygon, bounds);
 }
 
 // 懒加载 Path2D 构造函数
@@ -349,12 +285,7 @@ function getPath2D(): typeof Path2D {
   }
 }
 
-// 渲染路径
-function renderSvgPath(
-  ctx: CanvasRenderingContext2D,
-  path: SvgPathChild,
-  bounds: { x: number; y: number; width: number; height: number }
-): void {
+function renderSvgPath(ctx: CanvasRenderingContext2D, path: SvgPathChild, bounds: Bounds): void {
   const P2D = getPath2D();
   const path2d = new P2D(path.d);
   if (path.fill && path.fill !== "none") {
@@ -367,33 +298,24 @@ function renderSvgPath(
   }
 }
 
-// 渲染文本
-function renderSvgText(
-  ctx: CanvasRenderingContext2D,
-  text: SvgTextChild,
-  bounds: { x: number; y: number; width: number; height: number }
-): void {
+const TEXT_ANCHOR_MAP: Record<string, CanvasTextAlign> = {
+  start: "left",
+  middle: "center",
+  end: "right",
+};
+
+const BASELINE_MAP: Record<string, CanvasTextBaseline> = {
+  auto: "alphabetic",
+  middle: "middle",
+  hanging: "hanging",
+};
+
+function renderSvgText(ctx: CanvasRenderingContext2D, text: SvgTextChild, bounds: Bounds): void {
   const { x = 0, y = 0, content, font, textAnchor = "start", dominantBaseline = "auto" } = text;
 
   ctx.font = buildFontString(font ?? {});
-
-  // 设置文本对齐
-  if (textAnchor === "start") {
-    ctx.textAlign = "left";
-  } else if (textAnchor === "middle") {
-    ctx.textAlign = "center";
-  } else {
-    ctx.textAlign = "right";
-  }
-
-  // 设置基线
-  if (dominantBaseline === "auto") {
-    ctx.textBaseline = "alphabetic";
-  } else if (dominantBaseline === "middle") {
-    ctx.textBaseline = "middle";
-  } else {
-    ctx.textBaseline = "hanging";
-  }
+  ctx.textAlign = TEXT_ANCHOR_MAP[textAnchor] ?? "left";
+  ctx.textBaseline = BASELINE_MAP[dominantBaseline] ?? "alphabetic";
 
   if (text.fill && text.fill !== "none") {
     ctx.fillStyle = resolveColor(ctx, text.fill, bounds.x, bounds.y, bounds.width, bounds.height);
@@ -405,12 +327,11 @@ function renderSvgText(
   }
 }
 
-// 渲染子图形
 function renderSvgChild(
   ctx: CanvasRenderingContext2D,
   child: SvgChild,
   parentTransform: Matrix,
-  bounds: { x: number; y: number; width: number; height: number },
+  bounds: Bounds,
   baseTransform: DOMMatrix
 ): void {
   const localTransform = applyTransform(parentTransform, child.transform);
@@ -464,12 +385,11 @@ function renderSvgChild(
   ctx.restore();
 }
 
-// 渲染分组
 function renderSvgGroup(
   ctx: CanvasRenderingContext2D,
   group: SvgGroupChild,
   parentTransform: Matrix,
-  bounds: { x: number; y: number; width: number; height: number },
+  bounds: Bounds,
   baseTransform: DOMMatrix
 ): void {
   for (const child of group.children) {
@@ -477,7 +397,6 @@ function renderSvgGroup(
   }
 }
 
-// 计算 viewBox 变换
 function calculateViewBoxTransform(
   x: number,
   y: number,
@@ -497,62 +416,49 @@ function calculateViewBoxTransform(
   const align = preserveAspectRatio?.align ?? "xMidYMid";
   const meetOrSlice = preserveAspectRatio?.meetOrSlice ?? "meet";
 
-  let scale: number;
-  let translateX = x;
-  let translateY = y;
-
   if (align === "none") {
-    // translate(x, y) -> scale(scaleX, scaleY) -> translate(-vbX, -vbY)
-    let result = identityMatrix();
-    result = multiplyMatrices(result, translateMatrix(x, y));
-    result = multiplyMatrices(result, scaleMatrix(scaleX, scaleY));
-    result = multiplyMatrices(result, translateMatrix(-vbX, -vbY));
-    return result;
+    return composeTransform(x, y, scaleX, scaleY, -vbX, -vbY);
   }
 
-  if (meetOrSlice === "meet") {
-    scale = Math.min(scaleX, scaleY);
-  } else {
-    scale = Math.max(scaleX, scaleY);
-  }
-
+  const scale = meetOrSlice === "meet" ? Math.min(scaleX, scaleY) : Math.max(scaleX, scaleY);
   const scaledWidth = vbWidth * scale;
   const scaledHeight = vbHeight * scale;
 
-  // X 对齐
+  let translateX = x;
+  let translateY = y;
+
   if (align.includes("xMid")) {
     translateX += (width - scaledWidth) / 2;
   } else if (align.includes("xMax")) {
     translateX += width - scaledWidth;
   }
 
-  // Y 对齐
   if (align.includes("YMid")) {
     translateY += (height - scaledHeight) / 2;
   } else if (align.includes("YMax")) {
     translateY += height - scaledHeight;
   }
 
-  // translate(translateX, translateY) -> scale(scale) -> translate(-vbX, -vbY)
+  return composeTransform(translateX, translateY, scale, scale, -vbX, -vbY);
+}
+
+function composeTransform(tx1: number, ty1: number, sx: number, sy: number, tx2: number, ty2: number): Matrix {
   let result = identityMatrix();
-  result = multiplyMatrices(result, translateMatrix(translateX, translateY));
-  result = multiplyMatrices(result, scaleMatrix(scale));
-  result = multiplyMatrices(result, translateMatrix(-vbX, -vbY));
+  result = multiplyMatrices(result, translateMatrix(tx1, ty1));
+  result = multiplyMatrices(result, scaleMatrix(sx, sy));
+  result = multiplyMatrices(result, translateMatrix(tx2, ty2));
   return result;
 }
 
-// 应用阴影
-function applyShadow(
-  ctx: CanvasRenderingContext2D,
-  shadow: { offsetX?: number; offsetY?: number; blur?: number; color?: Color }
-): void {
+type Shadow = { offsetX?: number; offsetY?: number; blur?: number; color?: Color };
+
+function applyShadow(ctx: CanvasRenderingContext2D, shadow: Shadow): void {
   ctx.shadowOffsetX = shadow.offsetX ?? 0;
   ctx.shadowOffsetY = shadow.offsetY ?? 0;
   ctx.shadowBlur = shadow.blur ?? 0;
   ctx.shadowColor = (shadow.color as string) ?? "rgba(0,0,0,0.5)";
 }
 
-// 清除阴影
 function clearShadow(ctx: CanvasRenderingContext2D): void {
   ctx.shadowOffsetX = 0;
   ctx.shadowOffsetY = 0;
@@ -560,40 +466,27 @@ function clearShadow(ctx: CanvasRenderingContext2D): void {
   ctx.shadowColor = "transparent";
 }
 
-// 渲染 SVG 元素
 export function renderSvg(ctx: CanvasRenderingContext2D, node: LayoutNode): void {
   const element = node.element as SvgElement;
   const { x, y, width, height } = node.layout;
+  const bounds: Bounds = { x, y, width, height };
 
-  // 绘制背景
   if (element.background) {
-    if (element.shadow) {
-      applyShadow(ctx, element.shadow);
-    }
+    if (element.shadow) applyShadow(ctx, element.shadow);
     ctx.fillStyle = resolveColor(ctx, element.background, x, y, width, height);
     ctx.fillRect(x, y, width, height);
-    if (element.shadow) {
-      clearShadow(ctx);
-    }
+    if (element.shadow) clearShadow(ctx);
   }
 
   ctx.save();
-
-  // 设置裁剪区域
   ctx.beginPath();
   ctx.rect(x, y, width, height);
   ctx.clip();
 
-  // 获取当前变换矩阵（包含 pixelRatio 缩放等）
   const baseTransform = ctx.getTransform();
-
-  // 计算 viewBox 变换
   const viewBox = element.viewBox ?? { x: 0, y: 0, width, height };
   const transform = calculateViewBoxTransform(x, y, width, height, viewBox, element.preserveAspectRatio);
 
-  const bounds = { x, y, width, height };
-
-  // 渲染子图形
   for (const child of element.children) {
     renderSvgChild(ctx, child, transform, bounds, baseTransform);
   }
