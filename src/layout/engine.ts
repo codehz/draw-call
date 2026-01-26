@@ -359,24 +359,44 @@ export function computeLayout(
         const childX = isRow ? contentX + mainOffset + info.margin.left : contentX + crossOffset + info.margin.left;
         const childY = isRow ? contentY + crossOffset + info.margin.top : contentY + mainOffset + info.margin.top;
 
-        // 处理 stretch 对约束的影响
-        const stretchWidth =
-          !isRow && info.element.width === undefined && align === "stretch"
-            ? contentWidth - info.margin.left - info.margin.right
-            : null;
-        const stretchHeight =
-          isRow && info.element.height === undefined && align === "stretch"
-            ? contentHeight - info.margin.top - info.margin.bottom
-            : null;
+        // 对于 flex 子元素，需要强制使用计算出的 flex 尺寸
+        // 对于非 flex 子元素，处理 stretch 对约束的影响
+        let minWidth = 0;
+        let maxWidth = info.width;
+        let minHeight = 0;
+        let maxHeight = info.height;
+
+        if (info.flex > 0) {
+          // Flex 子元素：在主轴方向强制使用计算出的尺寸
+          if (isRow) {
+            minWidth = maxWidth = info.width;
+          } else {
+            minHeight = maxHeight = info.height;
+          }
+          // 在交叉轴方向，如果没有指定尺寸且 align="stretch"，也要强制拉伸
+          if (isRow && info.element.height === undefined && align === "stretch") {
+            minHeight = maxHeight = info.height;
+          } else if (!isRow && info.element.width === undefined && align === "stretch") {
+            minWidth = maxWidth = info.width;
+          }
+        } else {
+          // 非 flex 元素：处理 stretch
+          if (!isRow && info.element.width === undefined && align === "stretch") {
+            minWidth = maxWidth = contentWidth - info.margin.left - info.margin.right;
+          }
+          if (isRow && info.element.height === undefined && align === "stretch") {
+            minHeight = maxHeight = contentHeight - info.margin.top - info.margin.bottom;
+          }
+        }
 
         const childNode = computeLayout(
           info.element,
           ctx,
           {
-            minWidth: stretchWidth ?? 0,
-            maxWidth: stretchWidth ?? info.width,
-            minHeight: stretchHeight ?? 0,
-            maxHeight: stretchHeight ?? info.height,
+            minWidth,
+            maxWidth,
+            minHeight,
+            maxHeight,
           },
           childX - info.margin.left,
           childY - info.margin.top
