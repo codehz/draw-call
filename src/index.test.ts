@@ -781,5 +781,58 @@ describe("draw-call", () => {
       expect(node.children[1].layout.width).toBe(260); // 300 - 20*2 padding
       expect(node.children[1].layout.height).toBe(150);
     });
+
+    test("should calculate image intrinsic size correctly", () => {
+      const sourceCanvas = createCanvas({ width: 200, height: 100 });
+      const image = Image({
+        src: sourceCanvas.canvas,
+      });
+
+      // 测试没有指定宽高的情况，应该使用图片的自然尺寸
+      expect(image.src).toBe(sourceCanvas.canvas);
+
+      // 在布局计算中验证 - 使用align: "start"防止拉伸
+      const canvas = createCanvas({ width: 400, height: 300 });
+      const node = canvas.render(
+        Box({
+          width: 400,
+          height: 300,
+          direction: "column",
+          align: "start", // 防止子元素拉伸
+          children: [
+            Image({
+              src: sourceCanvas.canvas, // 200x100 的图片
+            }),
+          ],
+        })
+      );
+
+      // 验证 Image 节点的布局尺寸应该与图片的自然尺寸一致
+      expect(node.children[0].layout.width).toBe(200);
+      expect(node.children[0].layout.height).toBe(100);
+    });
+
+    test("should respect explicit width and height for image", () => {
+      const sourceCanvas = createCanvas({ width: 200, height: 100 });
+      const canvas = createCanvas({ width: 400, height: 300 });
+      const node = canvas.render(
+        Box({
+          width: 400,
+          height: 300,
+          direction: "column",
+          children: [
+            Image({
+              src: sourceCanvas.canvas, // 200x100 的图片
+              width: 150,
+              height: 75,
+            }),
+          ],
+        })
+      );
+
+      // 验证 Image 节点的布局尺寸应该与指定的尺寸一致
+      expect(node.children[0].layout.width).toBe(150);
+      expect(node.children[0].layout.height).toBe(75);
+    });
   });
 });
