@@ -170,6 +170,9 @@ export function computeLayout(
       const isRow = direction === "row" || direction === "row-reverse";
       const isReverse = direction === "row-reverse" || direction === "column-reverse";
 
+      const getContentMainSize = () => (isRow ? contentWidth : contentHeight);
+      const getContentCrossSize = () => (isRow ? contentHeight : contentWidth);
+
       // 第一遍：计算所有非 flex 子元素的尺寸
       const childInfos: Array<{
         element: Element;
@@ -193,13 +196,7 @@ export function computeLayout(
           });
         } else {
           // 非 flex 元素，测量固有尺寸
-          const size = measureIntrinsicSize(
-            child,
-            ctx,
-            isRow
-              ? contentWidth - childMargin.left - childMargin.right
-              : contentWidth - childMargin.left - childMargin.right
-          );
+          const size = measureIntrinsicSize(child, ctx, contentWidth - childMargin.left - childMargin.right);
 
           // 判断是否需要在交叉轴 stretch
           // 当元素在交叉轴上没有指定尺寸且 align="stretch" 时，应该拉伸
@@ -237,7 +234,7 @@ export function computeLayout(
       if (wrap) {
         let currentLine: typeof childInfos = [];
         let currentLineSize = 0;
-        const mainAxisSize = isRow ? contentWidth : contentHeight;
+        const mainAxisSize = getContentMainSize();
 
         for (const info of childInfos) {
           const itemSize = isRow
@@ -284,7 +281,7 @@ export function computeLayout(
           }
         }
 
-        const mainAxisSize = isRow ? contentWidth : contentHeight;
+        const mainAxisSize = getContentMainSize();
         const availableForFlex = Math.max(0, mainAxisSize - totalFixed - totalGap);
 
         for (const info of lineInfos) {
@@ -318,14 +315,15 @@ export function computeLayout(
         const totalGap = lineInfos.length > 1 ? gap * (lineInfos.length - 1) : 0;
         const totalSize =
           lineInfos.reduce((sum, info) => {
-            if (isRow) {
-              return sum + info.width + info.margin.left + info.margin.right;
-            } else {
-              return sum + info.height + info.margin.top + info.margin.bottom;
-            }
+            return (
+              sum +
+              (isRow
+                ? info.width + info.margin.left + info.margin.right
+                : info.height + info.margin.top + info.margin.bottom)
+            );
           }, 0) + totalGap;
 
-        const mainAxisSize = isRow ? contentWidth : contentHeight;
+        const mainAxisSize = getContentMainSize();
         const freeSpace = mainAxisSize - totalSize;
 
         let mainStart = 0;
@@ -377,39 +375,29 @@ export function computeLayout(
 
         for (let i = 0; i < orderedInfos.length; i++) {
           const info = orderedInfos[i];
-          const crossAxisSize = wrap ? lineCrossSize : isRow ? contentHeight : contentWidth;
+          const crossAxisSize = wrap ? lineCrossSize : getContentCrossSize();
           const childCrossSize = isRow
             ? info.height + info.margin.top + info.margin.bottom
             : info.width + info.margin.left + info.margin.right;
 
           // 计算交叉轴位置
           let itemCrossOffset = 0;
-          const effectiveAlign =
-            info.element.alignSelf === "auto" || info.element.alignSelf === undefined ? align : info.element.alignSelf;
+          const effectiveAlign = info.element.alignSelf ?? align;
 
-          switch (effectiveAlign) {
-            case "start":
-              itemCrossOffset = 0;
-              break;
-            case "end":
-              itemCrossOffset = crossAxisSize - childCrossSize;
-              break;
-            case "center":
-              itemCrossOffset = (crossAxisSize - childCrossSize) / 2;
-              break;
-            case "stretch":
-              itemCrossOffset = 0;
-              if (isRow && info.element.height === undefined) {
-                info.height = crossAxisSize - info.margin.top - info.margin.bottom;
-              } else if (!isRow && info.element.width === undefined) {
-                info.width = crossAxisSize - info.margin.left - info.margin.right;
-              }
-              break;
-            case "baseline":
-              // TODO: 实现 baseline 对齐
-              itemCrossOffset = 0;
-              break;
-          }
+          if (effectiveAlign === "start") {
+            itemCrossOffset = 0;
+          } else if (effectiveAlign === "end") {
+            itemCrossOffset = crossAxisSize - childCrossSize;
+          } else if (effectiveAlign === "center") {
+            itemCrossOffset = (crossAxisSize - childCrossSize) / 2;
+          } else if (effectiveAlign === "stretch") {
+            itemCrossOffset = 0;
+            if (isRow && info.element.height === undefined) {
+              info.height = crossAxisSize - info.margin.top - info.margin.bottom;
+            } else if (!isRow && info.element.width === undefined) {
+              info.width = crossAxisSize - info.margin.left - info.margin.right;
+            }
+          } // baseline case is handled by default (itemCrossOffset = 0)
 
           const childX = isRow
             ? contentX + mainOffset + info.margin.left
