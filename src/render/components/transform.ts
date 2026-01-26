@@ -61,14 +61,12 @@ export function parseTransformValue(transform: TransformValue | undefined): DOMM
 
   if (simpleObj.rotate !== undefined) {
     if (typeof simpleObj.rotate === "number") {
-      // 单个数字：旋转角度（弧度），需要转换为度数
-      const degrees = (simpleObj.rotate * 180) / Math.PI;
-      result = result.rotate(degrees);
+      // 单个数字：旋转角度（度数）
+      result = result.rotate(simpleObj.rotate);
     } else {
-      // [angle, cx, cy]：绕点 (cx, cy) 旋转（角度为弧度）
+      // [angle, cx, cy]：绕点 (cx, cy) 旋转（角度为度数）
       const [angle, cx, cy] = simpleObj.rotate;
-      const degrees = (angle * 180) / Math.PI;
-      result = result.translate(cx, cy).rotate(degrees).translate(-cx, -cy);
+      result = result.translate(cx, cy).rotate(angle).translate(-cx, -cy);
     }
   }
 
@@ -83,15 +81,13 @@ export function parseTransformValue(transform: TransformValue | undefined): DOMM
   }
 
   if (simpleObj.skewX !== undefined) {
-    // skewX 接受弧度，需要转换为度数
-    const degrees = (simpleObj.skewX * 180) / Math.PI;
-    result = result.skewX(degrees);
+    // skewX 接受角度
+    result = result.skewX(simpleObj.skewX);
   }
 
   if (simpleObj.skewY !== undefined) {
-    // skewY 接受弧度，需要转换为度数
-    const degrees = (simpleObj.skewY * 180) / Math.PI;
-    result = result.skewY(degrees);
+    // skewY 接受角度
+    result = result.skewY(simpleObj.skewY);
   }
 
   return result;

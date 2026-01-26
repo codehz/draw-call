@@ -264,7 +264,7 @@ const layout = canvas.render(
                 align: "center",
                 children: [
                   DemoBox("45°", {
-                    rotate: Math.PI / 4, // 45度
+                    rotate: 45, // 45度
                   }),
                   Text({
                     content: "rotate(45°)",
@@ -280,7 +280,7 @@ const layout = canvas.render(
                 align: "center",
                 children: [
                   DemoBox("90°", {
-                    rotate: Math.PI / 2, // 90度
+                    rotate: 90, // 90度
                   }),
                   Text({
                     content: "rotate(90°)",
@@ -296,7 +296,7 @@ const layout = canvas.render(
                 align: "center",
                 children: [
                   DemoBox("-30°", {
-                    rotate: -Math.PI / 6, // -30度
+                    rotate: -30, // -30度
                   }),
                   Text({
                     content: "rotate(-30°)",
@@ -336,7 +336,7 @@ const layout = canvas.render(
                 children: [
                   DemoBox("移+转", {
                     translate: [20, 10],
-                    rotate: Math.PI / 6, // 30度
+                    rotate: 30, // 30度
                   }),
                   Text({
                     content: "移动 + 旋转",
@@ -353,7 +353,7 @@ const layout = canvas.render(
                 children: [
                   DemoBox("缩+转", {
                     scale: 1.2,
-                    rotate: -Math.PI / 8, // -22.5度
+                    rotate: -22.5, // -22.5度
                   }),
                   Text({
                     content: "缩放 + 旋转",
@@ -371,7 +371,7 @@ const layout = canvas.render(
                   DemoBox("全部", {
                     translate: [15, 10],
                     scale: 1.1,
-                    rotate: Math.PI / 4, // 45度
+                    rotate: 45, // 45度
                   }),
                   Text({
                     content: "移动 + 缩放 + 旋转",
@@ -389,7 +389,7 @@ const layout = canvas.render(
                   Transform({
                     transformOrigin: ["100%", "100%"],
                     transform: {
-                      rotate: Math.PI / 4, // 45度
+                      rotate: 45, // 45度
                       scale: 1.2,
                     },
                     children: Box({

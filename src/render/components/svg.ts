@@ -104,13 +104,10 @@ function applyTransform(base: DOMMatrix, transform?: SvgTransformProps["transfor
 
   if (transform.rotate !== undefined) {
     if (typeof transform.rotate === "number") {
-      // 弧度转换为度数
-      const degrees = (transform.rotate * 180) / Math.PI;
-      result = result.rotate(degrees);
+      result = result.rotate(transform.rotate);
     } else {
       const [angle, cx, cy] = transform.rotate;
-      const degrees = (angle * 180) / Math.PI;
-      result = result.translate(cx, cy).rotate(degrees).translate(-cx, -cy);
+      result = result.translate(cx, cy).rotate(angle).translate(-cx, -cy);
     }
   }
 
