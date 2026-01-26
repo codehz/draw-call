@@ -2,8 +2,7 @@
  * 示例：使用 draw-call 绘制一个卡片
  * 运行: bun examples/card.ts
  */
-import { Box, linearGradient, Svg, svg, Text } from "@/index";
-import { printLayout } from "@/layout";
+import { Box, linearGradient, printLayout, Svg, svg, Text } from "@/index";
 import { createCanvas } from "@/node";
 import { GlobalFonts } from "@napi-rs/canvas";
 import { fileURLToPath } from "bun";

@@ -8,6 +8,9 @@ export { Box, Image, Stack, Svg, Text, svg } from "@/components";
 // 渐变辅助函数
 export { linearGradient, radialGradient } from "@/types/base";
 
+// 布局打印工具
+export { layoutToString, printLayout } from "@/layout";
+
 // 类型导出
 export type {
   Border,
