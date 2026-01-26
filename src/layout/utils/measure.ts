@@ -2,8 +2,16 @@ import { buildFontString } from "@/render/utils/font";
 import type { FontProps } from "@/types/base";
 
 // 测量上下文接口 - 抽象 Canvas 测量 API
+export interface MeasureTextResult {
+  width: number;
+  height: number;
+  offset: number;
+  ascent: number;
+  descent: number;
+}
+
 export interface MeasureContext {
-  measureText(text: string, font: FontProps): { width: number; height: number; offset: number };
+  measureText(text: string, font: FontProps): MeasureTextResult;
 }
 
 // 创建基于 Canvas 的测量上下文
@@ -15,10 +23,13 @@ export function createCanvasMeasureContext(ctx: CanvasRenderingContext2D): Measu
       ctx.textBaseline = "middle";
       const metrics = ctx.measureText(text);
       const height = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
+      const fontSize = font.size || 16;
       return {
         width: metrics.width,
-        height: height || font.size || 16,
+        height: height || fontSize,
         offset: (metrics.actualBoundingBoxAscent - metrics.actualBoundingBoxDescent) / 2,
+        ascent: metrics.actualBoundingBoxAscent,
+        descent: metrics.actualBoundingBoxDescent,
       };
     },
   };

@@ -2,6 +2,7 @@ import type { MeasureContext } from "@/layout/utils/measure";
 import type { BoxElement, Element, StackElement } from "@/types/components";
 import { measureBoxSize } from "./box";
 import { measureImageSize } from "./image";
+import { measureRichTextSize } from "./richtext";
 import { measureStackSize } from "./stack";
 import { measureSvgSize } from "./svg";
 import { measureTextSize } from "./text";
@@ -17,6 +18,8 @@ export function measureIntrinsicSize(
   switch (element.type) {
     case "text":
       return measureTextSize(element, ctx, availableWidth);
+    case "richtext":
+      return measureRichTextSize(element, ctx, availableWidth);
     case "box":
       return measureBoxSize(element as BoxElement, ctx, availableWidth, measureIntrinsicSize);
     case "stack":
@@ -32,6 +35,7 @@ export function measureIntrinsicSize(
 
 export { measureBoxSize } from "./box";
 export { measureImageSize } from "./image";
+export { measureRichTextSize } from "./richtext";
 export { measureStackSize } from "./stack";
 export { measureSvgSize } from "./svg";
 export { measureTextSize } from "./text";

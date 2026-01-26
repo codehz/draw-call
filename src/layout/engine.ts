@@ -1,4 +1,5 @@
 import { measureIntrinsicSize } from "@/layout/components";
+import { wrapRichText } from "@/layout/components/richtext";
 import type { MeasureContext } from "@/layout/utils/measure";
 import { truncateText, wrapText } from "@/layout/utils/measure";
 import { applyOffset } from "@/layout/utils/offset";
@@ -97,6 +98,30 @@ export function computeLayout(
       node.lines = [text];
       node.lineOffsets = [offset];
     }
+  }
+
+  // 处理富文本元素的行
+  if (element.type === "richtext") {
+    const lineHeight = element.lineHeight ?? 1.2;
+    let lines = wrapRichText(ctx, element.spans, contentWidth, lineHeight);
+
+    if (element.maxLines && lines.length > element.maxLines) {
+      lines = lines.slice(0, element.maxLines);
+      if (element.ellipsis && lines.length > 0) {
+        // 富文本的省略号处理比较复杂，这里简化处理：在最后一行最后一个 segment 后面加省略号
+        const lastLine = lines[lines.length - 1];
+        if (lastLine.segments.length > 0) {
+          const lastSeg = lastLine.segments[lastLine.segments.length - 1];
+          // 实际应该检查宽度并截断，这里先简单加个 ...
+          lastSeg.text += "...";
+          const m = ctx.measureText(lastSeg.text, lastSeg.font ?? {});
+          lastSeg.width = m.width;
+          // 重新计算行宽
+          lastLine.width = lastLine.segments.reduce((sum, s) => sum + s.width, 0);
+        }
+      }
+    }
+    node.richLines = lines;
   }
 
   // 递归处理子元素

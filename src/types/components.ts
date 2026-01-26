@@ -2,7 +2,7 @@ import type { Border, Color, FontProps, Shadow, StrokeProps } from "@/types/base
 import type { ContainerLayoutProps, LayoutProps } from "@/types/layout";
 
 // 元素类型标识
-export type ElementType = "box" | "text" | "image" | "svg" | "stack";
+export type ElementType = "box" | "text" | "richtext" | "image" | "svg" | "stack";
 
 // 元素基础接口
 export interface ElementBase {
@@ -40,6 +40,30 @@ export interface TextProps extends LayoutProps {
 
 export interface TextElement extends ElementBase, TextProps {
   type: "text";
+}
+
+// RichText 组件属性
+export interface RichTextSpan {
+  text: string;
+  font?: FontProps;
+  color?: Color;
+  background?: Color;
+  underline?: boolean;
+  strikethrough?: boolean;
+}
+
+export interface RichTextProps extends LayoutProps {
+  spans: RichTextSpan[];
+  lineHeight?: number;
+  align?: "left" | "center" | "right";
+  verticalAlign?: "top" | "middle" | "bottom";
+  maxLines?: number;
+  ellipsis?: boolean;
+  color?: Color;
+}
+
+export interface RichTextElement extends ElementBase, RichTextProps {
+  type: "richtext";
 }
 
 // Image 组件属性
@@ -220,7 +244,7 @@ export interface StackElement extends ElementBase, StackProps {
 }
 
 // 所有元素类型联合
-export type Element = BoxElement | TextElement | ImageElement | SvgElement | StackElement;
+export type Element = BoxElement | TextElement | RichTextElement | ImageElement | SvgElement | StackElement;
 
 // 组件工厂函数类型
 export type ComponentFactory<Props, El extends Element> = (props: Props) => El;

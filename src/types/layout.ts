@@ -1,4 +1,4 @@
-import type { Size, Spacing } from "@/types/base";
+import type { Color, FontProps, Size, Spacing } from "@/types/base";
 import type { Element } from "./components";
 
 // 布局方向
@@ -48,6 +48,27 @@ export interface ComputedLayout {
   contentHeight: number;
 }
 
+export interface RichTextSpanSegment {
+  text: string;
+  font?: FontProps;
+  color?: Color;
+  background?: Color;
+  underline?: boolean;
+  strikethrough?: boolean;
+  width: number;
+  height: number;
+  ascent: number;
+  descent: number;
+  offset: number;
+}
+
+export interface RichTextLine {
+  segments: RichTextSpanSegment[];
+  width: number;
+  height: number;
+  baseline: number;
+}
+
 // 布局节点 - 包含计算后的布局信息
 export interface LayoutNode {
   element: Element;
@@ -57,6 +78,8 @@ export interface LayoutNode {
   lines?: string[];
   // 每行文本的基线偏移量（用于修正 middle 基线）
   lineOffsets?: number[];
+  // 富文本特有属性
+  richLines?: RichTextLine[];
 }
 
 // 布局约束

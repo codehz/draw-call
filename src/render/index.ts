@@ -1,5 +1,6 @@
 import { renderBox } from "@/render/components/box";
 import { renderImage } from "@/render/components/image";
+import { renderRichText } from "@/render/components/richtext";
 import { renderSvg } from "@/render/components/svg";
 import { renderText } from "@/render/components/text";
 import { roundRectPath } from "@/render/utils/shapes";
@@ -43,6 +44,11 @@ export function renderNode(ctx: CanvasRenderingContext2D, node: LayoutNode): voi
 
     case "text": {
       renderText(ctx, node);
+      break;
+    }
+
+    case "richtext": {
+      renderRichText(ctx, node);
       break;
     }
 

@@ -3,7 +3,7 @@ export { createCanvas } from "@/canvas";
 export type { CanvasOptions, DrawCallCanvas, LayoutSize } from "@/canvas";
 
 // 组件
-export { Box, Image, Stack, Svg, Text, svg } from "@/components";
+export { Box, Image, RichText, Stack, Svg, Text, svg } from "@/components";
 
 // 渐变辅助函数
 export { linearGradient, radialGradient } from "@/types/base";
@@ -40,6 +40,9 @@ export type {
   BoxElement,
   BoxProps,
   Element,
+  RichTextElement,
+  RichTextProps,
+  RichTextSpan,
   StackAlign,
   StackElement,
   StackProps,
