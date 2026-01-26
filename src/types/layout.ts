@@ -1,4 +1,5 @@
 import type { Size, Spacing } from "@/types/base";
+import type { Element } from "./components";
 
 // 布局方向
 export type FlexDirection = "row" | "column" | "row-reverse" | "column-reverse";
@@ -45,6 +46,17 @@ export interface ComputedLayout {
   contentY: number;
   contentWidth: number;
   contentHeight: number;
+}
+
+// 布局节点 - 包含计算后的布局信息
+export interface LayoutNode {
+  element: Element;
+  layout: ComputedLayout;
+  children: LayoutNode[];
+  // 文本特有属性
+  lines?: string[];
+  // 每行文本的基线偏移量（用于修正 middle 基线）
+  lineOffsets?: number[];
 }
 
 // 布局约束

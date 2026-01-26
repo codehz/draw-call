@@ -5,19 +5,8 @@ import { applyOffset } from "@/layout/utils/offset";
 import type { NormalizedSpacing } from "@/types/base";
 import { normalizeSpacing } from "@/types/base";
 import type { Element } from "@/types/components";
-import type { ComputedLayout, LayoutConstraints } from "@/types/layout";
+import type { ComputedLayout, LayoutConstraints, LayoutNode } from "@/types/layout";
 import { resolveSize, sizeNeedsParent } from "@/types/layout";
-
-// 布局节点 - 包含计算后的布局信息
-export interface LayoutNode {
-  element: Element;
-  layout: ComputedLayout;
-  children: LayoutNode[];
-  // 文本特有属性
-  lines?: string[];
-  // 每行文本的基线偏移量（用于修正 middle 基线）
-  lineOffsets?: number[];
-}
 
 // 布局计算主函数
 export function computeLayout(

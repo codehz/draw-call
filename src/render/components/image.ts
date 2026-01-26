@@ -1,9 +1,9 @@
-import type { LayoutNode } from "@/layout/engine";
 import { resolveColor } from "@/render/utils/colors";
 import { applyShadow, clearShadow } from "@/render/utils/shadows";
 import { roundRectPath } from "@/render/utils/shapes";
 import { normalizeBorderRadius } from "@/types/base";
 import type { ImageElement } from "@/types/components";
+import type { LayoutNode } from "@/types/layout";
 
 // 绘制图片
 export function renderImage(ctx: CanvasRenderingContext2D, node: LayoutNode): void {

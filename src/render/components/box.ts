@@ -1,9 +1,9 @@
-import type { LayoutNode } from "@/layout/engine";
 import { resolveColor } from "@/render/utils/colors";
 import { applyShadow, clearShadow } from "@/render/utils/shadows";
 import { roundRectPath } from "@/render/utils/shapes";
 import { normalizeBorderRadius } from "@/types/base";
 import type { BoxElement, StackElement } from "@/types/components";
+import type { LayoutNode } from "@/types/layout";
 
 // 绘制 Box 背景和边框
 export function renderBox(ctx: CanvasRenderingContext2D, node: LayoutNode): void {

@@ -61,4 +61,5 @@ export type {
 
 // 布局工具（高级用法）
 export { computeLayout, createCanvasMeasureContext } from "@/layout";
-export type { LayoutNode, MeasureContext } from "@/layout";
+export type { MeasureContext } from "@/layout";
+export type { LayoutNode } from "@/types/layout";

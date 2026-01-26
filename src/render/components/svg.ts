@@ -1,6 +1,5 @@
 import { DOMMatrix } from "@/compat/DOMMatrix";
 import { Path2D } from "@/compat/Path2D";
-import type { LayoutNode } from "@/layout/engine";
 import { buildFontString } from "@/render/utils/font";
 import type { Color, GradientDescriptor, StrokeProps } from "@/types/base";
 import type {
@@ -19,6 +18,7 @@ import type {
   SvgTextChild,
   SvgTransformProps,
 } from "@/types/components";
+import type { LayoutNode } from "@/types/layout";
 
 // 判断是否为渐变描述符
 function isGradientDescriptor(color: Color): color is GradientDescriptor {

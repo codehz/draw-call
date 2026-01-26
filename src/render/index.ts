@@ -1,10 +1,10 @@
-import type { LayoutNode } from "@/layout";
 import { renderBox } from "@/render/components/box";
 import { renderImage } from "@/render/components/image";
 import { renderSvg } from "@/render/components/svg";
 import { renderText } from "@/render/components/text";
 import { roundRectPath } from "@/render/utils/shapes";
 import { normalizeBorderRadius } from "@/types/base";
+import type { LayoutNode } from "@/types/layout";
 
 // 渲染上下文接口
 export interface RenderContext {
