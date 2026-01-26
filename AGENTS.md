@@ -7,10 +7,12 @@
 ### 核心特性
 
 - **Flexbox 布局引擎**: 支持完整的 Flexbox 布局，包括方向、对齐、间距等
-- **组件化渲染**: 提供 Box、Text、RichText、Image、Svg、Stack 等组件
+- **组件化渲染**: 提供 Box、Text、RichText、Image、Svg、Stack、CustomDraw、Transform 等组件
 - **丰富的样式支持**: 渐变、阴影、边框、圆角等
 - **文本排版**: 自动换行、省略号、行高控制、富文本支持等
 - **SVG 图形**: 支持矩形、圆形、椭圆、路径等 SVG 图形
+- **2D 变换**: 支持旋转、倾斜等 2D 变换操作
+- **自定义绘制**: 支持自定义 Canvas 绘制逻辑
 - **跨平台**: 支持浏览器和 Node.js 环境（通过 @napi-rs/canvas）
 
 ## 项目结构
@@ -25,7 +27,9 @@ src/
 │   ├── Text.ts        # Text 文本组件
 │   ├── RichText.ts    # RichText 富文本组件
 │   ├── Image.ts       # Image 图片组件
-│   └── Svg.ts         # SVG 图形组件
+│   ├── Svg.ts         # SVG 图形组件
+│   ├── Transform.ts   # Transform 2D 变换组件
+│   └── CustomDraw.ts  # CustomDraw 自定义绘制组件
 ├── layout/            # 布局引擎
 │   ├── engine.ts      # 布局计算核心
 │   ├── components/    # 组件固有尺寸测量
@@ -33,6 +37,7 @@ src/
 ├── render/            # 渲染引擎
 │   ├── components/    # 组件渲染实现
 │   └── utils/         # 渲染工具函数
+├── __tests__/         # 集成测试
 ├── types/             # 类型定义
 │   ├── base.ts        # 基础类型（颜色、尺寸、样式等）
 │   ├── components.ts  # 组件类型

@@ -5,10 +5,12 @@
 ## ✨ 特性
 
 - **Flexbox 布局引擎** - 支持完整的 Flexbox 布局，包括方向、对齐、间距等
-- **组件化渲染** - 提供 Box、Text、Image、Svg、Stack 等组件
+- **组件化渲染** - 提供 Box、Text、Image、Svg、Stack、RichText、CustomDraw、Transform 等组件
 - **丰富的样式支持** - 渐变、阴影、边框、圆角等
-- **文本排版** - 自动换行、省略号、行高控制等
+- **文本排版** - 自动换行、省略号、行高控制、富文本支持等
 - **SVG 图形** - 支持矩形、圆形、椭圆、路径等 SVG 图形
+- **2D 变换** - 支持旋转、倾斜等 2D 变换操作
+- **自定义绘制** - 支持自定义 Canvas 绘制逻辑
 - **跨平台** - 支持浏览器和 Node.js 环境
 - **TypeScript** - 完整的类型支持
 
@@ -222,6 +224,44 @@ Stack({
 });
 ```
 
+### Transform
+
+2D 变换组件，支持旋转、倾斜等变换操作。
+
+```typescript
+Transform({
+  children: Box({
+    width: 100,
+    height: 100,
+    background: "#667eea",
+  }),
+  transform: {
+    rotate: Math.PI / 4, // 旋转 45 度
+  },
+  transformOrigin: ["50%", "50%"], // 变换原点
+});
+```
+
+### CustomDraw
+
+自定义绘制组件，提供原生 Canvas 上下文进行自定义绘制。
+
+```typescript
+CustomDraw({
+  width: 200,
+  height: 100,
+  draw: (ctx, options) => {
+    // 使用原生 Canvas API 进行绘制
+    ctx.fillStyle = "#667eea";
+    ctx.fillRect(10, 10, 180, 80);
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "bold 16px sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText("Custom Draw", 100, 60);
+  },
+});
+```
+
 ## 🎨 样式
 
 ### 尺寸
@@ -373,6 +413,9 @@ console.log(layoutNode.layout.y);       // 0
 
 - [demo.ts](examples/demo.ts) - 浏览器环境演示
 - [card.ts](examples/card.ts) - Node.js 环境卡片示例
+- [richtext.ts](examples/richtext.ts) - 富文本示例
+- [transform.ts](examples/transform.ts) - 2D 变换示例
+- [customdraw.ts](examples/customdraw.ts) - 自定义绘制示例
 
 ## 🤝 贡献
 
