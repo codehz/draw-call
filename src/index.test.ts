@@ -1,18 +1,19 @@
 import { describe, expect, test } from "bun:test";
 import { Box, Stack, Text } from "./index";
+import { computeLayout, createCanvasMeasureContext } from "./layout";
 import { createCanvas } from "./node";
 
 describe("draw-call", () => {
   describe("createCanvas", () => {
-    test("should create canvas with specified dimensions", async () => {
-      const canvas = await createCanvas({ width: 800, height: 600 });
+    test("should create canvas with specified dimensions", () => {
+      const canvas = createCanvas({ width: 800, height: 600 });
       expect(canvas.width).toBe(800);
       expect(canvas.height).toBe(600);
       expect(canvas.pixelRatio).toBe(1);
     });
 
-    test("should support pixel ratio", async () => {
-      const canvas = await createCanvas({
+    test("should support pixel ratio", () => {
+      const canvas = createCanvas({
         width: 400,
         height: 300,
         pixelRatio: 2,
@@ -68,9 +69,8 @@ describe("draw-call", () => {
   });
 
   describe("Stack alignment", () => {
-    test("should align children to center horizontally", async () => {
-      const canvas = await createCanvas({ width: 200, height: 200 });
-      const { computeLayout, createCanvasMeasureContext } = await import("./layout");
+    test("should align children to center horizontally", () => {
+      const canvas = createCanvas({ width: 200, height: 200 });
       const ctx = createCanvasMeasureContext(canvas.getContext());
       const tree = computeLayout(
         Stack({
@@ -87,9 +87,8 @@ describe("draw-call", () => {
       expect(tree.children[0].layout.y).toBe(0);
     });
 
-    test("should align children to center vertically", async () => {
-      const canvas = await createCanvas({ width: 200, height: 200 });
-      const { computeLayout, createCanvasMeasureContext } = await import("./layout");
+    test("should align children to center vertically", () => {
+      const canvas = createCanvas({ width: 200, height: 200 });
       const ctx = createCanvasMeasureContext(canvas.getContext());
       const tree = computeLayout(
         Stack({
@@ -106,9 +105,8 @@ describe("draw-call", () => {
       expect(tree.children[0].layout.y).toBe(75);
     });
 
-    test("should align children to center both axes", async () => {
-      const canvas = await createCanvas({ width: 200, height: 200 });
-      const { computeLayout, createCanvasMeasureContext } = await import("./layout");
+    test("should align children to center both axes", () => {
+      const canvas = createCanvas({ width: 200, height: 200 });
       const ctx = createCanvasMeasureContext(canvas.getContext());
       const tree = computeLayout(
         Stack({
@@ -125,9 +123,8 @@ describe("draw-call", () => {
       expect(tree.children[0].layout.y).toBe(75);
     });
 
-    test("should align children to end", async () => {
-      const canvas = await createCanvas({ width: 200, height: 200 });
-      const { computeLayout, createCanvasMeasureContext } = await import("./layout");
+    test("should align children to end", () => {
+      const canvas = createCanvas({ width: 200, height: 200 });
       const ctx = createCanvasMeasureContext(canvas.getContext());
       const tree = computeLayout(
         Stack({
@@ -145,9 +142,8 @@ describe("draw-call", () => {
       expect(tree.children[0].layout.y).toBe(150);
     });
 
-    test("should default to start alignment", async () => {
-      const canvas = await createCanvas({ width: 200, height: 200 });
-      const { computeLayout, createCanvasMeasureContext } = await import("./layout");
+    test("should default to start alignment", () => {
+      const canvas = createCanvas({ width: 200, height: 200 });
       const ctx = createCanvasMeasureContext(canvas.getContext());
       const tree = computeLayout(
         Stack({
@@ -164,8 +160,8 @@ describe("draw-call", () => {
   });
 
   describe("render", () => {
-    test("should render simple box", async () => {
-      const canvas = await createCanvas({ width: 200, height: 200 });
+    test("should render simple box", () => {
+      const canvas = createCanvas({ width: 200, height: 200 });
       canvas.render(
         Box({
           width: 100,
@@ -177,8 +173,8 @@ describe("draw-call", () => {
       expect(true).toBe(true);
     });
 
-    test("should render nested boxes", async () => {
-      const canvas = await createCanvas({ width: 400, height: 300 });
+    test("should render nested boxes", () => {
+      const canvas = createCanvas({ width: 400, height: 300 });
       canvas.render(
         Box({
           width: "fill",
@@ -202,8 +198,8 @@ describe("draw-call", () => {
       expect(true).toBe(true);
     });
 
-    test("should render text", async () => {
-      const canvas = await createCanvas({ width: 300, height: 100 });
+    test("should render text", () => {
+      const canvas = createCanvas({ width: 300, height: 100 });
       canvas.render(
         Box({
           width: "fill",
@@ -221,8 +217,8 @@ describe("draw-call", () => {
       expect(true).toBe(true);
     });
 
-    test("should render card layout", async () => {
-      const canvas = await createCanvas({ width: 400, height: 300 });
+    test("should render card layout", () => {
+      const canvas = createCanvas({ width: 400, height: 300 });
       canvas.render(
         Box({
           width: 360,
@@ -260,8 +256,8 @@ describe("draw-call", () => {
       expect(true).toBe(true);
     });
 
-    test("should support flex justify content", async () => {
-      const canvas = await createCanvas({ width: 400, height: 100 });
+    test("should support flex justify content", () => {
+      const canvas = createCanvas({ width: 400, height: 100 });
       canvas.render(
         Box({
           width: "fill",
@@ -279,8 +275,8 @@ describe("draw-call", () => {
       expect(true).toBe(true);
     });
 
-    test("should support flex align items", async () => {
-      const canvas = await createCanvas({ width: 200, height: 200 });
+    test("should support flex align items", () => {
+      const canvas = createCanvas({ width: 200, height: 200 });
       canvas.render(
         Box({
           width: "fill",
@@ -299,8 +295,8 @@ describe("draw-call", () => {
       expect(true).toBe(true);
     });
 
-    test("should output to buffer", async () => {
-      const canvas = await createCanvas({ width: 100, height: 100 });
+    test("should output to buffer", () => {
+      const canvas = createCanvas({ width: 100, height: 100 });
       canvas.render(
         Box({
           width: "fill",
@@ -309,7 +305,7 @@ describe("draw-call", () => {
           border: { radius: 10 },
         })
       );
-      const buffer = await canvas.toBuffer("image/png");
+      const buffer = canvas.toBuffer("image/png");
       expect(buffer).toBeInstanceOf(Buffer);
       expect(buffer.length).toBeGreaterThan(0);
     });

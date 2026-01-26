@@ -56,7 +56,7 @@ export function createCanvas(options: Omit<CanvasOptions, "canvas">): DrawCallCa
       return canvas.toDataURL(type as "image/png", quality);
     },
 
-    async toBuffer(type: "image/png" | "image/jpeg" = "image/png"): Promise<Buffer> {
+    toBuffer(type: "image/png" | "image/jpeg" = "image/png"): Buffer {
       // @ts-expect-error 类型不匹配问题，强制转换
       return canvas.toBuffer(type);
     },

@@ -29,7 +29,7 @@ export interface DrawCallCanvas {
   clear(): void;
   getContext(): CanvasRenderingContext2D;
   toDataURL(type?: string, quality?: number): string;
-  toBuffer(type?: "image/png" | "image/jpeg"): Promise<Buffer>;
+  toBuffer(type?: "image/png" | "image/jpeg"): Buffer;
 }
 
 /**
@@ -101,7 +101,7 @@ export function createCanvas(options: CanvasOptions): DrawCallCanvas {
       throw new Error("toDataURL not supported");
     },
 
-    async toBuffer(type: "image/png" | "image/jpeg" = "image/png"): Promise<Buffer> {
+    toBuffer(type: "image/png" | "image/jpeg" = "image/png"): Buffer {
       if ("toBuffer" in canvas && typeof canvas.toBuffer === "function") {
         return canvas.toBuffer(type);
       }
