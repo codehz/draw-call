@@ -1,8 +1,35 @@
 /**
  * draw-call 网页演示
- * 展示库的各项功能：逐句布局、样式、文本排版等
+ * 展示库的各项功能：逐句布局、样式、文本排版、图片渲染等
  */
-import { Box, Text, createCanvas, linearGradient } from "@/index";
+import { Box, Image, Text, createCanvas, linearGradient } from "@/index";
+
+// 创建一个 canvas 并绘制图片内容，返回用于 Image 组件的 canvas
+function createDemoImage(): HTMLCanvasElement {
+  const imgCanvas = document.createElement("canvas");
+  imgCanvas.width = 120;
+  imgCanvas.height = 60;
+  const ctx = imgCanvas.getContext("2d");
+  if (!ctx) return imgCanvas;
+
+  // 绘制渐变背景
+  const gradient = ctx.createLinearGradient(0, 0, 120, 60);
+  gradient.addColorStop(0, "#667eea");
+  gradient.addColorStop(1, "#764ba2");
+  ctx.fillStyle = gradient;
+  ctx.beginPath();
+  ctx.roundRect(0, 0, 120, 60, 8);
+  ctx.fill();
+
+  // 绘制文字
+  ctx.fillStyle = "#ffffff";
+  ctx.font = "bold 14px sans-serif";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText("Image Demo", 60, 30);
+
+  return imgCanvas;
+}
 
 // 获取 canvas 元素并设置尺寸
 const canvasEl = document.getElementById("canvas") as HTMLCanvasElement;
@@ -242,6 +269,30 @@ canvas.render(
                 color: "#666",
                 wrap: true,
                 lineHeight: 1.4,
+              }),
+            ],
+          }),
+
+          // 卡片 4：图片展示
+          Box({
+            width: "fill",
+            background: "#ffffff",
+            border: { radius: 8, width: 1, color: "#e0e0e0" },
+            padding: 12,
+            shadow: { offsetY: 2, blur: 8, color: "rgba(0,0,0,0.08)" },
+            direction: "column",
+            gap: 8,
+            children: [
+              Text({
+                content: "Canvas 图片",
+                font: { size: 12, weight: "bold", family: "sans-serif" },
+                color: "#333",
+              }),
+              Image({
+                src: createDemoImage(),
+                width: 120,
+                height: 60,
+                border: { radius: 8 },
               }),
             ],
           }),
