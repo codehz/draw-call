@@ -104,10 +104,13 @@ function applyTransform(base: DOMMatrix, transform?: SvgTransformProps["transfor
 
   if (transform.rotate !== undefined) {
     if (typeof transform.rotate === "number") {
-      result = result.rotate(transform.rotate);
+      // 弧度转换为度数
+      const degrees = (transform.rotate * 180) / Math.PI;
+      result = result.rotate(degrees);
     } else {
       const [angle, cx, cy] = transform.rotate;
-      result = result.translate(cx, cy).rotate(angle).translate(-cx, -cy);
+      const degrees = (angle * 180) / Math.PI;
+      result = result.translate(cx, cy).rotate(degrees).translate(-cx, -cy);
     }
   }
 
@@ -120,11 +123,15 @@ function applyTransform(base: DOMMatrix, transform?: SvgTransformProps["transfor
   }
 
   if (transform.skewX !== undefined) {
-    result = result.skewX(transform.skewX);
+    // 弧度转换为度数
+    const degrees = (transform.skewX * 180) / Math.PI;
+    result = result.skewX(degrees);
   }
 
   if (transform.skewY !== undefined) {
-    result = result.skewY(transform.skewY);
+    // 弧度转换为度数
+    const degrees = (transform.skewY * 180) / Math.PI;
+    result = result.skewY(degrees);
   }
 
   return result;

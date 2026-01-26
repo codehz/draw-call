@@ -20,6 +20,7 @@ const canvas = createNodeCanvas({
 function DemoBox(label: string, transform?: any) {
   return Transform({
     transform,
+    transformOrigin: ["50%", "50%"],
     children: Box({
       width: 80,
       height: 80,

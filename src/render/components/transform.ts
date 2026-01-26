@@ -61,12 +61,14 @@ export function parseTransformValue(transform: TransformValue | undefined): DOMM
 
   if (simpleObj.rotate !== undefined) {
     if (typeof simpleObj.rotate === "number") {
-      // 单个数字：旋转角度（度数）
-      result = result.rotate(simpleObj.rotate);
+      // 单个数字：旋转角度（弧度），需要转换为度数
+      const degrees = (simpleObj.rotate * 180) / Math.PI;
+      result = result.rotate(degrees);
     } else {
-      // [angle, cx, cy]：绕点 (cx, cy) 旋转
+      // [angle, cx, cy]：绕点 (cx, cy) 旋转（角度为弧度）
       const [angle, cx, cy] = simpleObj.rotate;
-      result = result.translate(cx, cy).rotate(angle).translate(-cx, -cy);
+      const degrees = (angle * 180) / Math.PI;
+      result = result.translate(cx, cy).rotate(degrees).translate(-cx, -cy);
     }
   }
 
@@ -81,11 +83,15 @@ export function parseTransformValue(transform: TransformValue | undefined): DOMM
   }
 
   if (simpleObj.skewX !== undefined) {
-    result = result.skewX(simpleObj.skewX);
+    // skewX 接受弧度，需要转换为度数
+    const degrees = (simpleObj.skewX * 180) / Math.PI;
+    result = result.skewX(degrees);
   }
 
   if (simpleObj.skewY !== undefined) {
-    result = result.skewY(simpleObj.skewY);
+    // skewY 接受弧度，需要转换为度数
+    const degrees = (simpleObj.skewY * 180) / Math.PI;
+    result = result.skewY(degrees);
   }
 
   return result;
@@ -143,8 +149,12 @@ export function renderTransform(ctx: CanvasRenderingContext2D, node: LayoutNode)
 
   const childNode = children[0];
 
-  // 解析变换原点
-  const [ox, oy] = resolveTransformOrigin(element.transformOrigin, childNode.layout);
+  // 解析变换原点（相对于子元素尺寸）
+  const [relativeOx, relativeOy] = resolveTransformOrigin(element.transformOrigin, childNode.layout);
+
+  // 转换为绝对坐标（加上子元素的布局位置）
+  const ox = childNode.layout.x + relativeOx;
+  const oy = childNode.layout.y + relativeOy;
 
   // 解析变换矩阵
   const targetMatrix = parseTransformValue(element.transform);
