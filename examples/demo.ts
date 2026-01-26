@@ -2,7 +2,7 @@
  * draw-call 网页演示
  * 展示库的各项功能：逐句布局、样式、文本排版、图片渲染等
  */
-import { Box, Image, Text, createCanvas, linearGradient } from "@/index";
+import { Box, createCanvas, Image, linearGradient, Svg, svg, Text } from "@/index";
 
 // 创建一个 canvas 并绘制图片内容，返回用于 Image 组件的 canvas
 function createDemoImage(): HTMLCanvasElement {
@@ -38,7 +38,7 @@ if (!canvasEl) throw new Error("Canvas element not found");
 // 根据设备像素比设置实际大小
 const dpr = window.devicePixelRatio || 1;
 const width = 720;
-const height = 400;
+const height = 600;
 
 canvasEl.width = width * dpr;
 canvasEl.height = height * dpr;
@@ -293,6 +293,94 @@ canvas.render(
                 width: 120,
                 height: 60,
                 border: { radius: 8 },
+              }),
+            ],
+          }),
+
+          // 卡片 5：SVG 图形展示
+          Box({
+            width: "fill",
+            background: "#ffffff",
+            border: { radius: 8, width: 1, color: "#e0e0e0" },
+            padding: 12,
+            shadow: { offsetY: 2, blur: 8, color: "rgba(0,0,0,0.08)" },
+            direction: "column",
+            gap: 8,
+            children: [
+              Text({
+                content: "SVG 图形",
+                font: { size: 12, weight: "bold", family: "sans-serif" },
+                color: "#333",
+              }),
+              Svg({
+                width: "fill",
+                height: 100,
+                viewBox: { width: 200, height: 100 },
+                children: [
+                  // 绘制背景网格
+                  svg.rect({
+                    x: 0,
+                    y: 0,
+                    width: 200,
+                    height: 100,
+                    fill: "rgba(245, 247, 250, 0.5)",
+                  }),
+                  // 绘制矩形
+                  svg.rect({
+                    x: 10,
+                    y: 20,
+                    width: 40,
+                    height: 30,
+                    rx: 5,
+                    fill: "#667eea",
+                  }),
+                  // 绘制圆形
+                  svg.circle({
+                    cx: 80,
+                    cy: 35,
+                    r: 15,
+                    fill: "#764ba2",
+                  }),
+                  // 绘制椭圆
+                  svg.ellipse({
+                    cx: 120,
+                    cy: 35,
+                    rx: 20,
+                    ry: 12,
+                    fill: "#f093fb",
+                  }),
+                  // 绘制线条
+                  svg.line({
+                    x1: 10,
+                    y1: 70,
+                    x2: 60,
+                    y2: 70,
+                    stroke: { color: "#3498db", width: 2 },
+                  }),
+                  // 绘制多边形
+                  svg.polygon({
+                    points: [
+                      [80, 70],
+                      [90, 55],
+                      [100, 70],
+                    ],
+                    fill: "#e74c3c",
+                  }),
+                  // 绘制路径
+                  svg.path({
+                    d: "M120 70 Q130 50, 140 70 T160 70",
+                    fill: "none",
+                    stroke: { color: "#2ecc71", width: 2 },
+                  }),
+                  // 绘制文本
+                  svg.text({
+                    x: 160,
+                    y: 35,
+                    content: "SVG",
+                    font: { size: 16, weight: "bold", family: "sans-serif" },
+                    fill: "#333",
+                  }),
+                ],
               }),
             ],
           }),
