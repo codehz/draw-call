@@ -1,3 +1,4 @@
+import { Path2D } from "../compat/Path2D";
 import type { LayoutNode } from "../layout/engine";
 import { buildFontString } from "../layout/measure";
 import type { Color, GradientDescriptor, StrokeProps } from "../types/base";
@@ -261,33 +262,8 @@ function renderSvgPolygon(ctx: CanvasRenderingContext2D, polygon: SvgPolygonChil
   applyFillAndStroke(ctx, polygon, bounds);
 }
 
-// 懒加载 Path2D 构造函数
-let Path2DConstructor: typeof Path2D | undefined;
-
-function getPath2D(): typeof Path2D {
-  if (Path2DConstructor) return Path2DConstructor;
-
-  // 尝试使用全局 Path2D (浏览器环境)
-  if (typeof Path2D !== "undefined") {
-    Path2DConstructor = Path2D;
-    return Path2DConstructor;
-  }
-
-  // 尝试从 @napi-rs/canvas 加载 (Node.js 环境)
-  try {
-    // use iife to prevent static analysis
-    // eslint-disable-next-line @typescript-eslint/consistent-type-imports
-    const napiCanvas = require((() => "@napi-rs/canvas")()) as typeof import("@napi-rs/canvas");
-    Path2DConstructor = napiCanvas.Path2D as typeof Path2D;
-    return Path2DConstructor!;
-  } catch {
-    throw new Error("Path2D is not available. In Node.js, install @napi-rs/canvas.");
-  }
-}
-
 function renderSvgPath(ctx: CanvasRenderingContext2D, path: SvgPathChild, bounds: Bounds): void {
-  const P2D = getPath2D();
-  const path2d = new P2D(path.d);
+  const path2d = new Path2D(path.d);
   if (path.fill && path.fill !== "none") {
     ctx.fillStyle = resolveColor(ctx, path.fill, bounds.x, bounds.y, bounds.width, bounds.height);
     ctx.fill(path2d);
