@@ -63,6 +63,7 @@ canvas.render(
     children: [
       // 左侧：功能展示区
       Box({
+        width: "fill",
         flex: 1,
         background: linearGradient(135, "#667eea", "#764ba2"),
         padding: 20,
@@ -157,7 +158,8 @@ canvas.render(
 
       // 右侧：卡片展示
       Box({
-        flex: 1,
+        width: "fill",
+        flex: 2,
         padding: 20,
         direction: "column",
         gap: 12,
