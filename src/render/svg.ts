@@ -1,3 +1,4 @@
+import { DOMMatrix } from "../compat/DOMMatrix";
 import { Path2D } from "../compat/Path2D";
 import type { LayoutNode } from "../layout/engine";
 import { buildFontString } from "../layout/measure";
@@ -18,55 +19,6 @@ import type {
   SvgTextChild,
   SvgTransformProps,
 } from "../types/components";
-
-// 简单的 2D 变换矩阵实现
-// 矩阵格式: [a, b, c, d, e, f] 对应:
-// | a c e |
-// | b d f |
-// | 0 0 1 |
-type Matrix = [number, number, number, number, number, number];
-
-function identityMatrix(): Matrix {
-  return [1, 0, 0, 1, 0, 0];
-}
-
-function multiplyMatrices(m1: Matrix, m2: Matrix): Matrix {
-  const [a1, b1, c1, d1, e1, f1] = m1;
-  const [a2, b2, c2, d2, e2, f2] = m2;
-  return [
-    a1 * a2 + c1 * b2,
-    b1 * a2 + d1 * b2,
-    a1 * c2 + c1 * d2,
-    b1 * c2 + d1 * d2,
-    a1 * e2 + c1 * f2 + e1,
-    b1 * e2 + d1 * f2 + f1,
-  ];
-}
-
-function translateMatrix(tx: number, ty: number): Matrix {
-  return [1, 0, 0, 1, tx, ty];
-}
-
-function scaleMatrix(sx: number, sy?: number): Matrix {
-  return [sx, 0, 0, sy ?? sx, 0, 0];
-}
-
-function rotateMatrix(angleDeg: number): Matrix {
-  const rad = (angleDeg * Math.PI) / 180;
-  const cos = Math.cos(rad);
-  const sin = Math.sin(rad);
-  return [cos, sin, -sin, cos, 0, 0];
-}
-
-function skewXMatrix(angleDeg: number): Matrix {
-  const rad = (angleDeg * Math.PI) / 180;
-  return [1, 0, Math.tan(rad), 1, 0, 0];
-}
-
-function skewYMatrix(angleDeg: number): Matrix {
-  const rad = (angleDeg * Math.PI) / 180;
-  return [1, Math.tan(rad), 0, 1, 0, 0];
-}
 
 // 判断是否为渐变描述符
 function isGradientDescriptor(color: Color): color is GradientDescriptor {
@@ -136,44 +88,43 @@ function resolveColor(
 }
 
 // 应用变换到矩阵
-function applyTransform(base: Matrix, transform?: SvgTransformProps["transform"]): Matrix {
+function applyTransform(base: DOMMatrix, transform?: SvgTransformProps["transform"]): DOMMatrix {
   if (!transform) return base;
 
-  let result = base;
+  let result = new DOMMatrix([base.a, base.b, base.c, base.d, base.e, base.f]);
 
   if (transform.matrix) {
-    result = multiplyMatrices(result, transform.matrix);
+    const [a, b, c, d, e, f] = transform.matrix;
+    result = result.multiply(new DOMMatrix([a, b, c, d, e, f]));
   }
 
   if (transform.translate) {
-    result = multiplyMatrices(result, translateMatrix(transform.translate[0], transform.translate[1]));
+    result = result.translate(transform.translate[0], transform.translate[1]);
   }
 
   if (transform.rotate !== undefined) {
     if (typeof transform.rotate === "number") {
-      result = multiplyMatrices(result, rotateMatrix(transform.rotate));
+      result = result.rotate(transform.rotate);
     } else {
       const [angle, cx, cy] = transform.rotate;
-      result = multiplyMatrices(result, translateMatrix(cx, cy));
-      result = multiplyMatrices(result, rotateMatrix(angle));
-      result = multiplyMatrices(result, translateMatrix(-cx, -cy));
+      result = result.translate(cx, cy).rotate(angle).translate(-cx, -cy);
     }
   }
 
   if (transform.scale !== undefined) {
     if (typeof transform.scale === "number") {
-      result = multiplyMatrices(result, scaleMatrix(transform.scale));
+      result = result.scale(transform.scale);
     } else {
-      result = multiplyMatrices(result, scaleMatrix(transform.scale[0], transform.scale[1]));
+      result = result.scale(transform.scale[0], transform.scale[1]);
     }
   }
 
   if (transform.skewX !== undefined) {
-    result = multiplyMatrices(result, skewXMatrix(transform.skewX));
+    result = result.skewX(transform.skewX);
   }
 
   if (transform.skewY !== undefined) {
-    result = multiplyMatrices(result, skewYMatrix(transform.skewY));
+    result = result.skewY(transform.skewY);
   }
 
   return result;
@@ -306,7 +257,7 @@ function renderSvgText(ctx: CanvasRenderingContext2D, text: SvgTextChild, bounds
 function renderSvgChild(
   ctx: CanvasRenderingContext2D,
   child: SvgChild,
-  parentTransform: Matrix,
+  parentTransform: DOMMatrix,
   bounds: Bounds,
   baseTransform: DOMMatrix
 ): void {
@@ -314,15 +265,7 @@ function renderSvgChild(
 
   ctx.save();
   // 先恢复基础变换（包含 pixelRatio 缩放），再应用 SVG 变换
-  const [a, b, c, d, e, f] = localTransform;
-  ctx.setTransform(
-    baseTransform.a * a + baseTransform.c * b,
-    baseTransform.b * a + baseTransform.d * b,
-    baseTransform.a * c + baseTransform.c * d,
-    baseTransform.b * c + baseTransform.d * d,
-    baseTransform.a * e + baseTransform.c * f + baseTransform.e,
-    baseTransform.b * e + baseTransform.d * f + baseTransform.f
-  );
+  ctx.setTransform(baseTransform.multiply(localTransform));
 
   if (child.opacity !== undefined) {
     ctx.globalAlpha *= child.opacity;
@@ -364,7 +307,7 @@ function renderSvgChild(
 function renderSvgGroup(
   ctx: CanvasRenderingContext2D,
   group: SvgGroupChild,
-  parentTransform: Matrix,
+  parentTransform: DOMMatrix,
   bounds: Bounds,
   baseTransform: DOMMatrix
 ): void {
@@ -380,7 +323,7 @@ function calculateViewBoxTransform(
   height: number,
   viewBox: { x?: number; y?: number; width: number; height: number },
   preserveAspectRatio?: { align?: SvgAlign; meetOrSlice?: "meet" | "slice" }
-): Matrix {
+): DOMMatrix {
   const vbX = viewBox.x ?? 0;
   const vbY = viewBox.y ?? 0;
   const vbWidth = viewBox.width;
@@ -393,7 +336,7 @@ function calculateViewBoxTransform(
   const meetOrSlice = preserveAspectRatio?.meetOrSlice ?? "meet";
 
   if (align === "none") {
-    return composeTransform(x, y, scaleX, scaleY, -vbX, -vbY);
+    return new DOMMatrix().translate(x, y).scale(scaleX, scaleY).translate(-vbX, -vbY);
   }
 
   const scale = meetOrSlice === "meet" ? Math.min(scaleX, scaleY) : Math.max(scaleX, scaleY);
@@ -415,15 +358,7 @@ function calculateViewBoxTransform(
     translateY += height - scaledHeight;
   }
 
-  return composeTransform(translateX, translateY, scale, scale, -vbX, -vbY);
-}
-
-function composeTransform(tx1: number, ty1: number, sx: number, sy: number, tx2: number, ty2: number): Matrix {
-  let result = identityMatrix();
-  result = multiplyMatrices(result, translateMatrix(tx1, ty1));
-  result = multiplyMatrices(result, scaleMatrix(sx, sy));
-  result = multiplyMatrices(result, translateMatrix(tx2, ty2));
-  return result;
+  return new DOMMatrix().translate(translateX, translateY).scale(scale, scale).translate(-vbX, -vbY);
 }
 
 type Shadow = { offsetX?: number; offsetY?: number; blur?: number; color?: Color };
