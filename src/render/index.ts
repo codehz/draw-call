@@ -3,6 +3,7 @@ import { renderImage } from "@/render/components/image";
 import { renderRichText } from "@/render/components/richtext";
 import { renderSvg } from "@/render/components/svg";
 import { renderText } from "@/render/components/text";
+import { renderTransform } from "@/render/components/transform";
 import { roundRectPath } from "@/render/utils/shapes";
 import { normalizeBorderRadius } from "@/types/base";
 import type { LayoutNode } from "@/types/layout";
@@ -59,6 +60,11 @@ export function renderNode(ctx: CanvasRenderingContext2D, node: LayoutNode): voi
 
     case "svg": {
       renderSvg(ctx, node);
+      break;
+    }
+
+    case "transform": {
+      renderTransform(ctx, node);
       break;
     }
   }

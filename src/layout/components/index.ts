@@ -6,6 +6,7 @@ import { measureRichTextSize } from "./richtext";
 import { measureStackSize } from "./stack";
 import { measureSvgSize } from "./svg";
 import { measureTextSize } from "./text";
+import { measureTransformSize } from "./transform";
 
 /**
  * 计算元素的固有尺寸（不依赖父容器的尺寸）
@@ -28,6 +29,8 @@ export function measureIntrinsicSize(
       return measureImageSize(element, ctx, availableWidth);
     case "svg":
       return measureSvgSize(element, ctx, availableWidth);
+    case "transform":
+      return measureTransformSize(element as Element, ctx, availableWidth, measureIntrinsicSize);
     default:
       return { width: 0, height: 0 };
   }
@@ -39,3 +42,4 @@ export { measureRichTextSize } from "./richtext";
 export { measureStackSize } from "./stack";
 export { measureSvgSize } from "./svg";
 export { measureTextSize } from "./text";
+export { measureTransformSize } from "./transform";

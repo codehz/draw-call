@@ -2,7 +2,7 @@ import type { Border, Color, FontProps, Shadow, StrokeProps } from "@/types/base
 import type { ContainerLayoutProps, LayoutProps } from "@/types/layout";
 
 // 元素类型标识
-export type ElementType = "box" | "text" | "richtext" | "image" | "svg" | "stack";
+export type ElementType = "box" | "text" | "richtext" | "image" | "svg" | "stack" | "transform";
 
 // 元素基础接口
 export interface ElementBase {
@@ -246,8 +246,49 @@ export interface StackElement extends ElementBase, StackProps {
   type: "stack";
 }
 
+// Transform 变换属性
+// 简易对象形式
+interface TransformSimpleObject {
+  translate?: [number, number];
+  rotate?: number | [number, number, number];
+  scale?: number | [number, number];
+  skewX?: number;
+  skewY?: number;
+}
+
+// DOMMatrix2DInit 形式
+interface DOMMatrix2DInit {
+  a?: number;
+  b?: number;
+  c?: number;
+  d?: number;
+  e?: number;
+  f?: number;
+}
+
+// Transform 值的三种形式
+export type TransformValue = TransformSimpleObject | DOMMatrix2DInit | [number, number, number, number, number, number];
+
+// Transform 组件属性
+export interface TransformProps {
+  children: Element;
+  transform?: TransformValue;
+  transformOrigin?: [number | string, number | string];
+}
+
+export interface TransformElement extends ElementBase, TransformProps {
+  type: "transform";
+}
+
 // 所有元素类型联合
-export type Element = BoxElement | TextElement | RichTextElement | ImageElement | SvgElement | StackElement;
+export type Element =
+  | BoxElement
+  | TextElement
+  | RichTextElement
+  | ImageElement
+  | SvgElement
+  | StackElement
+  | TransformElement;
 
 // 组件工厂函数类型
 export type ComponentFactory<Props, El extends Element> = (props: Props) => El;

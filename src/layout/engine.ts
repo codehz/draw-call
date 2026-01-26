@@ -557,6 +557,41 @@ export function computeLayout(
         node.children.reverse();
       }
     }
+  } else if (element.type === "transform") {
+    // Transform: 布局单个子元素
+    const child = (element as any).children;
+    if (child) {
+      const childMargin = normalizeSpacing(child.margin);
+      const childNode = computeLayout(
+        child,
+        ctx,
+        {
+          minWidth: 0,
+          maxWidth: contentWidth,
+          minHeight: 0,
+          maxHeight: contentHeight,
+        },
+        contentX,
+        contentY
+      );
+
+      node.children.push(childNode);
+
+      // 如果 Transform 的尺寸是 auto，根据子元素尺寸更新
+      if (element.width === undefined) {
+        const childOuterWidth = childNode.layout.width + childMargin.left + childMargin.right;
+        const actualWidth = childOuterWidth + padding.left + padding.right;
+        node.layout.width = actualWidth;
+        node.layout.contentWidth = childOuterWidth;
+      }
+
+      if (element.height === undefined) {
+        const childOuterHeight = childNode.layout.height + childMargin.top + childMargin.bottom;
+        const actualHeight = childOuterHeight + padding.top + padding.bottom;
+        node.layout.height = actualHeight;
+        node.layout.contentHeight = childOuterHeight;
+      }
+    }
   }
 
   return node;

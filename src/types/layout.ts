@@ -1,3 +1,4 @@
+import type { MeasureContext } from "@/layout/utils/measure";
 import type { Color, FontProps, Size, Spacing } from "@/types/base";
 import type { Element } from "./components";
 
@@ -89,6 +90,13 @@ export interface LayoutConstraints {
   minHeight: number;
   maxHeight: number;
 }
+
+// 元素尺寸测量函数类型
+export type MeasureFunction = (
+  element: Element,
+  ctx: MeasureContext,
+  availableWidth: number
+) => { width: number; height: number };
 
 // 计算可用空间大小
 export function resolveSize(size: Size | undefined, available: number, auto: number): number {
