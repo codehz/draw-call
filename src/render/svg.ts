@@ -410,12 +410,22 @@ function renderSvgChild(
   ctx: CanvasRenderingContext2D,
   child: SvgChild,
   parentTransform: Matrix,
-  bounds: { x: number; y: number; width: number; height: number }
+  bounds: { x: number; y: number; width: number; height: number },
+  baseTransform: DOMMatrix
 ): void {
   const localTransform = applyTransform(parentTransform, child.transform);
 
   ctx.save();
-  ctx.setTransform(...localTransform);
+  // 先恢复基础变换（包含 pixelRatio 缩放），再应用 SVG 变换
+  const [a, b, c, d, e, f] = localTransform;
+  ctx.setTransform(
+    baseTransform.a * a + baseTransform.c * b,
+    baseTransform.b * a + baseTransform.d * b,
+    baseTransform.a * c + baseTransform.c * d,
+    baseTransform.b * c + baseTransform.d * d,
+    baseTransform.a * e + baseTransform.c * f + baseTransform.e,
+    baseTransform.b * e + baseTransform.d * f + baseTransform.f
+  );
 
   if (child.opacity !== undefined) {
     ctx.globalAlpha *= child.opacity;
@@ -447,7 +457,7 @@ function renderSvgChild(
       renderSvgText(ctx, child, bounds);
       break;
     case "g":
-      renderSvgGroup(ctx, child, localTransform, bounds);
+      renderSvgGroup(ctx, child, localTransform, bounds, baseTransform);
       break;
   }
 
@@ -459,10 +469,11 @@ function renderSvgGroup(
   ctx: CanvasRenderingContext2D,
   group: SvgGroupChild,
   parentTransform: Matrix,
-  bounds: { x: number; y: number; width: number; height: number }
+  bounds: { x: number; y: number; width: number; height: number },
+  baseTransform: DOMMatrix
 ): void {
   for (const child of group.children) {
-    renderSvgChild(ctx, child, parentTransform, bounds);
+    renderSvgChild(ctx, child, parentTransform, bounds, baseTransform);
   }
 }
 
@@ -573,6 +584,9 @@ export function renderSvg(ctx: CanvasRenderingContext2D, node: LayoutNode): void
   ctx.rect(x, y, width, height);
   ctx.clip();
 
+  // 获取当前变换矩阵（包含 pixelRatio 缩放等）
+  const baseTransform = ctx.getTransform();
+
   // 计算 viewBox 变换
   const viewBox = element.viewBox ?? { x: 0, y: 0, width, height };
   const transform = calculateViewBoxTransform(x, y, width, height, viewBox, element.preserveAspectRatio);
@@ -581,7 +595,7 @@ export function renderSvg(ctx: CanvasRenderingContext2D, node: LayoutNode): void
 
   // 渲染子图形
   for (const child of element.children) {
-    renderSvgChild(ctx, child, transform, bounds);
+    renderSvgChild(ctx, child, transform, bounds, baseTransform);
   }
 
   ctx.restore();

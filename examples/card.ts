@@ -4,7 +4,7 @@
  */
 import { GlobalFonts } from "@napi-rs/canvas";
 import { fileURLToPath } from "bun";
-import { Box, Text, linearGradient } from "../src";
+import { Box, linearGradient, Svg, svg, Text } from "../src";
 import { printLayout } from "../src/layout";
 import { createCanvas } from "../src/node";
 
@@ -40,9 +40,30 @@ const layout = canvas.render(
             height: 100,
             background: linearGradient(135, "#667eea", "#764ba2"),
             padding: 20,
-            justify: "end",
+            justify: "space-between",
             align: "end",
             children: [
+              // SVG 图标演示
+              Svg({
+                width: 48,
+                height: 48,
+                viewBox: { width: 24, height: 24 },
+                children: [
+                  // 绘制一个简单的画笔图标
+                  svg.circle({ cx: 12, cy: 12, r: 10, fill: "rgba(255,255,255,0.2)" }),
+                  svg.path({
+                    d: "M4 20h4l10.5-10.5a1.5 1.5 0 0 0-4-4L4 16v4z",
+                    fill: "#ffffff",
+                  }),
+                  svg.line({
+                    x1: 13.5,
+                    y1: 6.5,
+                    x2: 17.5,
+                    y2: 10.5,
+                    stroke: { color: "#ffffff", width: 1.5 },
+                  }),
+                ],
+              }),
               Text({
                 content: "draw-call",
                 font: { size: 28, weight: "bold", family: "unifont" },
