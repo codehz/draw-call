@@ -67,6 +67,102 @@ describe("draw-call", () => {
     });
   });
 
+  describe("Stack alignment", () => {
+    test("should align children to center horizontally", async () => {
+      const canvas = await createCanvas({ width: 200, height: 200 });
+      const { computeLayout, createCanvasMeasureContext } = await import("./layout");
+      const ctx = createCanvasMeasureContext(canvas.getContext());
+      const tree = computeLayout(
+        Stack({
+          width: 200,
+          height: 200,
+          align: "center",
+          children: [Box({ width: 100, height: 50 })],
+        }),
+        ctx,
+        { minWidth: 200, maxWidth: 200, minHeight: 200, maxHeight: 200 }
+      );
+      // child should be centered horizontally: (200 - 100) / 2 = 50
+      expect(tree.children[0].layout.x).toBe(50);
+      expect(tree.children[0].layout.y).toBe(0);
+    });
+
+    test("should align children to center vertically", async () => {
+      const canvas = await createCanvas({ width: 200, height: 200 });
+      const { computeLayout, createCanvasMeasureContext } = await import("./layout");
+      const ctx = createCanvasMeasureContext(canvas.getContext());
+      const tree = computeLayout(
+        Stack({
+          width: 200,
+          height: 200,
+          justify: "center",
+          children: [Box({ width: 100, height: 50 })],
+        }),
+        ctx,
+        { minWidth: 200, maxWidth: 200, minHeight: 200, maxHeight: 200 }
+      );
+      // child should be centered vertically: (200 - 50) / 2 = 75
+      expect(tree.children[0].layout.x).toBe(0);
+      expect(tree.children[0].layout.y).toBe(75);
+    });
+
+    test("should align children to center both axes", async () => {
+      const canvas = await createCanvas({ width: 200, height: 200 });
+      const { computeLayout, createCanvasMeasureContext } = await import("./layout");
+      const ctx = createCanvasMeasureContext(canvas.getContext());
+      const tree = computeLayout(
+        Stack({
+          width: 200,
+          height: 200,
+          align: "center",
+          justify: "center",
+          children: [Box({ width: 100, height: 50 })],
+        }),
+        ctx,
+        { minWidth: 200, maxWidth: 200, minHeight: 200, maxHeight: 200 }
+      );
+      expect(tree.children[0].layout.x).toBe(50);
+      expect(tree.children[0].layout.y).toBe(75);
+    });
+
+    test("should align children to end", async () => {
+      const canvas = await createCanvas({ width: 200, height: 200 });
+      const { computeLayout, createCanvasMeasureContext } = await import("./layout");
+      const ctx = createCanvasMeasureContext(canvas.getContext());
+      const tree = computeLayout(
+        Stack({
+          width: 200,
+          height: 200,
+          align: "end",
+          justify: "end",
+          children: [Box({ width: 100, height: 50 })],
+        }),
+        ctx,
+        { minWidth: 200, maxWidth: 200, minHeight: 200, maxHeight: 200 }
+      );
+      // child should be at end: 200 - 100 = 100, 200 - 50 = 150
+      expect(tree.children[0].layout.x).toBe(100);
+      expect(tree.children[0].layout.y).toBe(150);
+    });
+
+    test("should default to start alignment", async () => {
+      const canvas = await createCanvas({ width: 200, height: 200 });
+      const { computeLayout, createCanvasMeasureContext } = await import("./layout");
+      const ctx = createCanvasMeasureContext(canvas.getContext());
+      const tree = computeLayout(
+        Stack({
+          width: 200,
+          height: 200,
+          children: [Box({ width: 100, height: 50 })],
+        }),
+        ctx,
+        { minWidth: 200, maxWidth: 200, minHeight: 200, maxHeight: 200 }
+      );
+      expect(tree.children[0].layout.x).toBe(0);
+      expect(tree.children[0].layout.y).toBe(0);
+    });
+  });
+
   describe("render", () => {
     test("should render simple box", async () => {
       const canvas = await createCanvas({ width: 200, height: 200 });

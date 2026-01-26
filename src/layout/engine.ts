@@ -137,6 +137,17 @@ function measureIntrinsicSize(
   }
 }
 
+// 递归地为布局节点及其子节点应用位置偏移
+function applyOffset(node: LayoutNode, dx: number, dy: number): void {
+  node.layout.x += dx;
+  node.layout.y += dy;
+  node.layout.contentX += dx;
+  node.layout.contentY += dy;
+  for (const child of node.children) {
+    applyOffset(child, dx, dy);
+  }
+}
+
 // 布局计算主函数
 export function computeLayout(
   element: Element,
@@ -233,8 +244,12 @@ export function computeLayout(
     const children = element.children ?? [];
 
     if (element.type === "stack") {
-      // Stack: 所有子元素在同一位置开始
+      // Stack: 所有子元素在同一位置开始，支持对齐
+      const stackAlign = element.align ?? "start";
+      const stackJustify = element.justify ?? "start";
+
       for (const child of children) {
+        // 先在原点布局以获取子元素尺寸
         const childNode = computeLayout(
           child,
           ctx,
@@ -247,6 +262,31 @@ export function computeLayout(
           contentX,
           contentY
         );
+
+        // 根据对齐方式计算偏移
+        const childMargin = normalizeSpacing(child.margin);
+        const childOuterWidth = childNode.layout.width + childMargin.left + childMargin.right;
+        const childOuterHeight = childNode.layout.height + childMargin.top + childMargin.bottom;
+
+        let offsetX = 0;
+        if (stackAlign === "center") {
+          offsetX = (contentWidth - childOuterWidth) / 2;
+        } else if (stackAlign === "end") {
+          offsetX = contentWidth - childOuterWidth;
+        }
+
+        let offsetY = 0;
+        if (stackJustify === "center") {
+          offsetY = (contentHeight - childOuterHeight) / 2;
+        } else if (stackJustify === "end") {
+          offsetY = contentHeight - childOuterHeight;
+        }
+
+        // 应用偏移
+        if (offsetX !== 0 || offsetY !== 0) {
+          applyOffset(childNode, offsetX, offsetY);
+        }
+
         node.children.push(childNode);
       }
     } else {

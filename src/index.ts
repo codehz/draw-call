@@ -37,6 +37,7 @@ export type {
   BoxElement,
   BoxProps,
   Element,
+  StackAlign,
   StackElement,
   StackProps,
   TextElement,

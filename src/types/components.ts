@@ -76,6 +76,9 @@ export interface ShapeElement extends ElementBase, ShapeProps {
   type: "shape";
 }
 
+// Stack 对齐方式
+export type StackAlign = "start" | "end" | "center";
+
 // Stack 组件属性
 export interface StackProps extends LayoutProps {
   children: Element[];
@@ -84,6 +87,10 @@ export interface StackProps extends LayoutProps {
   shadow?: Shadow;
   opacity?: number;
   clip?: boolean;
+  /** 水平对齐方式（默认 start） */
+  align?: StackAlign;
+  /** 垂直对齐方式（默认 start） */
+  justify?: StackAlign;
 }
 
 export interface StackElement extends ElementBase, StackProps {
