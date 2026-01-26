@@ -1,10 +1,12 @@
 import type { NormalizedSpacing } from "../types/base";
 import { normalizeSpacing } from "../types/base";
-import type { Element, TextElement } from "../types/components";
+import type { Element } from "../types/components";
 import type { ComputedLayout, LayoutConstraints } from "../types/layout";
 import { resolveSize, sizeNeedsParent } from "../types/layout";
+import { measureIntrinsicSize } from "./components";
 import type { MeasureContext } from "./measure";
 import { truncateText, wrapText } from "./measure";
+import { applyOffset } from "./utils/offset";
 
 // 布局节点 - 包含计算后的布局信息
 export interface LayoutNode {
@@ -15,137 +17,6 @@ export interface LayoutNode {
   lines?: string[];
   // 每行文本的基线偏移量（用于修正 middle 基线）
   lineOffsets?: number[];
-}
-
-// 计算元素的固有尺寸（不依赖父容器的尺寸）
-function measureIntrinsicSize(
-  element: Element,
-  ctx: MeasureContext,
-  availableWidth: number
-): { width: number; height: number } {
-  switch (element.type) {
-    case "text": {
-      const font = element.font ?? {};
-      const fontSize = font.size ?? 16;
-      const lineHeight = element.lineHeight ?? 1.2;
-      const lineHeightPx = fontSize * lineHeight;
-
-      // 如果设置了 wrap 且有可用宽度，进行换行计算
-      if (element.wrap && availableWidth > 0 && availableWidth < Infinity) {
-        const { lines } = wrapText(ctx, element.content, availableWidth, font);
-        const { width: maxLineWidth } = lines.reduce(
-          (max, line) => {
-            const { width } = ctx.measureText(line, font);
-            return width > max.width ? { width } : max;
-          },
-          { width: 0 }
-        );
-        return {
-          width: maxLineWidth,
-          height: lines.length * lineHeightPx,
-        };
-      }
-
-      // 不换行时测量整行
-      const { width, height } = ctx.measureText(element.content, font);
-      return { width, height: Math.max(height, lineHeightPx) };
-    }
-
-    case "box": {
-      // Box: Flex 布局
-      const padding = normalizeSpacing(element.padding);
-      const gap = element.gap ?? 0;
-      const direction = element.direction ?? "row";
-      const isRow = direction === "row" || direction === "row-reverse";
-
-      let contentWidth = 0;
-      let contentHeight = 0;
-
-      const children = element.children ?? [];
-
-      for (let i = 0; i < children.length; i++) {
-        const child = children[i];
-        const childMargin = normalizeSpacing(child.margin);
-        const childSize = measureIntrinsicSize(
-          child,
-          ctx,
-          availableWidth - padding.left - padding.right - childMargin.left - childMargin.right
-        );
-
-        if (isRow) {
-          contentWidth += childSize.width + childMargin.left + childMargin.right;
-          contentHeight = Math.max(contentHeight, childSize.height + childMargin.top + childMargin.bottom);
-          if (i > 0) contentWidth += gap;
-        } else {
-          contentHeight += childSize.height + childMargin.top + childMargin.bottom;
-          contentWidth = Math.max(contentWidth, childSize.width + childMargin.left + childMargin.right);
-          if (i > 0) contentHeight += gap;
-        }
-      }
-
-      // 如果明确设置了数值尺寸，优先使用
-      const intrinsicWidth = contentWidth + padding.left + padding.right;
-      const intrinsicHeight = contentHeight + padding.top + padding.bottom;
-
-      return {
-        width: typeof element.width === "number" ? element.width : intrinsicWidth,
-        height: typeof element.height === "number" ? element.height : intrinsicHeight,
-      };
-    }
-
-    case "stack": {
-      // Stack: 子元素重叠，取最大值
-      const padding = normalizeSpacing(element.padding);
-
-      let contentWidth = 0;
-      let contentHeight = 0;
-
-      const children = element.children ?? [];
-
-      for (const child of children) {
-        const childMargin = normalizeSpacing(child.margin);
-        const childSize = measureIntrinsicSize(
-          child,
-          ctx,
-          availableWidth - padding.left - padding.right - childMargin.left - childMargin.right
-        );
-        contentWidth = Math.max(contentWidth, childSize.width + childMargin.left + childMargin.right);
-        contentHeight = Math.max(contentHeight, childSize.height + childMargin.top + childMargin.bottom);
-      }
-
-      // 如果明确设置了数值尺寸，优先使用
-      const intrinsicWidth = contentWidth + padding.left + padding.right;
-      const intrinsicHeight = contentHeight + padding.top + padding.bottom;
-
-      return {
-        width: typeof element.width === "number" ? element.width : intrinsicWidth,
-        height: typeof element.height === "number" ? element.height : intrinsicHeight,
-      };
-    }
-
-    case "image": {
-      // 图片使用指定尺寸或默认值
-      return { width: 0, height: 0 };
-    }
-
-    case "svg": {
-      return { width: 0, height: 0 };
-    }
-
-    default:
-      return { width: 0, height: 0 };
-  }
-}
-
-// 递归地为布局节点及其子节点应用位置偏移
-function applyOffset(node: LayoutNode, dx: number, dy: number): void {
-  node.layout.x += dx;
-  node.layout.y += dy;
-  node.layout.contentX += dx;
-  node.layout.contentY += dy;
-  for (const child of node.children) {
-    applyOffset(child, dx, dy);
-  }
 }
 
 // 布局计算主函数
@@ -530,81 +401,4 @@ export function computeLayout(
   }
 
   return node;
-}
-// 获取元素类型的显示名称
-function getElementType(element: Element): string {
-  switch (element.type) {
-    case "box":
-      return "Box";
-    case "text":
-      return `Text "${(element as TextElement).content.slice(0, 20)}${(element as TextElement).content.length > 20 ? "..." : ""}"`;
-    case "stack":
-      return "Stack";
-    case "image":
-      return "Image";
-    case "svg":
-      return "Svg";
-    default:
-      // @ts-expect-error: 未知类型兜底
-      return element.type;
-  }
-}
-
-// 递归打印布局树
-function printLayoutToString(
-  node: LayoutNode,
-  prefix: string = "",
-  isLast: boolean = true,
-  depth: number = 0
-): string[] {
-  const lines: string[] = [];
-  const connector = isLast ? "└─ " : "├─ ";
-  const type = getElementType(node.element);
-  const { x, y, width, height } = node.layout;
-  const childCount = node.children.length;
-
-  // 第一行：元素类型和位置尺寸
-  lines.push(
-    `${prefix}${connector}${type} @(${Math.round(x)},${Math.round(y)}) size:${Math.round(width)}x${Math.round(height)}`
-  );
-
-  // 如果是文本，显示内容行
-  if (node.element.type === "text" && node.lines) {
-    const contentPrefix = prefix + (isLast ? "    " : "│   ");
-    for (let i = 0; i < node.lines.length; i++) {
-      const lineText = node.lines[i];
-      const isLastLine = i === node.lines.length - 1 && childCount === 0;
-      lines.push(`${contentPrefix}${isLastLine ? "└─ " : "├─ "}${JSON.stringify(lineText)}`);
-    }
-  }
-
-  // 递归打印子元素
-  for (let i = 0; i < node.children.length; i++) {
-    const child = node.children[i];
-    const isChildLast = i === node.children.length - 1;
-    const childPrefix = prefix + (isLast ? "    " : "│   ");
-    lines.push(...printLayoutToString(child, childPrefix, isChildLast, depth + 1));
-  }
-
-  return lines;
-}
-
-/**
- * 打印 LayoutNode 树结构到控制台
- * @param node LayoutNode 根节点
- */
-export function printLayout(node: LayoutNode): void {
-  const lines = printLayoutToString(node, "", true);
-  console.log(lines.join("\n"));
-}
-
-/**
- * 将 LayoutNode 转换为美观的字符串
- * @param node LayoutNode 根节点
- * @param indent 缩进字符串，默认为两个空格
- * @returns 格式化的字符串
- */
-export function layoutToString(node: LayoutNode, _indent: string = "  "): string {
-  const lines = printLayoutToString(node, "", true);
-  return lines.join("\n");
 }
