@@ -42,9 +42,8 @@ export interface TextElement extends ElementBase, TextProps {
   type: "text";
 }
 
-// RichText 组件属性
-export interface RichTextSpan {
-  text: string;
+// RichText 文本样式属性
+export interface RichTextStyleProps {
   font?: FontProps;
   color?: Color;
   background?: Color;
@@ -52,14 +51,18 @@ export interface RichTextSpan {
   strikethrough?: boolean;
 }
 
-export interface RichTextProps extends LayoutProps {
+// RichText 组件属性
+export interface RichTextSpan extends RichTextStyleProps {
+  text: string;
+}
+
+export interface RichTextProps extends LayoutProps, RichTextStyleProps {
   spans: RichTextSpan[];
   lineHeight?: number;
   align?: "left" | "center" | "right";
   verticalAlign?: "top" | "middle" | "bottom";
   maxLines?: number;
   ellipsis?: boolean;
-  color?: Color;
 }
 
 export interface RichTextElement extends ElementBase, RichTextProps {
