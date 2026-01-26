@@ -12,7 +12,7 @@ GlobalFonts.registerFromPath(fileURLToPath(import.meta.resolve("@fontpkg/unifont
 
 const canvas = createNodeCanvas({
   width: 600,
-  height: 500,
+  height: 1000,
   pixelRatio: 2,
 });
 
