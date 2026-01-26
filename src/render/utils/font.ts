@@ -1,4 +1,4 @@
-import type { FontProps } from "../../types/base";
+import type { FontProps } from "@/types/base";
 
 /**
  * 构建 Canvas 字体字符串

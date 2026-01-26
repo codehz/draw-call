@@ -1,5 +1,5 @@
-import type { Border, Color, FontProps, Shadow, StrokeProps } from "./base";
-import type { ContainerLayoutProps, LayoutProps } from "./layout";
+import type { Border, Color, FontProps, Shadow, StrokeProps } from "@/types/base";
+import type { ContainerLayoutProps, LayoutProps } from "@/types/layout";
 
 // 元素类型标识
 export type ElementType = "box" | "text" | "image" | "svg" | "stack";

@@ -1,4 +1,4 @@
-import type { Color, GradientDescriptor } from "../../types/base";
+import type { Color, GradientDescriptor } from "@/types/base";
 
 // 判断是否为渐变描述符
 export function isGradientDescriptor(color: Color): color is GradientDescriptor {

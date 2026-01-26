@@ -2,11 +2,11 @@
  * 示例：使用 draw-call 绘制一个卡片
  * 运行: bun examples/card.ts
  */
+import { Box, linearGradient, Svg, svg, Text } from "@/index";
+import { printLayout } from "@/layout";
+import { createCanvas } from "@/node";
 import { GlobalFonts } from "@napi-rs/canvas";
 import { fileURLToPath } from "bun";
-import { Box, linearGradient, Svg, svg, Text } from "../src";
-import { printLayout } from "../src/layout";
-import { createCanvas } from "../src/node";
 
 GlobalFonts.registerFromPath(fileURLToPath(import.meta.resolve("@fontpkg/unifont/unifont-15.0.01.ttf")), "unifont");
 

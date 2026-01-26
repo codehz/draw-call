@@ -1,5 +1,5 @@
-import type { Element } from "../../types/components";
-import type { MeasureContext } from "../utils/measure";
+import type { MeasureContext } from "@/layout/utils/measure";
+import type { Element } from "@/types/components";
 
 /**
  * 测量 SVG 元素的固有尺寸

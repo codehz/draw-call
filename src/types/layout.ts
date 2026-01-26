@@ -1,4 +1,4 @@
-import type { Size, Spacing } from "./base";
+import type { Size, Spacing } from "@/types/base";
 
 // 布局方向
 export type FlexDirection = "row" | "column" | "row-reverse" | "column-reverse";

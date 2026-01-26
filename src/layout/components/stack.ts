@@ -1,6 +1,6 @@
-import { normalizeSpacing } from "../../types/base";
-import type { Element, StackElement } from "../../types/components";
-import type { MeasureContext } from "../utils/measure";
+import type { MeasureContext } from "@/layout/utils/measure";
+import { normalizeSpacing } from "@/types/base";
+import type { Element, StackElement } from "@/types/components";
 
 /**
  * 测量 Stack 元素的固有尺寸

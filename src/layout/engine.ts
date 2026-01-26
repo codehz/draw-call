@@ -1,12 +1,12 @@
-import type { NormalizedSpacing } from "../types/base";
-import { normalizeSpacing } from "../types/base";
-import type { Element } from "../types/components";
-import type { ComputedLayout, LayoutConstraints } from "../types/layout";
-import { resolveSize, sizeNeedsParent } from "../types/layout";
-import { measureIntrinsicSize } from "./components";
-import type { MeasureContext } from "./utils/measure";
-import { truncateText, wrapText } from "./utils/measure";
-import { applyOffset } from "./utils/offset";
+import { measureIntrinsicSize } from "@/layout/components";
+import type { MeasureContext } from "@/layout/utils/measure";
+import { truncateText, wrapText } from "@/layout/utils/measure";
+import { applyOffset } from "@/layout/utils/offset";
+import type { NormalizedSpacing } from "@/types/base";
+import { normalizeSpacing } from "@/types/base";
+import type { Element } from "@/types/components";
+import type { ComputedLayout, LayoutConstraints } from "@/types/layout";
+import { resolveSize, sizeNeedsParent } from "@/types/layout";
 
 // 布局节点 - 包含计算后的布局信息
 export interface LayoutNode {

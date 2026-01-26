@@ -1,4 +1,4 @@
-import type { ImageElement, ImageProps } from "../types/components";
+import type { ImageElement, ImageProps } from "@/types/components";
 
 export function Image(props: ImageProps): ImageElement {
   return {

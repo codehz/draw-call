@@ -1,4 +1,4 @@
-import type { LayoutNode } from "../engine";
+import type { LayoutNode } from "@/layout/engine";
 
 /**
  * 递归地为布局节点及其子节点应用位置偏移

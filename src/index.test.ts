@@ -1,7 +1,7 @@
+import { Box, Stack, Svg, svg, Text } from "@/index";
+import { computeLayout, createCanvasMeasureContext } from "@/layout";
+import { createCanvas } from "@/node";
 import { describe, expect, test } from "bun:test";
-import { Box, Stack, Svg, svg, Text } from "./index";
-import { computeLayout, createCanvasMeasureContext } from "./layout";
-import { createCanvas } from "./node";
 
 describe("draw-call", () => {
   describe("createCanvas", () => {

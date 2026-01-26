@@ -1,10 +1,10 @@
-import type { LayoutNode } from "../layout";
-import { normalizeBorderRadius } from "../types/base";
-import { renderBox } from "./components/box";
-import { renderImage } from "./components/image";
-import { renderSvg } from "./components/svg";
-import { renderText } from "./components/text";
-import { roundRectPath } from "./utils/shapes";
+import type { LayoutNode } from "@/layout";
+import { renderBox } from "@/render/components/box";
+import { renderImage } from "@/render/components/image";
+import { renderSvg } from "@/render/components/svg";
+import { renderText } from "@/render/components/text";
+import { roundRectPath } from "@/render/utils/shapes";
+import { normalizeBorderRadius } from "@/types/base";
 
 // 渲染上下文接口
 export interface RenderContext {

@@ -1,8 +1,8 @@
-import type { LayoutNode } from "../../layout/engine";
-import type { TextElement } from "../../types/components";
-import { resolveColor } from "../utils/colors";
-import { buildFontString } from "../utils/font";
-import { applyShadow, clearShadow } from "../utils/shadows";
+import type { LayoutNode } from "@/layout/engine";
+import { resolveColor } from "@/render/utils/colors";
+import { buildFontString } from "@/render/utils/font";
+import { applyShadow, clearShadow } from "@/render/utils/shadows";
+import type { TextElement } from "@/types/components";
 
 // 绘制文本
 export function renderText(ctx: CanvasRenderingContext2D, node: LayoutNode): void {

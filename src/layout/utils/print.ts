@@ -1,5 +1,5 @@
-import type { Element, TextElement } from "../../types/components";
-import type { LayoutNode } from "../engine";
+import type { LayoutNode } from "@/layout/engine";
+import type { Element, TextElement } from "@/types/components";
 
 /**
  * 获取元素类型的显示名称

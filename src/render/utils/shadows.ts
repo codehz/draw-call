@@ -1,4 +1,4 @@
-import type { Shadow } from "../../types/base";
+import type { Shadow } from "@/types/base";
 
 // 应用阴影
 export function applyShadow(ctx: CanvasRenderingContext2D, shadow?: Shadow): void {

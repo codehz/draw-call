@@ -1,5 +1,5 @@
-import { buildFontString } from "../../render/utils/font";
-import type { FontProps } from "../../types/base";
+import { buildFontString } from "@/render/utils/font";
+import type { FontProps } from "@/types/base";
 
 // 测量上下文接口 - 抽象 Canvas 测量 API
 export interface MeasureContext {

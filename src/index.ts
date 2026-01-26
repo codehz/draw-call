@@ -1,12 +1,12 @@
 // 主入口文件 - 浏览器环境
-export { createCanvas } from "./canvas";
-export type { CanvasOptions, DrawCallCanvas, LayoutSize } from "./canvas";
+export { createCanvas } from "@/canvas";
+export type { CanvasOptions, DrawCallCanvas, LayoutSize } from "@/canvas";
 
 // 组件
-export { Box, Stack, Svg, Text, svg } from "./components";
+export { Box, Stack, Svg, Text, svg } from "@/components";
 
 // 渐变辅助函数
-export { linearGradient, radialGradient } from "./types/base";
+export { linearGradient, radialGradient } from "@/types/base";
 
 // 类型导出
 export type {
@@ -22,7 +22,7 @@ export type {
   Size,
   Spacing,
   StrokeProps,
-} from "./types/base";
+} from "@/types/base";
 
 export type {
   AlignItems,
@@ -31,7 +31,7 @@ export type {
   FlexDirection,
   JustifyContent,
   LayoutProps,
-} from "./types/layout";
+} from "@/types/layout";
 
 export type {
   BoxElement,
@@ -57,8 +57,8 @@ export type {
   SvgTransformProps,
   TextElement,
   TextProps,
-} from "./types/components";
+} from "@/types/components";
 
 // 布局工具（高级用法）
-export { computeLayout, createCanvasMeasureContext } from "./layout";
-export type { LayoutNode, MeasureContext } from "./layout";
+export { computeLayout, createCanvasMeasureContext } from "@/layout";
+export type { LayoutNode, MeasureContext } from "@/layout";

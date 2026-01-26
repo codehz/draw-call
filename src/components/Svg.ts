@@ -10,7 +10,7 @@ import type {
   SvgProps,
   SvgRectChild,
   SvgTextChild,
-} from "../types/components";
+} from "@/types/components";
 
 export function Svg(props: SvgProps): SvgElement {
   return {
