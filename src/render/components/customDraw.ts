@@ -14,6 +14,9 @@ export function renderCustomDraw(ctx: CanvasRenderingContext2D, node: LayoutNode
   // 保存起始的 Canvas 状态
   ctx.save();
 
+  // 平移到 CustomDraw 节点的位置（使用绝对位置）
+  ctx.translate(node.layout.x, node.layout.y);
+
   // 保存初始的 transform 矩阵
   const baseTransform = ctx.getTransform();
 
@@ -23,7 +26,11 @@ export function renderCustomDraw(ctx: CanvasRenderingContext2D, node: LayoutNode
   // 定义 inner 函数，当调用时，如果存在子元素，进行渲染
   const inner = () => {
     if (node.children && node.children.length > 0) {
+      // 临时恢复坐标系统以使用绝对位置渲染子元素
+      ctx.restore();
       renderNode(ctx, node.children[0]);
+      ctx.save();
+      ctx.translate(node.layout.x, node.layout.y);
     }
   };
 
