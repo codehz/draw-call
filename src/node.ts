@@ -32,6 +32,7 @@ export function createCanvas(options: Omit<CanvasOptions, "canvas">): DrawCallCa
     width,
     height,
     pixelRatio,
+    canvas: canvas as unknown as HTMLCanvasElement,
 
     render(element: Element): LayoutNode {
       const layoutTree = computeLayout(element, measureCtx, {

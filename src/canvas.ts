@@ -25,6 +25,7 @@ export interface DrawCallCanvas {
   readonly width: number;
   readonly height: number;
   readonly pixelRatio: number;
+  readonly canvas: HTMLCanvasElement;
   render(element: Element): LayoutNode;
   clear(): void;
   getContext(): CanvasRenderingContext2D;
@@ -74,6 +75,7 @@ export function createCanvas(options: CanvasOptions): DrawCallCanvas {
     width,
     height,
     pixelRatio,
+    canvas: canvas as HTMLCanvasElement,
 
     render(element: Element): LayoutNode {
       const layoutTree = computeLayout(element, measureCtx, {
