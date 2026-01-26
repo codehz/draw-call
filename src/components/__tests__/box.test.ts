@@ -394,6 +394,42 @@ describe("Box component", () => {
       expect(node.children[1].layout.y).toBe(0);
       expect(node.children[2].layout.y).toBe(60);
     });
+
+    test("should calculate correct height when parent has fixed width and auto height with wrap", () => {
+      const canvas = createCanvas({ width: 200, height: 400 });
+      const node = canvas.render(
+        Box({
+          width: 200, // 固定宽度
+          // 自动高度
+          direction: "row",
+          wrap: true,
+          children: [
+            Box({ width: 80, height: 50, background: "#f00" }),
+            Box({ width: 80, height: 50, background: "#0f0" }),
+            Box({ width: 80, height: 50, background: "#00f" }),
+            Box({ width: 80, height: 50, background: "#ff0" }),
+          ],
+        })
+      );
+
+      // 由于容器宽度为200，每个子元素宽度为80，间隙为0，所以每行最多容纳2个元素
+      // 第一行：2个元素，高度50
+      // 第二行：2个元素，高度50
+      // 总高度应该是 50 + 50 = 100
+      expect(node.layout.height).toBe(100);
+
+      // 验证子元素位置
+      // 第一行
+      expect(node.children[0].layout.x).toBe(0);
+      expect(node.children[0].layout.y).toBe(0);
+      expect(node.children[1].layout.x).toBe(80);
+      expect(node.children[1].layout.y).toBe(0);
+      // 第二行
+      expect(node.children[2].layout.x).toBe(0);
+      expect(node.children[2].layout.y).toBe(50);
+      expect(node.children[3].layout.x).toBe(80);
+      expect(node.children[3].layout.y).toBe(50);
+    });
   });
 
   describe("Combined layout properties", () => {
