@@ -84,27 +84,114 @@ export function wrapRichText(
     for (const word of words) {
       if (word === "") continue;
 
-      const metrics = ctx.measureText(word, font);
-      const wordWidth = metrics.width;
+      // 检查是否是纯空格
+      const isWhitespace = /^\s+$/.test(word);
 
-      if (maxWidth > 0 && currentLineWidth + wordWidth > maxWidth && currentSegments.length > 0) {
-        pushLine();
+      if (isWhitespace) {
+        // 空格直接处理
+        const metrics = ctx.measureText(word, font);
+        const wordWidth = metrics.width;
+
+        if (maxWidth > 0 && currentLineWidth + wordWidth > maxWidth && currentSegments.length > 0) {
+          pushLine();
+        }
+
+        currentSegments.push({
+          text: word,
+          font: font,
+          color: span.color,
+          background: span.background,
+          underline: span.underline,
+          strikethrough: span.strikethrough,
+          width: wordWidth,
+          height: lh,
+          ascent: metrics.ascent,
+          descent: metrics.descent,
+          offset: metrics.offset,
+        });
+        currentLineWidth += wordWidth;
+      } else {
+        // 非空格文本，可能需要按字符拆分（用于中文）
+        const metrics = ctx.measureText(word, font);
+        const wordWidth = metrics.width;
+
+        // 如果整个单词能放下，直接添加
+        if (maxWidth <= 0 || currentLineWidth + wordWidth <= maxWidth) {
+          currentSegments.push({
+            text: word,
+            font: font,
+            color: span.color,
+            background: span.background,
+            underline: span.underline,
+            strikethrough: span.strikethrough,
+            width: wordWidth,
+            height: lh,
+            ascent: metrics.ascent,
+            descent: metrics.descent,
+            offset: metrics.offset,
+          });
+          currentLineWidth += wordWidth;
+        } else {
+          // 单词超出宽度，需要按字符拆分
+          if (currentSegments.length > 0) {
+            pushLine();
+          }
+
+          // 逐字符处理（支持中文）
+          const remainingWidth = maxWidth;
+          let currentPos = 0;
+
+          while (currentPos < word.length) {
+            // 尝试找到能放入当前行的最长子串
+            let bestLen = 0;
+
+            for (let len = word.length - currentPos; len > 0; len--) {
+              const substr = word.substring(currentPos, currentPos + len);
+              const m = ctx.measureText(substr, font);
+
+              if (currentLineWidth + m.width <= remainingWidth) {
+                bestLen = len;
+
+                // 继续扩展看能否容纳更多
+                if (len < word.length - currentPos) break;
+              }
+            }
+
+            if (bestLen === 0) {
+              // 即使是单个字符也放不下，强制断行
+              if (currentSegments.length > 0) {
+                pushLine();
+              }
+              // 重新尝试
+              bestLen = 1;
+            }
+
+            const substr = word.substring(currentPos, currentPos + bestLen);
+            const m = ctx.measureText(substr, font);
+
+            currentSegments.push({
+              text: substr,
+              font: font,
+              color: span.color,
+              background: span.background,
+              underline: span.underline,
+              strikethrough: span.strikethrough,
+              width: m.width,
+              height: lh,
+              ascent: m.ascent,
+              descent: m.descent,
+              offset: m.offset,
+            });
+            currentLineWidth += m.width;
+            currentPos += bestLen;
+
+            // 如果还有剩余文本且当前行已满，换行
+            if (currentPos < word.length && currentLineWidth >= remainingWidth) {
+              pushLine();
+            }
+          }
+        }
       }
-
-      currentSegments.push({
-        text: word,
-        font: font,
-        color: span.color,
-        background: span.background,
-        underline: span.underline,
-        strikethrough: span.strikethrough,
-        width: wordWidth,
-        height: lh,
-        ascent: metrics.ascent,
-        descent: metrics.descent,
-        offset: metrics.offset,
-      });
-      currentLineWidth += wordWidth;
     }
   }
 
