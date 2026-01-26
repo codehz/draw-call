@@ -1,4 +1,5 @@
 import { renderBox } from "@/render/components/box";
+import { renderCustomDraw } from "@/render/components/customDraw";
 import { renderImage } from "@/render/components/image";
 import { renderRichText } from "@/render/components/richtext";
 import { renderSvg } from "@/render/components/svg";
@@ -65,6 +66,11 @@ export function renderNode(ctx: CanvasRenderingContext2D, node: LayoutNode): voi
 
     case "transform": {
       renderTransform(ctx, node);
+      break;
+    }
+
+    case "customdraw": {
+      renderCustomDraw(ctx, node);
       break;
     }
   }

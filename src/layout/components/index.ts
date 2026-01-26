@@ -1,6 +1,7 @@
 import type { MeasureContext } from "@/layout/utils/measure";
-import type { BoxElement, Element, StackElement } from "@/types/components";
+import type { BoxElement, CustomDrawElement, Element, StackElement } from "@/types/components";
 import { measureBoxSize } from "./box";
+import { measureCustomDrawSize } from "./customDraw";
 import { measureImageSize } from "./image";
 import { measureRichTextSize } from "./richtext";
 import { measureStackSize } from "./stack";
@@ -31,12 +32,15 @@ export function measureIntrinsicSize(
       return measureSvgSize(element, ctx, availableWidth);
     case "transform":
       return measureTransformSize(element as Element, ctx, availableWidth, measureIntrinsicSize);
+    case "customdraw":
+      return measureCustomDrawSize(element as CustomDrawElement, ctx, availableWidth, measureIntrinsicSize);
     default:
       return { width: 0, height: 0 };
   }
 }
 
 export { measureBoxSize } from "./box";
+export { measureCustomDrawSize } from "./customDraw";
 export { measureImageSize } from "./image";
 export { measureRichTextSize } from "./richtext";
 export { measureStackSize } from "./stack";

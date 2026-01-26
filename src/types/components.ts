@@ -2,7 +2,14 @@ import type { Border, Color, FontProps, Shadow, StrokeProps } from "@/types/base
 import type { ContainerLayoutProps, LayoutProps } from "@/types/layout";
 
 // 元素类型标识
-export type ElementType = "box" | "text" | "richtext" | "image" | "svg" | "stack" | "transform";
+export type ElementType = "box" | "text" | "richtext" | "image" | "svg" | "stack" | "transform" | "customdraw";
+
+// CustomDraw 代理上下文选项
+export interface ProxiedCanvasContextOptions {
+  inner?: () => void;
+  width: number;
+  height: number;
+}
 
 // 元素基础接口
 export interface ElementBase {
@@ -288,6 +295,16 @@ export interface TransformElement extends ElementBase, TransformProps {
   type: "transform";
 }
 
+// CustomDraw 组件属性
+export interface CustomDrawProps extends LayoutProps {
+  draw: (ctx: CanvasRenderingContext2D, options: ProxiedCanvasContextOptions) => void;
+  children?: Element;
+}
+
+export interface CustomDrawElement extends ElementBase, CustomDrawProps {
+  type: "customdraw";
+}
+
 // 所有元素类型联合
 export type Element =
   | BoxElement
@@ -296,7 +313,8 @@ export type Element =
   | ImageElement
   | SvgElement
   | StackElement
-  | TransformElement;
+  | TransformElement
+  | CustomDrawElement;
 
 // 组件工厂函数类型
 export type ComponentFactory<Props, El extends Element> = (props: Props) => El;
