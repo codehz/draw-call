@@ -36,18 +36,8 @@ export function renderImage(ctx: CanvasRenderingContext2D, node: LayoutNode): vo
   }
 
   // 获取图片尺寸
-  let imgWidth: number;
-  let imgHeight: number;
-
-  if (src instanceof ImageBitmap) {
-    imgWidth = src.width;
-    imgHeight = src.height;
-  } else {
-    // CanvasImageSource (HTMLImageElement, HTMLCanvasElement, etc.)
-    const imgSrc = src as HTMLImageElement | HTMLCanvasElement | HTMLVideoElement;
-    imgWidth = "naturalWidth" in imgSrc ? imgSrc.naturalWidth : imgSrc.width;
-    imgHeight = "naturalHeight" in imgSrc ? imgSrc.naturalHeight : imgSrc.height;
-  }
+  const imgWidth = "naturalWidth" in src ? src.naturalWidth : "width" in src ? +src.width : 0;
+  const imgHeight = "naturalHeight" in src ? src.naturalHeight : "height" in src ? +src.height : 0;
 
   // 计算绘制区域
   const fit = element.fit ?? "fill";
