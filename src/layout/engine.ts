@@ -166,6 +166,7 @@ export function computeLayout(
       const justify = element.justify ?? "start";
       const align = element.align ?? "stretch";
       const gap = element.gap ?? 0;
+      const wrap = element.wrap ?? false;
       const isRow = direction === "row" || direction === "row-reverse";
       const isReverse = direction === "row-reverse" || direction === "column-reverse";
 
@@ -178,16 +179,11 @@ export function computeLayout(
         margin: NormalizedSpacing;
       }> = [];
 
-      let totalFixed = 0;
-      let totalFlex = 0;
-      let totalGap = children.length > 1 ? gap * (children.length - 1) : 0;
-
       for (const child of children) {
         const childMargin = normalizeSpacing(child.margin);
         const childFlex = child.flex ?? 0;
 
         if (childFlex > 0) {
-          totalFlex += childFlex;
           childInfos.push({
             element: child,
             width: 0,
@@ -218,18 +214,12 @@ export function computeLayout(
             ? resolveSize(child.height, contentHeight - childMargin.top - childMargin.bottom, size.height)
             : resolveSize(child.height, 0, size.height);
 
-          // 应用 stretch
-          if (shouldStretchWidth) {
+          // 应用 stretch（注意：wrap 时不应提前应用 stretch）
+          if (shouldStretchWidth && !wrap) {
             w = contentWidth - childMargin.left - childMargin.right;
           }
-          if (shouldStretchHeight) {
+          if (shouldStretchHeight && !wrap) {
             h = contentHeight - childMargin.top - childMargin.bottom;
-          }
-
-          if (isRow) {
-            totalFixed += w + childMargin.left + childMargin.right;
-          } else {
-            totalFixed += h + childMargin.top + childMargin.bottom;
           }
 
           childInfos.push({
@@ -242,174 +232,251 @@ export function computeLayout(
         }
       }
 
-      // 计算 flex 元素的尺寸
-      const availableForFlex = isRow
-        ? Math.max(0, contentWidth - totalFixed - totalGap)
-        : Math.max(0, contentHeight - totalFixed - totalGap);
+      // 如果启用 wrap，将子元素分组到多行/列
+      const lines: Array<typeof childInfos> = [];
+      if (wrap) {
+        let currentLine: typeof childInfos = [];
+        let currentLineSize = 0;
+        const mainAxisSize = isRow ? contentWidth : contentHeight;
 
-      for (const info of childInfos) {
-        if (info.flex > 0) {
-          const flexSize = (availableForFlex * info.flex) / totalFlex;
-          if (isRow) {
-            info.width = flexSize;
-            // 测量高度
-            const size = measureIntrinsicSize(info.element, ctx, flexSize);
-            info.height = sizeNeedsParent(info.element.height)
-              ? resolveSize(info.element.height, contentHeight - info.margin.top - info.margin.bottom, size.height)
-              : resolveSize(info.element.height, 0, size.height);
+        for (const info of childInfos) {
+          const itemSize = isRow
+            ? info.width + info.margin.left + info.margin.right
+            : info.height + info.margin.top + info.margin.bottom;
+
+          // 检查是否需要换行
+          const needsWrap = currentLine.length > 0 && currentLineSize + gap + itemSize > mainAxisSize;
+
+          if (needsWrap) {
+            // 换行
+            lines.push(currentLine);
+            currentLine = [info];
+            currentLineSize = itemSize;
           } else {
-            info.height = flexSize;
-            // 测量宽度
-            const size = measureIntrinsicSize(info.element, ctx, contentWidth - info.margin.left - info.margin.right);
-            info.width = sizeNeedsParent(info.element.width)
-              ? resolveSize(info.element.width, contentWidth - info.margin.left - info.margin.right, size.width)
-              : resolveSize(info.element.width, 0, size.width);
+            currentLine.push(info);
+            currentLineSize += (currentLine.length > 1 ? gap : 0) + itemSize;
+          }
+        }
+
+        if (currentLine.length > 0) {
+          lines.push(currentLine);
+        }
+      } else {
+        // 不换行，所有元素在一行
+        lines.push(childInfos);
+      }
+
+      // 计算 flex 元素的尺寸（每行分别计算）
+      for (const lineInfos of lines) {
+        let totalFixed = 0;
+        let totalFlex = 0;
+        const totalGap = lineInfos.length > 1 ? gap * (lineInfos.length - 1) : 0;
+
+        for (const info of lineInfos) {
+          if (info.flex > 0) {
+            totalFlex += info.flex;
+          } else {
+            if (isRow) {
+              totalFixed += info.width + info.margin.left + info.margin.right;
+            } else {
+              totalFixed += info.height + info.margin.top + info.margin.bottom;
+            }
+          }
+        }
+
+        const mainAxisSize = isRow ? contentWidth : contentHeight;
+        const availableForFlex = Math.max(0, mainAxisSize - totalFixed - totalGap);
+
+        for (const info of lineInfos) {
+          if (info.flex > 0) {
+            const flexSize = totalFlex > 0 ? (availableForFlex * info.flex) / totalFlex : 0;
+            if (isRow) {
+              info.width = flexSize;
+              // 测量高度
+              const size = measureIntrinsicSize(info.element, ctx, flexSize);
+              info.height = sizeNeedsParent(info.element.height)
+                ? resolveSize(info.element.height, contentHeight - info.margin.top - info.margin.bottom, size.height)
+                : resolveSize(info.element.height, 0, size.height);
+            } else {
+              info.height = flexSize;
+              // 测量宽度
+              const size = measureIntrinsicSize(info.element, ctx, contentWidth - info.margin.left - info.margin.right);
+              info.width = sizeNeedsParent(info.element.width)
+                ? resolveSize(info.element.width, contentWidth - info.margin.left - info.margin.right, size.width)
+                : resolveSize(info.element.width, 0, size.width);
+            }
           }
         }
       }
 
-      // 计算主轴起始位置和间距
-      const totalSize =
-        childInfos.reduce((sum, info) => {
-          if (isRow) {
-            return sum + info.width + info.margin.left + info.margin.right;
-          } else {
-            return sum + info.height + info.margin.top + info.margin.bottom;
-          }
-        }, 0) + totalGap;
+      // 布局每一行/列
+      let crossOffset = 0;
 
-      const mainAxisSize = isRow ? contentWidth : contentHeight;
-      const freeSpace = mainAxisSize - totalSize;
+      for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
+        const lineInfos = lines[lineIndex];
+        // 计算该行的主轴总尺寸
+        const totalGap = lineInfos.length > 1 ? gap * (lineInfos.length - 1) : 0;
+        const totalSize =
+          lineInfos.reduce((sum, info) => {
+            if (isRow) {
+              return sum + info.width + info.margin.left + info.margin.right;
+            } else {
+              return sum + info.height + info.margin.top + info.margin.bottom;
+            }
+          }, 0) + totalGap;
 
-      let mainStart = 0;
-      let mainGap = gap;
+        const mainAxisSize = isRow ? contentWidth : contentHeight;
+        const freeSpace = mainAxisSize - totalSize;
 
-      switch (justify) {
-        case "start":
-          mainStart = 0;
-          break;
-        case "end":
-          mainStart = freeSpace;
-          break;
-        case "center":
-          mainStart = freeSpace / 2;
-          break;
-        case "space-between":
-          mainStart = 0;
-          if (children.length > 1) {
-            mainGap = gap + freeSpace / (children.length - 1);
-          }
-          break;
-        case "space-around":
-          if (children.length > 0) {
-            const spacing = freeSpace / children.length;
-            mainStart = spacing / 2;
-            mainGap = gap + spacing;
-          }
-          break;
-        case "space-evenly":
-          if (children.length > 0) {
-            const spacing = freeSpace / (children.length + 1);
-            mainStart = spacing;
-            mainGap = gap + spacing;
-          }
-          break;
-      }
+        let mainStart = 0;
+        let mainGap = gap;
 
-      // 布局子元素
-      let mainOffset = mainStart;
-      const orderedInfos = isReverse ? [...childInfos].reverse() : childInfos;
-
-      for (let i = 0; i < orderedInfos.length; i++) {
-        const info = orderedInfos[i];
-        const crossAxisSize = isRow ? contentHeight : contentWidth;
-        const childCrossSize = isRow
-          ? info.height + info.margin.top + info.margin.bottom
-          : info.width + info.margin.left + info.margin.right;
-
-        // 计算交叉轴位置
-        let crossOffset = 0;
-        const effectiveAlign =
-          info.element.alignSelf === "auto" || info.element.alignSelf === undefined ? align : info.element.alignSelf;
-
-        switch (effectiveAlign) {
+        switch (justify) {
           case "start":
-            crossOffset = 0;
+            mainStart = 0;
             break;
           case "end":
-            crossOffset = crossAxisSize - childCrossSize;
+            mainStart = freeSpace;
             break;
           case "center":
-            crossOffset = (crossAxisSize - childCrossSize) / 2;
+            mainStart = freeSpace / 2;
             break;
-          case "stretch":
-            crossOffset = 0;
-            if (isRow && info.element.height === undefined) {
-              info.height = crossAxisSize - info.margin.top - info.margin.bottom;
-            } else if (!isRow && info.element.width === undefined) {
-              info.width = crossAxisSize - info.margin.left - info.margin.right;
+          case "space-between":
+            mainStart = 0;
+            if (lineInfos.length > 1) {
+              mainGap = gap + freeSpace / (lineInfos.length - 1);
             }
             break;
-          case "baseline":
-            // TODO: 实现 baseline 对齐
-            crossOffset = 0;
+          case "space-around":
+            if (lineInfos.length > 0) {
+              const spacing = freeSpace / lineInfos.length;
+              mainStart = spacing / 2;
+              mainGap = gap + spacing;
+            }
+            break;
+          case "space-evenly":
+            if (lineInfos.length > 0) {
+              const spacing = freeSpace / (lineInfos.length + 1);
+              mainStart = spacing;
+              mainGap = gap + spacing;
+            }
             break;
         }
 
-        const childX = isRow ? contentX + mainOffset + info.margin.left : contentX + crossOffset + info.margin.left;
-        const childY = isRow ? contentY + crossOffset + info.margin.top : contentY + mainOffset + info.margin.top;
+        // 计算该行的交叉轴尺寸
+        const lineCrossSize = lineInfos.reduce((max, info) => {
+          const itemCrossSize = isRow
+            ? info.height + info.margin.top + info.margin.bottom
+            : info.width + info.margin.left + info.margin.right;
+          return Math.max(max, itemCrossSize);
+        }, 0);
 
-        // 对于 flex 子元素，需要强制使用计算出的 flex 尺寸
-        // 对于非 flex 子元素，处理 stretch 对约束的影响
-        let minWidth = 0;
-        let maxWidth = info.width;
-        let minHeight = 0;
-        let maxHeight = info.height;
+        // 布局该行的子元素
+        let mainOffset = mainStart;
+        const orderedInfos = isReverse ? [...lineInfos].reverse() : lineInfos;
 
-        if (info.flex > 0) {
-          // Flex 子元素：在主轴方向强制使用计算出的尺寸
-          if (isRow) {
-            minWidth = maxWidth = info.width;
+        for (let i = 0; i < orderedInfos.length; i++) {
+          const info = orderedInfos[i];
+          const crossAxisSize = wrap ? lineCrossSize : isRow ? contentHeight : contentWidth;
+          const childCrossSize = isRow
+            ? info.height + info.margin.top + info.margin.bottom
+            : info.width + info.margin.left + info.margin.right;
+
+          // 计算交叉轴位置
+          let itemCrossOffset = 0;
+          const effectiveAlign =
+            info.element.alignSelf === "auto" || info.element.alignSelf === undefined ? align : info.element.alignSelf;
+
+          switch (effectiveAlign) {
+            case "start":
+              itemCrossOffset = 0;
+              break;
+            case "end":
+              itemCrossOffset = crossAxisSize - childCrossSize;
+              break;
+            case "center":
+              itemCrossOffset = (crossAxisSize - childCrossSize) / 2;
+              break;
+            case "stretch":
+              itemCrossOffset = 0;
+              if (isRow && info.element.height === undefined) {
+                info.height = crossAxisSize - info.margin.top - info.margin.bottom;
+              } else if (!isRow && info.element.width === undefined) {
+                info.width = crossAxisSize - info.margin.left - info.margin.right;
+              }
+              break;
+            case "baseline":
+              // TODO: 实现 baseline 对齐
+              itemCrossOffset = 0;
+              break;
+          }
+
+          const childX = isRow
+            ? contentX + mainOffset + info.margin.left
+            : contentX + crossOffset + itemCrossOffset + info.margin.left;
+          const childY = isRow
+            ? contentY + crossOffset + itemCrossOffset + info.margin.top
+            : contentY + mainOffset + info.margin.top;
+
+          // 对于 flex 子元素，需要强制使用计算出的 flex 尺寸
+          // 对于非 flex 子元素，处理 stretch 对约束的影响
+          let minWidth = 0;
+          let maxWidth = info.width;
+          let minHeight = 0;
+          let maxHeight = info.height;
+
+          if (info.flex > 0) {
+            // Flex 子元素：在主轴方向强制使用计算出的尺寸
+            if (isRow) {
+              minWidth = maxWidth = info.width;
+            } else {
+              minHeight = maxHeight = info.height;
+            }
+            // 在交叉轴方向，如果没有指定尺寸且 align="stretch"，也要强制拉伸
+            if (isRow && info.element.height === undefined && align === "stretch") {
+              minHeight = maxHeight = info.height;
+            } else if (!isRow && info.element.width === undefined && align === "stretch") {
+              minWidth = maxWidth = info.width;
+            }
           } else {
-            minHeight = maxHeight = info.height;
+            // 非 flex 元素：处理 stretch
+            if (!isRow && info.element.width === undefined && align === "stretch") {
+              minWidth = maxWidth = crossAxisSize - info.margin.left - info.margin.right;
+            }
+            if (isRow && info.element.height === undefined && align === "stretch") {
+              minHeight = maxHeight = crossAxisSize - info.margin.top - info.margin.bottom;
+            }
           }
-          // 在交叉轴方向，如果没有指定尺寸且 align="stretch"，也要强制拉伸
-          if (isRow && info.element.height === undefined && align === "stretch") {
-            minHeight = maxHeight = info.height;
-          } else if (!isRow && info.element.width === undefined && align === "stretch") {
-            minWidth = maxWidth = info.width;
-          }
-        } else {
-          // 非 flex 元素：处理 stretch
-          if (!isRow && info.element.width === undefined && align === "stretch") {
-            minWidth = maxWidth = contentWidth - info.margin.left - info.margin.right;
-          }
-          if (isRow && info.element.height === undefined && align === "stretch") {
-            minHeight = maxHeight = contentHeight - info.margin.top - info.margin.bottom;
+
+          const childNode = computeLayout(
+            info.element,
+            ctx,
+            {
+              minWidth,
+              maxWidth,
+              minHeight,
+              maxHeight,
+            },
+            childX - info.margin.left,
+            childY - info.margin.top
+          );
+
+          node.children.push(childNode);
+
+          // 更新主轴偏移
+          mainOffset += isRow
+            ? info.width + info.margin.left + info.margin.right
+            : info.height + info.margin.top + info.margin.bottom;
+          if (i < orderedInfos.length - 1) {
+            mainOffset += mainGap;
           }
         }
 
-        const childNode = computeLayout(
-          info.element,
-          ctx,
-          {
-            minWidth,
-            maxWidth,
-            minHeight,
-            maxHeight,
-          },
-          childX - info.margin.left,
-          childY - info.margin.top
-        );
-
-        node.children.push(childNode);
-
-        // 更新主轴偏移
-        mainOffset += isRow
-          ? info.width + info.margin.left + info.margin.right
-          : info.height + info.margin.top + info.margin.bottom;
-        if (i < orderedInfos.length - 1) {
-          mainOffset += mainGap;
+        // 更新交叉轴偏移（移到下一行/列）
+        crossOffset += lineCrossSize;
+        // 行与行之间也应该有 gap（除了最后一行）
+        if (lineIndex < lines.length - 1) {
+          crossOffset += gap;
         }
       }
 
