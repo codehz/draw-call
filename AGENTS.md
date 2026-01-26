@@ -7,9 +7,9 @@
 ### 核心特性
 
 - **Flexbox 布局引擎**: 支持完整的 Flexbox 布局，包括方向、对齐、间距等
-- **组件化渲染**: 提供 Box、Text、Image、Svg、Stack 等组件
+- **组件化渲染**: 提供 Box、Text、RichText、Image、Svg、Stack 等组件
 - **丰富的样式支持**: 渐变、阴影、边框、圆角等
-- **文本排版**: 自动换行、省略号、行高控制等
+- **文本排版**: 自动换行、省略号、行高控制、富文本支持等
 - **SVG 图形**: 支持矩形、圆形、椭圆、路径等 SVG 图形
 - **跨平台**: 支持浏览器和 Node.js 环境（通过 @napi-rs/canvas）
 
@@ -23,6 +23,7 @@ src/
 │   ├── Box.ts         # Box 容器组件
 │   ├── Stack.ts       # Stack 堆叠组件
 │   ├── Text.ts        # Text 文本组件
+│   ├── RichText.ts    # RichText 富文本组件
 │   ├── Image.ts       # Image 图片组件
 │   └── Svg.ts         # SVG 图形组件
 ├── layout/            # 布局引擎

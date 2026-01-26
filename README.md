@@ -127,6 +127,50 @@ Text({
 });
 ```
 
+### RichText
+
+富文本组件，支持同时展示多种样式的文本，每个文本段落可以有不同的字体、颜色、背景、装饰等。
+
+```typescript
+RichText({
+  spans: [
+    {
+      text: "普通文本 ",
+      color: "#333333",
+    },
+    {
+      text: "加粗文本 ",
+      font: { size: 16, weight: "bold" },
+      color: "#333333",
+    },
+    {
+      text: "彩色文本 ",
+      font: { size: 16, weight: "bold" },
+      color: "#667eea",
+    },
+    {
+      text: "带背景 ",
+      color: "#ffffff",
+      background: "#764ba2",
+    },
+    {
+      text: "带下划线",
+      underline: true,
+      color: "#333333",
+    },
+    {
+      text: "删除线",
+      strikethrough: true,
+      color: "#999999",
+    },
+  ],
+  lineHeight: 1.5,
+  align: "left",
+  maxLines: 5,
+  ellipsis: true,
+});
+```
+
 ### Image
 
 图片组件，支持多种适配模式。
