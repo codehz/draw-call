@@ -208,6 +208,7 @@ canvas.render(
               Box({
                 direction: "row",
                 gap: 6,
+                wrap: true,
                 children: [
                   Box({
                     padding: { left: 6, right: 6, top: 3, bottom: 3 },
@@ -242,6 +243,90 @@ canvas.render(
                         content: "声明式",
                         font: { size: 11, family: "sans-serif" },
                         color: "#fa8c16",
+                      }),
+                    ],
+                  }),
+                  Box({
+                    padding: { left: 6, right: 6, top: 3, bottom: 3 },
+                    background: "#ffe8e8",
+                    border: { radius: 3 },
+                    children: [
+                      Text({
+                        content: "Flexbox",
+                        font: { size: 11, family: "sans-serif" },
+                        color: "#f5222d",
+                      }),
+                    ],
+                  }),
+                  Box({
+                    padding: { left: 6, right: 6, top: 3, bottom: 3 },
+                    background: "#f0f0ff",
+                    border: { radius: 3 },
+                    children: [
+                      Text({
+                        content: "布局",
+                        font: { size: 11, family: "sans-serif" },
+                        color: "#2f54eb",
+                      }),
+                    ],
+                  }),
+                  Box({
+                    padding: { left: 6, right: 6, top: 3, bottom: 3 },
+                    background: "#e8f4f8",
+                    border: { radius: 3 },
+                    children: [
+                      Text({
+                        content: "渲染",
+                        font: { size: 11, family: "sans-serif" },
+                        color: "#1765ad",
+                      }),
+                    ],
+                  }),
+                  Box({
+                    padding: { left: 6, right: 6, top: 3, bottom: 3 },
+                    background: "#f9f0ff",
+                    border: { radius: 3 },
+                    children: [
+                      Text({
+                        content: "组件化",
+                        font: { size: 11, family: "sans-serif" },
+                        color: "#722ed1",
+                      }),
+                    ],
+                  }),
+                  Box({
+                    padding: { left: 6, right: 6, top: 3, bottom: 3 },
+                    background: "#fff0f5",
+                    border: { radius: 3 },
+                    children: [
+                      Text({
+                        content: "跨平台",
+                        font: { size: 11, family: "sans-serif" },
+                        color: "#eb2f96",
+                      }),
+                    ],
+                  }),
+                  Box({
+                    padding: { left: 6, right: 6, top: 3, bottom: 3 },
+                    background: "#f6ffec",
+                    border: { radius: 3 },
+                    children: [
+                      Text({
+                        content: "高性能",
+                        font: { size: 11, family: "sans-serif" },
+                        color: "#52c41a",
+                      }),
+                    ],
+                  }),
+                  Box({
+                    padding: { left: 6, right: 6, top: 3, bottom: 3 },
+                    background: "#fffbe6",
+                    border: { radius: 3 },
+                    children: [
+                      Text({
+                        content: "易用性",
+                        font: { size: 11, family: "sans-serif" },
+                        color: "#d48806",
                       }),
                     ],
                   }),
