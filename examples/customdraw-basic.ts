@@ -23,7 +23,7 @@ const SimpleRect = CustomDraw({
   draw(ctx, { width, height }) {
     ctx.fillStyle = "#667eea";
     ctx.fillRect(0, 0, width, height);
-    ctx.fillStyle = "#ffffff";
+    ctx.fillStyle = "#000000";
     ctx.font = "bold 16px sans-serif";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
@@ -45,7 +45,7 @@ const RotatedRect = CustomDraw({
     ctx.restore();
 
     // 恢复后可以正常绘制
-    ctx.fillStyle = "#ffffff";
+    ctx.fillStyle = "#000000";
     ctx.font = "16px sans-serif";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
