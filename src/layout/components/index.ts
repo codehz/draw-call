@@ -1,5 +1,5 @@
 import type { BoxElement, Element, StackElement } from "../../types/components";
-import type { MeasureContext } from "../measure";
+import type { MeasureContext } from "../utils/measure";
 import { measureBoxSize } from "./box";
 import { measureImageSize } from "./image";
 import { measureStackSize } from "./stack";

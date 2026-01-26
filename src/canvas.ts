@@ -1,6 +1,6 @@
 import type { LayoutNode } from "./layout/engine";
 import { computeLayout } from "./layout/engine";
-import { createCanvasMeasureContext } from "./layout/measure";
+import { createCanvasMeasureContext } from "./layout/utils/measure";
 import { renderNode } from "./render";
 import type { Element } from "./types/components";
 

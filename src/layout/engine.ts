@@ -4,8 +4,8 @@ import type { Element } from "../types/components";
 import type { ComputedLayout, LayoutConstraints } from "../types/layout";
 import { resolveSize, sizeNeedsParent } from "../types/layout";
 import { measureIntrinsicSize } from "./components";
-import type { MeasureContext } from "./measure";
-import { truncateText, wrapText } from "./measure";
+import type { MeasureContext } from "./utils/measure";
+import { truncateText, wrapText } from "./utils/measure";
 import { applyOffset } from "./utils/offset";
 
 // 布局节点 - 包含计算后的布局信息

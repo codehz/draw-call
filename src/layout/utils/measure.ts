@@ -1,17 +1,9 @@
-import type { FontProps } from "../types/base";
+import { buildFontString } from "../../render/utils/font";
+import type { FontProps } from "../../types/base";
 
 // 测量上下文接口 - 抽象 Canvas 测量 API
 export interface MeasureContext {
   measureText(text: string, font: FontProps): { width: number; height: number; offset: number };
-}
-
-// 构建字体字符串
-export function buildFontString(font: FontProps): string {
-  const style = font.style ?? "normal";
-  const weight = font.weight ?? "normal";
-  const size = font.size ?? 16;
-  const family = font.family ?? "sans-serif";
-  return `${style} ${weight} ${size}px ${family}`;
 }
 
 // 创建基于 Canvas 的测量上下文

@@ -1,6 +1,6 @@
 import { normalizeSpacing } from "../../types/base";
 import type { BoxElement, Element } from "../../types/components";
-import type { MeasureContext } from "../measure";
+import type { MeasureContext } from "../utils/measure";
 
 /**
  * 测量 Box 元素的固有尺寸

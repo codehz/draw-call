@@ -1,5 +1,5 @@
 import type { Element } from "../../types/components";
-import type { MeasureContext } from "../measure";
+import type { MeasureContext } from "../utils/measure";
 
 /**
  * 测量 Image 元素的固有尺寸

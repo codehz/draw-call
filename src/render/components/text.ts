@@ -1,7 +1,7 @@
 import type { LayoutNode } from "../../layout/engine";
-import { buildFontString } from "../../layout/measure";
 import type { TextElement } from "../../types/components";
 import { resolveColor } from "../utils/colors";
+import { buildFontString } from "../utils/font";
 import { applyShadow, clearShadow } from "../utils/shadows";
 
 // 绘制文本

@@ -1,6 +1,6 @@
 import type { TextElement } from "../../types/components";
-import type { MeasureContext } from "../measure";
-import { wrapText } from "../measure";
+import type { MeasureContext } from "../utils/measure";
+import { wrapText } from "../utils/measure";
 
 /**
  * 测量文本元素的固有尺寸
