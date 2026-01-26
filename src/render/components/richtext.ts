@@ -47,11 +47,8 @@ export function renderRichText(ctx: CanvasRenderingContext2D, node: LayoutNode):
       }
 
       // 绘制文本
-      ctx.fillStyle = seg.color
-        ? resolveColor(ctx, seg.color, lineX, currentY, seg.width, line.height)
-        : element.color
-          ? resolveColor(ctx, element.color, contentX, contentY, contentWidth, contentHeight)
-          : "#000";
+      // seg.color 已在布局阶段继承应用，总是有值
+      ctx.fillStyle = seg.color ? resolveColor(ctx, seg.color, lineX, currentY, seg.width, line.height) : "#000";
 
       ctx.textBaseline = "middle";
       ctx.fillText(seg.text, lineX, baselineY - seg.offset);

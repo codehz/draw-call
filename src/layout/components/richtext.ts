@@ -3,6 +3,30 @@ import type { RichTextElement, RichTextSpan } from "@/types/components";
 import type { RichTextLine, RichTextSpanSegment } from "@/types/layout";
 
 /**
+ * 合并 span 样式和元素级别样式
+ * 优先级：span 样式 > 元素样式 > 默认值
+ * font 属性进行深度合并，允许 span 部分覆盖 element 的 font
+ */
+function mergeSpanStyle(
+  span: RichTextSpan,
+  elementStyle: Pick<RichTextElement, "font" | "color" | "background" | "underline" | "strikethrough">
+): Omit<RichTextSpanSegment, "text" | "width" | "height" | "ascent" | "descent" | "offset"> {
+  // 深度合并 font 对象，span 的属性优先
+  const mergedFont = {
+    ...(elementStyle.font || {}),
+    ...(span.font || {}),
+  };
+
+  return {
+    font: mergedFont,
+    color: (span.color ?? elementStyle.color) as any,
+    background: (span.background ?? elementStyle.background) as any,
+    underline: span.underline ?? elementStyle.underline ?? false,
+    strikethrough: span.strikethrough ?? elementStyle.strikethrough ?? false,
+  };
+}
+
+/**
  * 测量富文本元素的固有尺寸
  */
 export function measureRichTextSize(
@@ -11,7 +35,14 @@ export function measureRichTextSize(
   availableWidth: number
 ): { width: number; height: number } {
   const lineHeight = element.lineHeight ?? 1.2;
-  const richLines = wrapRichText(ctx, element.spans, availableWidth, lineHeight);
+  const elementStyle = {
+    font: element.font,
+    color: element.color,
+    background: element.background,
+    underline: element.underline,
+    strikethrough: element.strikethrough,
+  };
+  const richLines = wrapRichText(ctx, element.spans, availableWidth, lineHeight, elementStyle);
 
   let maxWidth = 0;
   let totalHeight = 0;
@@ -34,7 +65,8 @@ export function wrapRichText(
   ctx: MeasureContext,
   spans: RichTextSpan[],
   maxWidth: number,
-  lineHeightScale: number = 1.2
+  lineHeightScale: number = 1.2,
+  elementStyle: Pick<RichTextElement, "font" | "color" | "background" | "underline" | "strikethrough"> = {}
 ): RichTextLine[] {
   const lines: RichTextLine[] = [];
   let currentSegments: RichTextSpanSegment[] = [];
@@ -74,7 +106,8 @@ export function wrapRichText(
   };
 
   for (const span of spans) {
-    const font = span.font ?? {};
+    const mergedStyle = mergeSpanStyle(span, elementStyle);
+    const font = mergedStyle.font;
     const fontSize = font.size ?? 16;
     const lh = fontSize * lineHeightScale;
 
@@ -98,11 +131,11 @@ export function wrapRichText(
 
         currentSegments.push({
           text: word,
-          font: font,
-          color: span.color,
-          background: span.background,
-          underline: span.underline,
-          strikethrough: span.strikethrough,
+          font: mergedStyle.font,
+          color: mergedStyle.color,
+          background: mergedStyle.background,
+          underline: mergedStyle.underline,
+          strikethrough: mergedStyle.strikethrough,
           width: wordWidth,
           height: lh,
           ascent: metrics.ascent,
@@ -119,11 +152,11 @@ export function wrapRichText(
         if (maxWidth <= 0 || currentLineWidth + wordWidth <= maxWidth) {
           currentSegments.push({
             text: word,
-            font: font,
-            color: span.color,
-            background: span.background,
-            underline: span.underline,
-            strikethrough: span.strikethrough,
+            font: mergedStyle.font,
+            color: mergedStyle.color,
+            background: mergedStyle.background,
+            underline: mergedStyle.underline,
+            strikethrough: mergedStyle.strikethrough,
             width: wordWidth,
             height: lh,
             ascent: metrics.ascent,
@@ -171,11 +204,11 @@ export function wrapRichText(
 
             currentSegments.push({
               text: substr,
-              font: font,
-              color: span.color,
-              background: span.background,
-              underline: span.underline,
-              strikethrough: span.strikethrough,
+              font: mergedStyle.font,
+              color: mergedStyle.color,
+              background: mergedStyle.background,
+              underline: mergedStyle.underline,
+              strikethrough: mergedStyle.strikethrough,
               width: m.width,
               height: lh,
               ascent: m.ascent,

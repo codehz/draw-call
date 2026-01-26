@@ -50,11 +50,11 @@ export interface ComputedLayout {
 
 export interface RichTextSpanSegment {
   text: string;
-  font?: FontProps;
-  color?: Color;
-  background?: Color;
-  underline?: boolean;
-  strikethrough?: boolean;
+  font: FontProps;
+  color: Color;
+  background: Color;
+  underline: boolean;
+  strikethrough: boolean;
   width: number;
   height: number;
   ascent: number;
