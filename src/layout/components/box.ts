@@ -2,6 +2,99 @@ import type { MeasureContext } from "@/layout/utils/measure";
 import { normalizeSpacing } from "@/types/base";
 import type { BoxElement, Element } from "@/types/components";
 
+type ChildSize = {
+  width: number;
+  height: number;
+  margin: { left: number; right: number; top: number; bottom: number };
+};
+
+function calcEffectiveSize(
+  element: BoxElement,
+  padding: { left: number; right: number; top: number; bottom: number },
+  availableWidth: number
+): { width: number; height: number } {
+  const effectiveWidth =
+    typeof element.width === "number"
+      ? element.width - padding.left - padding.right
+      : availableWidth > 0
+        ? availableWidth
+        : 0;
+  const effectiveHeight = typeof element.height === "number" ? element.height - padding.top - padding.bottom : 0;
+  return { width: effectiveWidth, height: effectiveHeight };
+}
+
+function collectChildSizes(
+  children: Element[],
+  ctx: MeasureContext,
+  availableWidth: number,
+  padding: { left: number; right: number; top: number; bottom: number },
+  measureChild: (el: Element, ctx: MeasureContext, width: number) => { width: number; height: number }
+): ChildSize[] {
+  const childSizes: ChildSize[] = [];
+  for (const child of children) {
+    const childMargin = normalizeSpacing(child.margin);
+    const childSize = measureChild(
+      child,
+      ctx,
+      availableWidth - padding.left - padding.right - childMargin.left - childMargin.right
+    );
+    childSizes.push({
+      width: childSize.width,
+      height: childSize.height,
+      margin: childMargin,
+    });
+  }
+  return childSizes;
+}
+
+function measureWrappedContent(
+  childSizes: ChildSize[],
+  gap: number,
+  availableMain: number,
+  isRow: boolean
+): { width: number; height: number } {
+  let currentMain = 0;
+  let currentCross = 0;
+  let totalCross = 0;
+  let maxMain = 0;
+  let lineCount = 0;
+
+  for (let i = 0; i < childSizes.length; i++) {
+    const { width, height, margin } = childSizes[i];
+    const itemMain = isRow ? width + margin.left + margin.right : height + margin.top + margin.bottom;
+    const itemCross = isRow ? height + margin.top + margin.bottom : width + margin.left + margin.right;
+
+    const needsWrap = lineCount > 0 && currentMain + gap + itemMain > availableMain;
+
+    if (needsWrap) {
+      totalCross += currentCross;
+      maxMain = Math.max(maxMain, currentMain);
+      lineCount++;
+
+      currentMain = itemMain;
+      currentCross = itemCross;
+    } else {
+      if (lineCount > 0 || i > 0) {
+        currentMain += gap;
+      }
+      currentMain += itemMain;
+      currentCross = Math.max(currentCross, itemCross);
+      if (i === 0) lineCount = 1;
+    }
+  }
+
+  if (childSizes.length > 0) {
+    totalCross += currentCross;
+    maxMain = Math.max(maxMain, currentMain);
+  }
+
+  if (lineCount > 1) {
+    totalCross += gap * (lineCount - 1);
+  }
+
+  return isRow ? { width: maxMain, height: totalCross } : { width: totalCross, height: maxMain };
+}
+
 /**
  * 测量 Box 元素的固有尺寸
  */
@@ -22,165 +115,21 @@ export function measureBoxSize(
 
   const children = element.children ?? [];
 
-  // 计算可用于换行计算的宽度
-  // element.width 是总宽度（包含 padding），所以需要减去 padding
-  // availableWidth 已经是内容区域宽度，不需要减去 padding
-  const effectiveWidth =
-    typeof element.width === "number"
-      ? element.width - padding.left - padding.right
-      : availableWidth > 0
-        ? availableWidth
-        : 0;
-
-  // 计算可用于换行计算的高度
-  // 同理，element.height 是总高度，availableWidth 的使用场景中不涉及高度的传入
-  const effectiveHeight = typeof element.height === "number" ? element.height - padding.top - padding.bottom : 0;
+  // 计算可用于换行计算的宽度/高度
+  // element.width/height 是总尺寸（包含 padding）
+  const { width: effectiveWidth, height: effectiveHeight } = calcEffectiveSize(element, padding, availableWidth);
 
   // 如果启用了 wrap 且有可用宽度，需要模拟换行来计算正确的高度
   if (wrap && isRow && effectiveWidth > 0) {
-    // 计算内容区域的可用宽度
-    const contentAvailableWidth = effectiveWidth;
-
-    // 测量所有子元素
-    const childSizes: Array<{
-      width: number;
-      height: number;
-      margin: { left: number; right: number; top: number; bottom: number };
-    }> = [];
-    for (const child of children) {
-      const childMargin = normalizeSpacing(child.margin);
-      const childSize = measureChild(
-        child,
-        ctx,
-        availableWidth - padding.left - padding.right - childMargin.left - childMargin.right
-      );
-      childSizes.push({
-        width: childSize.width,
-        height: childSize.height,
-        margin: childMargin,
-      });
-    }
-
-    // 模拟换行
-    let currentLineWidth = 0;
-    let currentLineHeight = 0;
-    let totalHeight = 0;
-    let maxWidth = 0;
-    let lineCount = 0;
-
-    for (let i = 0; i < childSizes.length; i++) {
-      const { width, height, margin } = childSizes[i];
-      const itemWidth = width + margin.left + margin.right;
-      const itemHeight = height + margin.top + margin.bottom;
-
-      // 检查是否需要换行
-      const needsWrap = lineCount > 0 && currentLineWidth + gap + itemWidth > contentAvailableWidth;
-
-      if (needsWrap) {
-        // 完成当前行
-        totalHeight += currentLineHeight;
-        maxWidth = Math.max(maxWidth, currentLineWidth);
-        lineCount++;
-
-        // 开始新行
-        currentLineWidth = itemWidth;
-        currentLineHeight = itemHeight;
-      } else {
-        // 添加到当前行
-        if (lineCount > 0 || i > 0) {
-          currentLineWidth += gap;
-        }
-        currentLineWidth += itemWidth;
-        currentLineHeight = Math.max(currentLineHeight, itemHeight);
-        if (i === 0) lineCount = 1;
-      }
-    }
-
-    // 添加最后一行
-    if (childSizes.length > 0) {
-      totalHeight += currentLineHeight;
-      maxWidth = Math.max(maxWidth, currentLineWidth);
-    }
-
-    // 如果有多行，需要加上行间距
-    if (lineCount > 1) {
-      totalHeight += gap * (lineCount - 1);
-    }
-
-    contentWidth = maxWidth;
-    contentHeight = totalHeight;
+    const childSizes = collectChildSizes(children, ctx, availableWidth, padding, measureChild);
+    const wrapped = measureWrappedContent(childSizes, gap, effectiveWidth, true);
+    contentWidth = wrapped.width;
+    contentHeight = wrapped.height;
   } else if (wrap && !isRow && effectiveHeight > 0) {
-    // 列方向的换行
-    const contentAvailableHeight = effectiveHeight;
-
-    // 测量所有子元素
-    const childSizes: Array<{
-      width: number;
-      height: number;
-      margin: { left: number; right: number; top: number; bottom: number };
-    }> = [];
-    for (const child of children) {
-      const childMargin = normalizeSpacing(child.margin);
-      const childSize = measureChild(
-        child,
-        ctx,
-        availableWidth - padding.left - padding.right - childMargin.left - childMargin.right
-      );
-      childSizes.push({
-        width: childSize.width,
-        height: childSize.height,
-        margin: childMargin,
-      });
-    }
-
-    // 模拟换列
-    let currentColumnHeight = 0;
-    let currentColumnWidth = 0;
-    let totalWidth = 0;
-    let maxHeight = 0;
-    let columnCount = 0;
-
-    for (let i = 0; i < childSizes.length; i++) {
-      const { width, height, margin } = childSizes[i];
-      const itemWidth = width + margin.left + margin.right;
-      const itemHeight = height + margin.top + margin.bottom;
-
-      // 检查是否需要换列
-      const needsWrap = columnCount > 0 && currentColumnHeight + gap + itemHeight > contentAvailableHeight;
-
-      if (needsWrap) {
-        // 完成当前列
-        totalWidth += currentColumnWidth;
-        maxHeight = Math.max(maxHeight, currentColumnHeight);
-        columnCount++;
-
-        // 开始新列
-        currentColumnHeight = itemHeight;
-        currentColumnWidth = itemWidth;
-      } else {
-        // 添加到当前列
-        if (columnCount > 0 || i > 0) {
-          currentColumnHeight += gap;
-        }
-        currentColumnHeight += itemHeight;
-        currentColumnWidth = Math.max(currentColumnWidth, itemWidth);
-        if (i === 0) columnCount = 1;
-      }
-    }
-
-    // 添加最后一列
-    if (childSizes.length > 0) {
-      totalWidth += currentColumnWidth;
-      maxHeight = Math.max(maxHeight, currentColumnHeight);
-    }
-
-    // 如果有多列，需要加上列间距
-    if (columnCount > 1) {
-      totalWidth += gap * (columnCount - 1);
-    }
-
-    contentWidth = totalWidth;
-    contentHeight = maxHeight;
+    const childSizes = collectChildSizes(children, ctx, availableWidth, padding, measureChild);
+    const wrapped = measureWrappedContent(childSizes, gap, effectiveHeight, false);
+    contentWidth = wrapped.width;
+    contentHeight = wrapped.height;
   } else {
     // 不换行的情况，保持原有逻辑
     for (let i = 0; i < children.length; i++) {
