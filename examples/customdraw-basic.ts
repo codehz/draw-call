@@ -3,14 +3,13 @@
  * 展示如何使用 CustomDraw 进行简单的自定义绘制
  * 运行: bun examples/customdraw-basic.ts
  */
-import { Box, CustomDraw, printLayout, Text } from "@/index";
-import { createNodeCanvas } from "@/node";
+import { Box, createCanvas, CustomDraw, printLayout, Text } from "@/index";
 import { GlobalFonts } from "@napi-rs/canvas";
 import { fileURLToPath } from "bun";
 
 GlobalFonts.registerFromPath(fileURLToPath(import.meta.resolve("@fontpkg/unifont/unifont-15.0.01.ttf")), "unifont");
 
-const canvas = createNodeCanvas({
+const canvas = createCanvas({
   width: 600,
   height: 1000,
   pixelRatio: 2,

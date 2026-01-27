@@ -1,5 +1,4 @@
-import { DOMMatrix } from "@/compat/DOMMatrix";
-import { Path2D } from "@/compat/Path2D";
+import { DOMMatrix, Path2D } from "@/compat";
 import { buildFontString } from "@/render/utils/font";
 import type { Color, GradientDescriptor, StrokeProps } from "@/types/base";
 import type {

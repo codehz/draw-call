@@ -8,7 +8,7 @@
  * 4. 转发所有其他 Canvas API 调用
  */
 
-import { DOMMatrix } from "@/compat/DOMMatrix";
+import { DOMMatrix } from "@/compat";
 
 export class ProxiedCanvasContext {
   /**

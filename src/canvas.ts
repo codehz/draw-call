@@ -1,3 +1,4 @@
+import { createRawCanvas } from "@/compat";
 import { computeLayout } from "@/layout/engine";
 import { createCanvasMeasureContext } from "@/layout/utils/measure";
 import { renderNode } from "@/render";
@@ -44,23 +45,7 @@ export interface DrawCallCanvas {
 export function createCanvas(options: CanvasOptions): DrawCallCanvas {
   const { width, height, pixelRatio = 1 } = options;
 
-  let canvas: {
-    getContext(type: "2d"): CanvasRenderingContext2D | null;
-    width: number;
-    height: number;
-    toDataURL?(type?: string, quality?: number): string;
-    toBuffer?(type: string): Buffer;
-  };
-
-  if (options.canvas) {
-    canvas = options.canvas;
-  } else {
-    // 浏览器环境，创建新的 canvas 元素
-    const el = document.createElement("canvas");
-    el.width = width * pixelRatio;
-    el.height = height * pixelRatio;
-    canvas = el;
-  }
+  const canvas = options.canvas ?? createRawCanvas(width * pixelRatio, height * pixelRatio);
 
   const ctx = canvas.getContext("2d");
   if (!ctx) {

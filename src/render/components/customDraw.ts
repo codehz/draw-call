@@ -1,4 +1,4 @@
-import type { DOMMatrix } from "@/compat/DOMMatrix";
+import type { DOMMatrix } from "@/compat";
 import { createProxiedCanvasContext } from "@/render/components/ProxiedCanvasContext";
 import { renderNode } from "@/render/index";
 import type { CustomDrawElement } from "@/types/components";

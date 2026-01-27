@@ -5,21 +5,51 @@ import { build } from "tsdown";
 console.log("Starting build process...");
 
 // 步骤 1: 使用 tsdown 编程 API 完成打包
-const bundles = await build({
+// 为浏览器环境打包（将 process.versions.node 替换为 undefined，消除 Node.js 代码）
+console.log("\n[1/2] Building for browser environment...");
+const browserBundles = await build({
   entry: {
     index: "src/index.ts",
-    node: "src/node.ts",
   },
+  platform: "browser",
   format: ["esm", "cjs"],
   dts: true,
   clean: true,
   treeshake: true,
   hash: false,
-  external: ["@napi-rs/canvas"],
+  shims: false,
+  plugins: [
+    {
+      name: "replace-napi-rs-canvas",
+      load(id) {
+        if (id === join(import.meta.dir, "../src/compat/index.ts")) {
+          return readFileSync(join(import.meta.dir, "../src/compat/browser.ts"), "utf-8");
+        }
+      },
+    },
+  ],
+  outDir: "dist/browser",
 });
 
-console.log("Build completed!");
-console.log(`Generated ${bundles.length} bundle(s)`);
+console.log(`Generated ${browserBundles.length} browser bundle(s)`);
+
+// 为 Node.js/Bun 环境打包（保留 process.versions.node）
+console.log("\n[2/2] Building for Node.js/Bun environment...");
+const nodeBundles = await build({
+  entry: {
+    index: "src/index.ts",
+  },
+  format: ["esm", "cjs"],
+  dts: true,
+  clean: false, // 不清除目录，追加到 dist
+  treeshake: true,
+  hash: false,
+  external: ["@napi-rs/canvas"],
+  outDir: "dist/node",
+});
+
+console.log(`Generated ${nodeBundles.length} Node.js/Bun bundle(s)`);
+console.log("\nBuild completed!");
 
 // 步骤 2: 复制 package.json、README.md、LICENSE 到 dist/
 console.log("\nCopying metadata files...");
@@ -39,32 +69,33 @@ delete pkg.scripts;
 delete pkg["lint-staged"];
 
 // 添加发布相关的字段
-pkg.main = "./index.cjs";
-pkg.module = "./index.mjs";
-pkg.types = "./index.d.cts";
+pkg.main = "./node/index.cjs";
+pkg.module = "./node/index.mjs";
+pkg.types = "./node/index.d.cts";
 pkg.exports = {
   ".": {
-    require: {
-      types: "./index.d.cts",
-      import: "./index.cjs",
-      default: "./index.cjs",
+    browser: {
+      types: "./browser/index.d.mts",
+      import: "./browser/index.mjs",
+      require: "./browser/index.cjs",
+      default: "./browser/index.mjs",
     },
-    import: {
-      types: "./index.d.mts",
-      import: "./index.mjs",
-      default: "./index.mjs",
+    node: {
+      types: "./node/index.d.mts",
+      import: "./node/index.mjs",
+      require: "./node/index.cjs",
+      default: "./node/index.mjs",
     },
-  },
-  "./node": {
-    require: {
-      types: "./node.d.cts",
-      import: "./node.cjs",
-      default: "./node.cjs",
+    bun: {
+      types: "./node/index.d.mts",
+      import: "./node/index.mjs",
+      default: "./node/index.mjs",
     },
-    import: {
-      types: "./node.d.mts",
-      import: "./node.mjs",
-      default: "./node.mjs",
+    default: {
+      types: "./node/index.d.mts",
+      import: "./node/index.mjs",
+      require: "./node/index.cjs",
+      default: "./node/index.mjs",
     },
   },
 };
@@ -101,8 +132,8 @@ function copyAndRewriteExamples() {
     content = content
       // 替换 @/index 为 @codehz/draw-call
       .replace(/from "@\/index"/g, 'from "@codehz/draw-call"')
-      // 替换 @/node 为 @codehz/draw-call/node
-      .replace(/from "@\/node"/g, 'from "@codehz/draw-call/node"');
+      // 替换 @/node 为 @codehz/draw-call（现在已合并）
+      .replace(/from "@\/node"/g, 'from "@codehz/draw-call"');
 
     // 写入文件
     writeFileSync(destPath, content);
@@ -114,3 +145,6 @@ copyAndRewriteExamples();
 
 console.log("\n✓ Release build completed successfully!");
 console.log("Ready to publish from dist/ directory");
+console.log("\nBuild outputs:");
+console.log("  - dist/browser/ (for browser environments)");
+console.log("  - dist/node/ (for Node.js/Bun environments)");

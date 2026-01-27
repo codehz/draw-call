@@ -1,6 +1,5 @@
-import { Box, Stack, Text } from "@/index";
+import { Box, createCanvas, Stack, Text } from "@/index";
 import { computeLayout, createCanvasMeasureContext } from "@/layout";
-import { createNodeCanvas } from "@/node";
 import { describe, expect, test } from "bun:test";
 
 describe("Stack component", () => {
@@ -15,7 +14,7 @@ describe("Stack component", () => {
 
 describe("Stack alignment", () => {
   test("should align children to center horizontally", () => {
-    const canvas = createNodeCanvas({ width: 200, height: 200 });
+    const canvas = createCanvas({ width: 200, height: 200 });
     const ctx = createCanvasMeasureContext(canvas.getContext());
     const tree = computeLayout(
       Stack({
@@ -33,7 +32,7 @@ describe("Stack alignment", () => {
   });
 
   test("should align children to center vertically", () => {
-    const canvas = createNodeCanvas({ width: 200, height: 200 });
+    const canvas = createCanvas({ width: 200, height: 200 });
     const ctx = createCanvasMeasureContext(canvas.getContext());
     const tree = computeLayout(
       Stack({
@@ -51,7 +50,7 @@ describe("Stack alignment", () => {
   });
 
   test("should align children to center both axes", () => {
-    const canvas = createNodeCanvas({ width: 200, height: 200 });
+    const canvas = createCanvas({ width: 200, height: 200 });
     const ctx = createCanvasMeasureContext(canvas.getContext());
     const tree = computeLayout(
       Stack({
@@ -69,7 +68,7 @@ describe("Stack alignment", () => {
   });
 
   test("should align children to end", () => {
-    const canvas = createNodeCanvas({ width: 200, height: 200 });
+    const canvas = createCanvas({ width: 200, height: 200 });
     const ctx = createCanvasMeasureContext(canvas.getContext());
     const tree = computeLayout(
       Stack({
@@ -88,7 +87,7 @@ describe("Stack alignment", () => {
   });
 
   test("should default to start alignment", () => {
-    const canvas = createNodeCanvas({ width: 200, height: 200 });
+    const canvas = createCanvas({ width: 200, height: 200 });
     const ctx = createCanvasMeasureContext(canvas.getContext());
     const tree = computeLayout(
       Stack({

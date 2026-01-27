@@ -3,14 +3,13 @@
  * 展示移动（translate）、旋转（rotate）、放大（scale）等变换效果
  * 运行: bun examples/transform.ts
  */
-import { Box, Text, Transform, printLayout } from "@/index";
-import { createNodeCanvas } from "@/node";
+import { Box, createCanvas, printLayout, Text, Transform } from "@/index";
 import { GlobalFonts } from "@napi-rs/canvas";
 import { fileURLToPath } from "bun";
 
 GlobalFonts.registerFromPath(fileURLToPath(import.meta.resolve("@fontpkg/unifont/unifont-15.0.01.ttf")), "unifont");
 
-const canvas = createNodeCanvas({
+const canvas = createCanvas({
   width: 800,
   height: 1000,
   pixelRatio: 2,

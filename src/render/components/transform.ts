@@ -1,4 +1,4 @@
-import { DOMMatrix } from "@/compat/DOMMatrix";
+import { DOMMatrix } from "@/compat";
 import { renderNode } from "@/render/index";
 import type { TransformElement, TransformValue } from "@/types/components";
 import type { LayoutNode } from "@/types/layout";

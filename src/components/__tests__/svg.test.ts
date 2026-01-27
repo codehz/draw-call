@@ -1,5 +1,4 @@
-import { Box, Svg, svg } from "@/index";
-import { createNodeCanvas } from "@/node";
+import { Box, createCanvas, Svg, svg } from "@/index";
 import { describe, expect, test } from "bun:test";
 
 describe("Svg component", () => {
@@ -122,7 +121,7 @@ describe("Svg component", () => {
   });
 
   test("should render svg as child of Box", () => {
-    const canvas = createNodeCanvas({ width: 300, height: 400 });
+    const canvas = createCanvas({ width: 300, height: 400 });
 
     const node = canvas.render(
       Box({

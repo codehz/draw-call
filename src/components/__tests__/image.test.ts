@@ -1,10 +1,9 @@
-import { Box, Image } from "@/index";
-import { createNodeCanvas } from "@/node";
+import { Box, createCanvas, Image } from "@/index";
 import { describe, expect, test } from "bun:test";
 
 describe("Image component", () => {
   test("should create image element", () => {
-    const sourceCanvas = createNodeCanvas({ width: 100, height: 100 });
+    const sourceCanvas = createCanvas({ width: 100, height: 100 });
     const image = Image({
       src: sourceCanvas.canvas,
       width: 100,
@@ -17,10 +16,10 @@ describe("Image component", () => {
   });
 
   test("should render image from another canvas", () => {
-    const canvas = createNodeCanvas({ width: 200, height: 200 });
+    const canvas = createCanvas({ width: 200, height: 200 });
 
     // 创建源 canvas 并绘制内容
-    const sourceCanvas = createNodeCanvas({ width: 100, height: 100 });
+    const sourceCanvas = createCanvas({ width: 100, height: 100 });
     const sourceCtx = sourceCanvas.getContext();
     sourceCtx.fillStyle = "#ff0000";
     sourceCtx.fillRect(0, 0, 100, 100);
@@ -43,10 +42,10 @@ describe("Image component", () => {
   });
 
   test("should render image with different fit modes", () => {
-    const canvas = createNodeCanvas({ width: 300, height: 200 });
+    const canvas = createCanvas({ width: 300, height: 200 });
 
     // 创建源 canvas
-    const sourceCanvas = createNodeCanvas({ width: 200, height: 100 });
+    const sourceCanvas = createCanvas({ width: 200, height: 100 });
     const sourceCtx = sourceCanvas.getContext();
     sourceCtx.fillStyle = "#3498db";
     sourceCtx.fillRect(0, 0, 200, 100);
@@ -77,8 +76,8 @@ describe("Image component", () => {
   });
 
   test("should render image with opacity", () => {
-    const canvas = createNodeCanvas({ width: 200, height: 200 });
-    const sourceCanvas = createNodeCanvas({ width: 100, height: 100 });
+    const canvas = createCanvas({ width: 200, height: 200 });
+    const sourceCanvas = createCanvas({ width: 100, height: 100 });
     const sourceCtx = sourceCanvas.getContext();
     sourceCtx.fillStyle = "#ff0000";
     sourceCtx.fillRect(0, 0, 100, 100);
@@ -96,8 +95,8 @@ describe("Image component", () => {
   });
 
   test("should render image with shadow", () => {
-    const canvas = createNodeCanvas({ width: 200, height: 200 });
-    const sourceCanvas = createNodeCanvas({ width: 100, height: 100 });
+    const canvas = createCanvas({ width: 200, height: 200 });
+    const sourceCanvas = createCanvas({ width: 100, height: 100 });
     const sourceCtx = sourceCanvas.getContext();
     sourceCtx.fillStyle = "#3498db";
     sourceCtx.fillRect(0, 0, 100, 100);
@@ -115,8 +114,8 @@ describe("Image component", () => {
   });
 
   test("should render image with border radius", () => {
-    const canvas = createNodeCanvas({ width: 200, height: 200 });
-    const sourceCanvas = createNodeCanvas({ width: 100, height: 100 });
+    const canvas = createCanvas({ width: 200, height: 200 });
+    const sourceCanvas = createCanvas({ width: 100, height: 100 });
     const sourceCtx = sourceCanvas.getContext();
     sourceCtx.fillStyle = "#e74c3c";
     sourceCtx.fillRect(0, 0, 100, 100);
@@ -134,8 +133,8 @@ describe("Image component", () => {
   });
 
   test("should render image with position", () => {
-    const canvas = createNodeCanvas({ width: 200, height: 200 });
-    const sourceCanvas = createNodeCanvas({ width: 50, height: 50 });
+    const canvas = createCanvas({ width: 200, height: 200 });
+    const sourceCanvas = createCanvas({ width: 50, height: 50 });
     const sourceCtx = sourceCanvas.getContext();
     sourceCtx.fillStyle = "#2ecc71";
     sourceCtx.fillRect(0, 0, 50, 50);
@@ -154,8 +153,8 @@ describe("Image component", () => {
   });
 
   test("should render image with border", () => {
-    const canvas = createNodeCanvas({ width: 200, height: 200 });
-    const sourceCanvas = createNodeCanvas({ width: 100, height: 100 });
+    const canvas = createCanvas({ width: 200, height: 200 });
+    const sourceCanvas = createCanvas({ width: 100, height: 100 });
     const sourceCtx = sourceCanvas.getContext();
     sourceCtx.fillStyle = "#9b59b6";
     sourceCtx.fillRect(0, 0, 100, 100);
@@ -173,8 +172,8 @@ describe("Image component", () => {
   });
 
   test("should render image as child of Box", () => {
-    const canvas = createNodeCanvas({ width: 300, height: 400 });
-    const sourceCanvas = createNodeCanvas({ width: 100, height: 100 });
+    const canvas = createCanvas({ width: 300, height: 400 });
+    const sourceCanvas = createCanvas({ width: 100, height: 100 });
     const sourceCtx = sourceCanvas.getContext();
     sourceCtx.fillStyle = "#f1c40f";
     sourceCtx.fillRect(0, 0, 100, 100);
@@ -216,7 +215,7 @@ describe("Image component", () => {
   });
 
   test("should calculate image intrinsic size correctly", () => {
-    const sourceCanvas = createNodeCanvas({ width: 200, height: 100 });
+    const sourceCanvas = createCanvas({ width: 200, height: 100 });
     const image = Image({
       src: sourceCanvas.canvas,
     });
@@ -225,7 +224,7 @@ describe("Image component", () => {
     expect(image.src).toBe(sourceCanvas.canvas);
 
     // 在布局计算中验证 - 使用align: "start"防止拉伸
-    const canvas = createNodeCanvas({ width: 400, height: 300 });
+    const canvas = createCanvas({ width: 400, height: 300 });
     const node = canvas.render(
       Box({
         width: 400,
@@ -246,8 +245,8 @@ describe("Image component", () => {
   });
 
   test("should respect explicit width and height for image", () => {
-    const sourceCanvas = createNodeCanvas({ width: 200, height: 100 });
-    const canvas = createNodeCanvas({ width: 400, height: 300 });
+    const sourceCanvas = createCanvas({ width: 200, height: 100 });
+    const canvas = createCanvas({ width: 400, height: 300 });
     const node = canvas.render(
       Box({
         width: 400,

@@ -2,14 +2,13 @@
  * 示例：使用 draw-call 的 RichText 组件
  * 运行: bun examples/richtext.ts
  */
-import { Box, RichText, Text } from "@/index";
-import { createNodeCanvas } from "@/node";
+import { Box, createCanvas, RichText, Text } from "@/index";
 import { GlobalFonts } from "@napi-rs/canvas";
 import { fileURLToPath } from "bun";
 
 GlobalFonts.registerFromPath(fileURLToPath(import.meta.resolve("@fontpkg/unifont/unifont-15.0.01.ttf")), "unifont");
 
-const canvas = createNodeCanvas({
+const canvas = createCanvas({
   width: 400,
   height: 820,
   pixelRatio: 2,
