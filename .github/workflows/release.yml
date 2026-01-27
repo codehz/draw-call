@@ -40,4 +40,4 @@ jobs:
 
       - name: Publish to NPM
         working-directory: dist
-        run: npm publish
+        run: npm publish || npm publish --tag beta
