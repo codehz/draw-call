@@ -74,29 +74,23 @@ pkg.module = "./node/index.mjs";
 pkg.types = "./node/index.d.cts";
 pkg.exports = {
   ".": {
+    types: {
+      import: "./node/index.d.mts",
+      require: "./node/index.d.cts",
+    },
     browser: {
-      types: "./browser/index.d.mts",
+      types: {
+        import: "./browser/index.d.mts",
+        require: "./browser/index.d.cts",
+      },
       import: "./browser/index.mjs",
       require: "./browser/index.cjs",
-      default: "./browser/index.mjs",
-    },
-    node: {
-      types: "./node/index.d.mts",
-      import: "./node/index.mjs",
-      require: "./node/index.cjs",
-      default: "./node/index.mjs",
     },
     bun: {
-      types: "./node/index.d.mts",
       import: "./node/index.mjs",
-      default: "./node/index.mjs",
     },
-    default: {
-      types: "./node/index.d.mts",
-      import: "./node/index.mjs",
-      require: "./node/index.cjs",
-      default: "./node/index.mjs",
-    },
+    import: "./node/index.mjs",
+    require: "./node/index.cjs",
   },
 };
 
