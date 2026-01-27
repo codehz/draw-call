@@ -8,6 +8,9 @@ export interface CanvasOptions {
   width: number;
   height: number;
   pixelRatio?: number;
+  // 图像平滑选项
+  imageSmoothingEnabled?: boolean;
+  imageSmoothingQuality?: "low" | "medium" | "high";
   // 可选的 canvas 实例（浏览器环境使用 HTMLCanvasElement）
   canvas?: {
     getContext(type: "2d"): CanvasRenderingContext2D | null;
@@ -62,6 +65,14 @@ export function createCanvas(options: CanvasOptions): DrawCallCanvas {
   const ctx = canvas.getContext("2d");
   if (!ctx) {
     throw new Error("Failed to get 2d context");
+  }
+
+  // 应用图像平滑选项
+  if (options.imageSmoothingEnabled !== undefined) {
+    ctx.imageSmoothingEnabled = options.imageSmoothingEnabled;
+  }
+  if (options.imageSmoothingQuality !== undefined) {
+    ctx.imageSmoothingQuality = options.imageSmoothingQuality;
   }
 
   // 应用像素比缩放

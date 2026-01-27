@@ -21,6 +21,14 @@ export function createNodeCanvas(options: Omit<CanvasOptions, "canvas">): DrawCa
   const canvas = createNapiCanvas(width * pixelRatio, height * pixelRatio);
   const ctx = canvas.getContext("2d");
 
+  // 应用图像平滑选项
+  if (options.imageSmoothingEnabled !== undefined) {
+    ctx.imageSmoothingEnabled = options.imageSmoothingEnabled;
+  }
+  if (options.imageSmoothingQuality !== undefined) {
+    ctx.imageSmoothingQuality = options.imageSmoothingQuality;
+  }
+
   // 应用像素比缩放
   if (pixelRatio !== 1) {
     ctx.scale(pixelRatio, pixelRatio);
