@@ -40,11 +40,6 @@ const dpr = window.devicePixelRatio || 1;
 const width = 720;
 const height = 600;
 
-canvasEl.width = width * dpr;
-canvasEl.height = height * dpr;
-canvasEl.style.width = `${width}px`;
-canvasEl.style.height = `${height}px`;
-
 // 创建 Canvas 实例
 const canvas = createCanvas({
   width,
