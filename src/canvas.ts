@@ -14,6 +14,7 @@ export interface CanvasOptions<
   pixelRatio?: number;
   /** 根据内容调整画布大小 */
   fitContent?: boolean;
+  updateStyles?: boolean;
   // 图像平滑选项
   imageSmoothingEnabled?: boolean;
   imageSmoothingQuality?: "low" | "medium" | "high";
@@ -44,6 +45,16 @@ export function createCanvas<T extends HTMLCanvasElement | OffscreenCanvas | Can
   const { width, height, pixelRatio = 1 } = options;
 
   const canvas = options.canvas ?? createRawCanvas(width * pixelRatio, height * pixelRatio);
+
+  if (options.canvas) {
+    canvas.width = width * pixelRatio;
+    canvas.height = height * pixelRatio;
+
+    if ("style" in canvas && options.updateStyles !== false) {
+      canvas.style.width = `${width}px`;
+      canvas.style.height = `${height}px`;
+    }
+  }
 
   const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
   if (!ctx) {
@@ -85,7 +96,7 @@ export function createCanvas<T extends HTMLCanvasElement | OffscreenCanvas | Can
         if (canvas.width !== contentWidth * pixelRatio || canvas.height !== contentHeight * pixelRatio) {
           canvas.width = contentWidth * pixelRatio;
           canvas.height = contentHeight * pixelRatio;
-          if ("style" in canvas) {
+          if ("style" in canvas && options.updateStyles !== false) {
             canvas.style.width = `${contentWidth}px`;
             canvas.style.height = `${contentHeight}px`;
           }
