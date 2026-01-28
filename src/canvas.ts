@@ -26,9 +26,7 @@ export interface LayoutSize {
   height: number;
 }
 
-export interface DrawCallCanvas<
-  T extends HTMLCanvasElement | OffscreenCanvas | Canvas = HTMLCanvasElement | OffscreenCanvas | Canvas,
-> {
+export interface DrawCallCanvas<T extends HTMLCanvasElement | OffscreenCanvas | Canvas = HTMLCanvasElement> {
   readonly width: number;
   readonly height: number;
   readonly pixelRatio: number;
