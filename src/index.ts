@@ -1,6 +1,6 @@
 // 主入口文件 - 浏览器环境
 export { createCanvas } from "@/canvas";
-export type { CanvasOptions, DrawCallCanvas, LayoutSize } from "@/canvas";
+export type { CanvasOptions, DrawCallCanvas } from "@/canvas";
 
 // 组件
 export { Box, CustomDraw, Image, RichText, Stack, Svg, Text, Transform, svg } from "@/components";
