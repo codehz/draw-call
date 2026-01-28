@@ -18,6 +18,7 @@ const browserBundles = await build({
   treeshake: true,
   hash: false,
   shims: false,
+  inlineOnly: false,
   plugins: [
     {
       name: "replace-napi-rs-canvas",
@@ -137,3 +138,4 @@ console.log("Ready to publish from dist/ directory");
 console.log("\nBuild outputs:");
 console.log("  - dist/browser/ (for browser environments)");
 console.log("  - dist/node/ (for Node.js/Bun environments)");
+process.exit(0);
