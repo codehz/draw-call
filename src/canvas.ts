@@ -4,20 +4,21 @@ import { createCanvasMeasureContext } from "@/layout/utils/measure";
 import { renderNode } from "@/render";
 import type { Element } from "@/types/components";
 import type { LayoutNode } from "@/types/layout";
+import type { Canvas } from "@napi-rs/canvas";
 
-export interface CanvasOptions {
+export interface CanvasOptions<
+  T extends HTMLCanvasElement | OffscreenCanvas | Canvas = HTMLCanvasElement | OffscreenCanvas | Canvas,
+> {
   width: number;
   height: number;
   pixelRatio?: number;
+  /** 根据内容调整画布大小 */
+  fitContent?: boolean;
   // 图像平滑选项
   imageSmoothingEnabled?: boolean;
   imageSmoothingQuality?: "low" | "medium" | "high";
   // 可选的 canvas 实例（浏览器环境使用 HTMLCanvasElement）
-  canvas?: {
-    getContext(type: "2d"): CanvasRenderingContext2D | null;
-    width: number;
-    height: number;
-  };
+  canvas?: T;
 }
 
 export interface LayoutSize {
@@ -25,11 +26,13 @@ export interface LayoutSize {
   height: number;
 }
 
-export interface DrawCallCanvas {
+export interface DrawCallCanvas<
+  T extends HTMLCanvasElement | OffscreenCanvas | Canvas = HTMLCanvasElement | OffscreenCanvas | Canvas,
+> {
   readonly width: number;
   readonly height: number;
   readonly pixelRatio: number;
-  readonly canvas: HTMLCanvasElement;
+  readonly canvas: T;
   render(element: Element): LayoutNode;
   clear(): void;
   getContext(): CanvasRenderingContext2D;
@@ -42,12 +45,14 @@ export interface DrawCallCanvas {
  *
  * 在浏览器环境中使用，支持传入已有的 canvas 实例
  */
-export function createCanvas(options: CanvasOptions): DrawCallCanvas {
+export function createCanvas<T extends HTMLCanvasElement | OffscreenCanvas | Canvas = HTMLCanvasElement>(
+  options: CanvasOptions<T>
+): DrawCallCanvas<T> {
   const { width, height, pixelRatio = 1 } = options;
 
   const canvas = options.canvas ?? createRawCanvas(width * pixelRatio, height * pixelRatio);
 
-  const ctx = canvas.getContext("2d");
+  const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
   if (!ctx) {
     throw new Error("Failed to get 2d context");
   }
@@ -71,7 +76,7 @@ export function createCanvas(options: CanvasOptions): DrawCallCanvas {
     width,
     height,
     pixelRatio,
-    canvas: canvas as HTMLCanvasElement,
+    canvas: canvas as T,
 
     render(element: Element): LayoutNode {
       const layoutTree = computeLayout(element, measureCtx, {
@@ -80,6 +85,23 @@ export function createCanvas(options: CanvasOptions): DrawCallCanvas {
         minHeight: 0,
         maxHeight: height,
       });
+      if (options.fitContent) {
+        // 根据内容调整画布大小
+        const contentWidth = layoutTree.layout.width;
+        const contentHeight = layoutTree.layout.height;
+        if (canvas.width !== contentWidth * pixelRatio || canvas.height !== contentHeight * pixelRatio) {
+          canvas.width = contentWidth * pixelRatio;
+          canvas.height = contentHeight * pixelRatio;
+          if ("style" in canvas) {
+            canvas.style.width = `${contentWidth}px`;
+            canvas.style.height = `${contentHeight}px`;
+          }
+          // 重新应用缩放
+          if (pixelRatio !== 1) {
+            ctx.scale(pixelRatio, pixelRatio);
+          }
+        }
+      }
       renderNode(ctx, layoutTree);
       return layoutTree;
     },
@@ -94,6 +116,7 @@ export function createCanvas(options: CanvasOptions): DrawCallCanvas {
 
     toDataURL(type?: string, quality?: number): string {
       if ("toDataURL" in canvas && typeof canvas.toDataURL === "function") {
+        // @ts-ignore
         return canvas.toDataURL(type, quality);
       }
       throw new Error("toDataURL not supported");
@@ -101,6 +124,7 @@ export function createCanvas(options: CanvasOptions): DrawCallCanvas {
 
     toBuffer(type: "image/png" | "image/jpeg" = "image/png"): Buffer {
       if ("toBuffer" in canvas && typeof canvas.toBuffer === "function") {
+        // @ts-ignore
         return canvas.toBuffer(type);
       }
       throw new Error("toBuffer not supported in this environment");

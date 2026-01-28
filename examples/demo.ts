@@ -51,6 +51,7 @@ const canvas = createCanvas({
   height,
   pixelRatio: dpr,
   canvas: canvasEl,
+  fitContent: true,
 });
 
 // 渲染演示内容
