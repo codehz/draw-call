@@ -60,6 +60,7 @@ export function createCanvas<T extends HTMLCanvasElement | OffscreenCanvas | Can
   if (!ctx) {
     throw new Error("Failed to get 2d context");
   }
+  ctx.resetTransform();
 
   // 应用图像平滑选项
   if (options.imageSmoothingEnabled !== undefined) {
