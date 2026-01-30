@@ -15,7 +15,6 @@
     "noEmit": true,
 
     // Path mapping
-    "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
     },
@@ -30,5 +29,6 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "noPropertyAccessFromIndexSignature": false
-  }
+  },
+  "exclude": ["drafts/*"]
 }
