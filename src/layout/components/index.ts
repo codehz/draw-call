@@ -1,5 +1,5 @@
 import type { MeasureContext } from "@/layout/utils/measure";
-import type { BoxElement, CustomDrawElement, Element, StackElement } from "@/types/components";
+import type { BoxElement, CustomDrawElement, Element, StackElement, TransformElement } from "@/types/components";
 import { measureBoxSize } from "./box";
 import { measureCustomDrawSize } from "./customDraw";
 import { measureImageSize } from "./image";
@@ -31,7 +31,7 @@ export function measureIntrinsicSize(
     case "svg":
       return measureSvgSize(element, ctx, availableWidth);
     case "transform":
-      return measureTransformSize(element as Element, ctx, availableWidth, measureIntrinsicSize);
+      return measureTransformSize(element as TransformElement, ctx, availableWidth, measureIntrinsicSize);
     case "customdraw":
       return measureCustomDrawSize(element as CustomDrawElement, ctx, availableWidth, measureIntrinsicSize);
     default:

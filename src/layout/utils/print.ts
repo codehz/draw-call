@@ -10,15 +10,18 @@ function getElementType(element: Element): string {
       return "Box";
     case "text":
       return `Text "${(element as TextElement).content.slice(0, 20)}${(element as TextElement).content.length > 20 ? "..." : ""}"`;
+    case "richtext":
+      return "RichText";
     case "stack":
       return "Stack";
     case "image":
       return "Image";
     case "svg":
       return "Svg";
-    default:
-      // @ts-expect-error: 未知类型兜底
-      return element.type;
+    case "transform":
+      return "Transform";
+    case "customdraw":
+      return "CustomDraw";
   }
 }
 

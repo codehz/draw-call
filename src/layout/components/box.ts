@@ -8,6 +8,17 @@ type ChildSize = {
   margin: { left: number; right: number; top: number; bottom: number };
 };
 
+/**
+ * 安全获取元素的 margin
+ * Transform 元素没有 margin，返回默认 spacing
+ */
+function getElementMargin(element: Element) {
+  if (element.type === "transform") {
+    return { top: 0, right: 0, bottom: 0, left: 0 };
+  }
+  return normalizeSpacing(element.margin);
+}
+
 function calcEffectiveSize(
   element: BoxElement,
   padding: { left: number; right: number; top: number; bottom: number },
@@ -32,7 +43,7 @@ function collectChildSizes(
 ): ChildSize[] {
   const childSizes: ChildSize[] = [];
   for (const child of children) {
-    const childMargin = normalizeSpacing(child.margin);
+    const childMargin = getElementMargin(child);
     const childSize = measureChild(
       child,
       ctx,
@@ -134,7 +145,7 @@ export function measureBoxSize(
     // 不换行的情况，保持原有逻辑
     for (let i = 0; i < children.length; i++) {
       const child = children[i];
-      const childMargin = normalizeSpacing(child.margin);
+      const childMargin = getElementMargin(child);
       const childSize = measureChild(
         child,
         ctx,

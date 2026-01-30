@@ -305,16 +305,18 @@ export interface CustomDrawElement extends ElementBase, CustomDrawProps {
   type: "customdraw";
 }
 
-// 所有元素类型联合
-export type Element =
+// 具有布局属性的元素类型
+export type LayoutElement =
   | BoxElement
   | TextElement
   | RichTextElement
   | ImageElement
   | SvgElement
   | StackElement
-  | TransformElement
   | CustomDrawElement;
+
+// 所有元素类型联合
+export type Element = LayoutElement | TransformElement;
 
 // 组件工厂函数类型
 export type ComponentFactory<Props, El extends Element> = (props: Props) => El;

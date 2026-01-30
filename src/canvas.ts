@@ -2,7 +2,7 @@ import { createRawCanvas } from "@/compat";
 import { computeLayout } from "@/layout/engine";
 import { createCanvasMeasureContext } from "@/layout/utils/measure";
 import { renderNode } from "@/render";
-import type { Element } from "@/types/components";
+import type { LayoutElement } from "@/types/components";
 import type { LayoutNode } from "@/types/layout";
 import type { Canvas } from "@napi-rs/canvas";
 
@@ -27,7 +27,7 @@ export interface DrawCallCanvas<T extends HTMLCanvasElement | OffscreenCanvas | 
   readonly height: number;
   readonly pixelRatio: number;
   readonly canvas: T;
-  render(element: Element): LayoutNode;
+  render(element: LayoutElement): LayoutNode;
   clear(): void;
   getContext(): CanvasRenderingContext2D;
   toDataURL(type?: string, quality?: number): string;
@@ -83,7 +83,7 @@ export function createCanvas<T extends HTMLCanvasElement | OffscreenCanvas | Can
     pixelRatio,
     canvas: canvas as T,
 
-    render(element: Element): LayoutNode {
+    render(element: LayoutElement): LayoutNode {
       const layoutTree = computeLayout(element, measureCtx, {
         minWidth: 0,
         maxWidth: width,

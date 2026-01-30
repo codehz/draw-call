@@ -5,44 +5,120 @@ import { truncateText, wrapText } from "@/layout/utils/measure";
 import { applyOffset } from "@/layout/utils/offset";
 import type { NormalizedSpacing } from "@/types/base";
 import { normalizeSpacing } from "@/types/base";
-import type { Element } from "@/types/components";
+import type { Element, LayoutElement } from "@/types/components";
 import type { ComputedLayout, LayoutConstraints, LayoutNode } from "@/types/layout";
 import { resolveSize, sizeNeedsParent } from "@/types/layout";
 
-// 布局计算主函数
+/**
+ * 类型守卫：检查 Element 是否为 LayoutElement（非 Transform）
+ * 由于 Transform 元素在 computeLayoutImpl 开始时被处理，
+ * 此时只应处理 LayoutElement
+ */
+function assertLayoutElement(element: Element): asserts element is LayoutElement {
+  if (element.type === "transform") {
+    throw new Error("Transform elements should be handled at entry point");
+  }
+}
+
+/**
+ * 安全获取元素的 margin
+ * Transform 元素没有 margin，返回默认 spacing
+ */
+function getElementMargin(element: Element): NormalizedSpacing {
+  if (element.type === "transform") {
+    return { top: 0, right: 0, bottom: 0, left: 0 };
+  }
+  return normalizeSpacing((element as LayoutElement).margin);
+}
+
+/**
+ * 安全获取元素的布局属性（width, height, flex等）
+ * Transform 元素这些属性为 undefined
+ */
+function getElementLayoutProps(element: Element) {
+  if (element.type === "transform") {
+    return {
+      width: undefined,
+      height: undefined,
+      flex: undefined,
+      minWidth: undefined,
+      maxWidth: undefined,
+      minHeight: undefined,
+      maxHeight: undefined,
+      alignSelf: undefined,
+    };
+  }
+  const le = element as LayoutElement;
+  return {
+    width: le.width,
+    height: le.height,
+    flex: le.flex,
+    minWidth: le.minWidth,
+    maxWidth: le.maxWidth,
+    minHeight: le.minHeight,
+    maxHeight: le.maxHeight,
+    alignSelf: le.alignSelf,
+  };
+}
+
+/**
+ * 布局计算主函数
+ * 内部使用 Element 类型以支持 Transform，外部通过 LayoutElement 约束类型
+ */
 export function computeLayout(
+  element: LayoutElement,
+  ctx: MeasureContext,
+  constraints: LayoutConstraints,
+  x: number = 0,
+  y: number = 0
+): LayoutNode {
+  return computeLayoutImpl(element as Element, ctx, constraints, x, y);
+}
+
+/**
+ * 内部实现函数，处理所有元素类型包括 Transform
+ */
+function computeLayoutImpl(
   element: Element,
   ctx: MeasureContext,
   constraints: LayoutConstraints,
   x: number = 0,
   y: number = 0
 ): LayoutNode {
-  const margin = normalizeSpacing(element.margin);
-  const padding = normalizeSpacing("padding" in element ? element.padding : undefined);
+  // Transform 元素需要特殊处理：直接委托给子元素
+  if (element.type === "transform") {
+    return computeLayoutImpl(element.children, ctx, constraints, x, y);
+  }
+
+  // 现在 element 被保证不是 Transform，类型收窄为 LayoutElement
+  assertLayoutElement(element);
+  const layoutElement = element;
+  const margin = normalizeSpacing(layoutElement.margin);
+  const padding = normalizeSpacing("padding" in layoutElement ? layoutElement.padding : undefined);
 
   // 计算可用空间（减去 margin）
   const availableWidth = constraints.maxWidth - margin.left - margin.right;
   const availableHeight = constraints.maxHeight - margin.top - margin.bottom;
 
   // 测量固有尺寸
-  const intrinsic = measureIntrinsicSize(element, ctx, availableWidth);
+  const intrinsic = measureIntrinsicSize(layoutElement, ctx, availableWidth);
 
   // 解析宽高
   // 当 minWidth === maxWidth 时，说明父容器（Flex）强制了宽度，应该直接使用约束值
   let width =
     constraints.minWidth === constraints.maxWidth && constraints.minWidth > 0
       ? constraints.maxWidth - margin.left - margin.right
-      : resolveSize(element.width, availableWidth, intrinsic.width);
+      : resolveSize(layoutElement.width, availableWidth, intrinsic.width);
   let height =
     constraints.minHeight === constraints.maxHeight && constraints.minHeight > 0
       ? constraints.maxHeight - margin.top - margin.bottom
-      : resolveSize(element.height, availableHeight, intrinsic.height);
+      : resolveSize(layoutElement.height, availableHeight, intrinsic.height);
 
   // 应用 min/max 约束
-  if (element.minWidth !== undefined) width = Math.max(width, element.minWidth);
-  if (element.maxWidth !== undefined) width = Math.min(width, element.maxWidth);
-  if (element.minHeight !== undefined) height = Math.max(height, element.minHeight);
-  if (element.maxHeight !== undefined) height = Math.min(height, element.maxHeight);
+  if (layoutElement.minWidth !== undefined) width = Math.max(width, layoutElement.minWidth);
+  if (layoutElement.maxWidth !== undefined) width = Math.min(width, layoutElement.maxWidth);
+  if (layoutElement.minHeight !== undefined) height = Math.max(height, layoutElement.minHeight);
+  if (layoutElement.maxHeight !== undefined) height = Math.min(height, layoutElement.maxHeight);
 
   // 计算实际位置
   const actualX = x + margin.left;
@@ -66,20 +142,20 @@ export function computeLayout(
   };
 
   const node: LayoutNode = {
-    element,
+    element: layoutElement,
     layout,
     children: [],
   };
 
   // 处理文本元素的行
-  if (element.type === "text") {
-    const font = element.font ?? {};
-    if (element.wrap && contentWidth > 0) {
-      let { lines, offsets } = wrapText(ctx, element.content, contentWidth, font);
-      if (element.maxLines && lines.length > element.maxLines) {
-        lines = lines.slice(0, element.maxLines);
-        offsets = offsets.slice(0, element.maxLines);
-        if (element.ellipsis && lines.length > 0) {
+  if (layoutElement.type === "text") {
+    const font = layoutElement.font ?? {};
+    if (layoutElement.wrap && contentWidth > 0) {
+      let { lines, offsets } = wrapText(ctx, layoutElement.content, contentWidth, font);
+      if (layoutElement.maxLines && lines.length > layoutElement.maxLines) {
+        lines = lines.slice(0, layoutElement.maxLines);
+        offsets = offsets.slice(0, layoutElement.maxLines);
+        if (layoutElement.ellipsis && lines.length > 0) {
           const lastIdx = lines.length - 1;
           const truncated = truncateText(ctx, lines[lastIdx], contentWidth, font);
           lines[lastIdx] = truncated.text;
@@ -91,8 +167,8 @@ export function computeLayout(
     } else {
       const { text, offset } = truncateText(
         ctx,
-        element.content,
-        contentWidth > 0 && element.ellipsis ? contentWidth : Infinity,
+        layoutElement.content,
+        contentWidth > 0 && layoutElement.ellipsis ? contentWidth : Infinity,
         font
       );
       node.lines = [text];
@@ -101,13 +177,13 @@ export function computeLayout(
   }
 
   // 处理富文本元素的行
-  if (element.type === "richtext") {
-    const lineHeight = element.lineHeight ?? 1.2;
-    let lines = wrapRichText(ctx, element.spans, contentWidth, lineHeight);
+  if (layoutElement.type === "richtext") {
+    const lineHeight = layoutElement.lineHeight ?? 1.2;
+    let lines = wrapRichText(ctx, layoutElement.spans, contentWidth, lineHeight);
 
-    if (element.maxLines && lines.length > element.maxLines) {
-      lines = lines.slice(0, element.maxLines);
-      if (element.ellipsis && lines.length > 0) {
+    if (layoutElement.maxLines && lines.length > layoutElement.maxLines) {
+      lines = lines.slice(0, layoutElement.maxLines);
+      if (layoutElement.ellipsis && lines.length > 0) {
         // 富文本的省略号处理比较复杂，这里简化处理：在最后一行最后一个 segment 后面加省略号
         const lastLine = lines[lines.length - 1];
         if (lastLine.segments.length > 0) {
@@ -125,17 +201,17 @@ export function computeLayout(
   }
 
   // 递归处理子元素
-  if (element.type === "box" || element.type === "stack") {
-    const children = element.children ?? [];
+  if (layoutElement.type === "box" || layoutElement.type === "stack") {
+    const children = layoutElement.children ?? [];
 
-    if (element.type === "stack") {
+    if (layoutElement.type === "stack") {
       // Stack: 所有子元素在同一位置开始，支持对齐
-      const stackAlign = element.align ?? "start";
-      const stackJustify = element.justify ?? "start";
+      const stackAlign = layoutElement.align ?? "start";
+      const stackJustify = layoutElement.justify ?? "start";
 
       for (const child of children) {
         // 先在原点布局以获取子元素尺寸
-        const childNode = computeLayout(
+        const childNode = computeLayoutImpl(
           child,
           ctx,
           {
@@ -149,7 +225,7 @@ export function computeLayout(
         );
 
         // 根据对齐方式计算偏移
-        const childMargin = normalizeSpacing(child.margin);
+        const childMargin = getElementMargin(child);
         const childOuterWidth = childNode.layout.width + childMargin.left + childMargin.right;
         const childOuterHeight = childNode.layout.height + childMargin.top + childMargin.bottom;
 
@@ -176,11 +252,12 @@ export function computeLayout(
       }
     } else {
       // Box: Flex 布局
-      const direction = element.direction ?? "row";
-      const justify = element.justify ?? "start";
-      const align = element.align ?? "stretch";
-      const gap = element.gap ?? 0;
-      const wrap = element.wrap ?? false;
+      const boxElement = layoutElement as Extract<LayoutElement, { type: "box" }>;
+      const direction = boxElement.direction ?? "row";
+      const justify = boxElement.justify ?? "start";
+      const align = boxElement.align ?? "stretch";
+      const gap = boxElement.gap ?? 0;
+      const wrap = boxElement.wrap ?? false;
       const isRow = direction === "row" || direction === "row-reverse";
       const isReverse = direction === "row-reverse" || direction === "column-reverse";
 
@@ -197,8 +274,9 @@ export function computeLayout(
       }> = [];
 
       for (const child of children) {
-        const childMargin = normalizeSpacing(child.margin);
-        const childFlex = child.flex ?? 0;
+        const childMargin = getElementMargin(child);
+        const childProps = getElementLayoutProps(child);
+        const childFlex = childProps.flex ?? 0;
 
         if (childFlex > 0) {
           childInfos.push({
@@ -214,16 +292,16 @@ export function computeLayout(
 
           // 判断是否需要在交叉轴 stretch
           // 当元素在交叉轴上没有指定尺寸且 align="stretch" 时，应该拉伸
-          const shouldStretchWidth = !isRow && child.width === undefined && align === "stretch";
-          const shouldStretchHeight = isRow && child.height === undefined && align === "stretch";
+          const shouldStretchWidth = !isRow && childProps.width === undefined && align === "stretch";
+          const shouldStretchHeight = isRow && childProps.height === undefined && align === "stretch";
 
           // 解析明确指定的尺寸
-          let w = sizeNeedsParent(child.width)
-            ? resolveSize(child.width, contentWidth - childMargin.left - childMargin.right, size.width)
-            : resolveSize(child.width, 0, size.width);
-          let h = sizeNeedsParent(child.height)
-            ? resolveSize(child.height, contentHeight - childMargin.top - childMargin.bottom, size.height)
-            : resolveSize(child.height, 0, size.height);
+          let w = sizeNeedsParent(childProps.width)
+            ? resolveSize(childProps.width, contentWidth - childMargin.left - childMargin.right, size.width)
+            : resolveSize(childProps.width, 0, size.width);
+          let h = sizeNeedsParent(childProps.height)
+            ? resolveSize(childProps.height, contentHeight - childMargin.top - childMargin.bottom, size.height)
+            : resolveSize(childProps.height, 0, size.height);
 
           // 应用 stretch（注意：wrap 时不应提前应用 stretch）
           if (shouldStretchWidth && !wrap) {
@@ -301,20 +379,21 @@ export function computeLayout(
         for (const info of lineInfos) {
           if (info.flex > 0) {
             const flexSize = totalFlex > 0 ? (availableForFlex * info.flex) / totalFlex : 0;
+            const childProps = getElementLayoutProps(info.element);
             if (isRow) {
               info.width = flexSize;
               // 测量高度
               const size = measureIntrinsicSize(info.element, ctx, flexSize);
-              info.height = sizeNeedsParent(info.element.height)
-                ? resolveSize(info.element.height, contentHeight - info.margin.top - info.margin.bottom, size.height)
-                : resolveSize(info.element.height, 0, size.height);
+              info.height = sizeNeedsParent(childProps.height)
+                ? resolveSize(childProps.height, contentHeight - info.margin.top - info.margin.bottom, size.height)
+                : resolveSize(childProps.height, 0, size.height);
             } else {
               info.height = flexSize;
               // 测量宽度
               const size = measureIntrinsicSize(info.element, ctx, contentWidth - info.margin.left - info.margin.right);
-              info.width = sizeNeedsParent(info.element.width)
-                ? resolveSize(info.element.width, contentWidth - info.margin.left - info.margin.right, size.width)
-                : resolveSize(info.element.width, 0, size.width);
+              info.width = sizeNeedsParent(childProps.width)
+                ? resolveSize(childProps.width, contentWidth - info.margin.left - info.margin.right, size.width)
+                : resolveSize(childProps.width, 0, size.width);
             }
           }
         }
@@ -389,6 +468,7 @@ export function computeLayout(
 
         for (let i = 0; i < orderedInfos.length; i++) {
           const info = orderedInfos[i];
+          const childProps = getElementLayoutProps(info.element);
           const crossAxisSize = wrap ? lineCrossSize : getContentCrossSize();
           const childCrossSize = isRow
             ? info.height + info.margin.top + info.margin.bottom
@@ -396,7 +476,7 @@ export function computeLayout(
 
           // 计算交叉轴位置
           let itemCrossOffset = 0;
-          const effectiveAlign = info.element.alignSelf ?? align;
+          const effectiveAlign = childProps.alignSelf ?? align;
 
           if (effectiveAlign === "start") {
             itemCrossOffset = 0;
@@ -406,9 +486,9 @@ export function computeLayout(
             itemCrossOffset = (crossAxisSize - childCrossSize) / 2;
           } else if (effectiveAlign === "stretch") {
             itemCrossOffset = 0;
-            if (isRow && info.element.height === undefined) {
+            if (isRow && childProps.height === undefined) {
               info.height = crossAxisSize - info.margin.top - info.margin.bottom;
-            } else if (!isRow && info.element.width === undefined) {
+            } else if (!isRow && childProps.width === undefined) {
               info.width = crossAxisSize - info.margin.left - info.margin.right;
             }
           } // baseline case is handled by default (itemCrossOffset = 0)
@@ -431,36 +511,38 @@ export function computeLayout(
 
           if (info.flex > 0) {
             // Flex 子元素：在主轴方向强制使用计算出的尺寸
+            const childProps = getElementLayoutProps(info.element);
             if (isRow) {
               minWidth = maxWidth = info.width;
               // 在交叉轴方向，设置最小高度为 stretch 高度
               // 如果父容器高度固定，强制使用 stretch 高度
               // 如果父容器高度 auto，允许子元素根据内容扩展（例如内部有 wrap 元素）
-              if (info.element.height === undefined && align === "stretch") {
+              if (childProps.height === undefined && align === "stretch") {
                 minHeight = info.height;
-                maxHeight = element.height !== undefined ? info.height : Infinity;
+                maxHeight = boxElement.height !== undefined ? info.height : Infinity;
                 shouldStretchCross = true;
               }
             } else {
               minHeight = maxHeight = info.height;
               // 同理处理 column 方向
-              if (info.element.width === undefined && align === "stretch") {
+              if (childProps.width === undefined && align === "stretch") {
                 minWidth = info.width;
-                maxWidth = element.width !== undefined ? info.width : Infinity;
+                maxWidth = boxElement.width !== undefined ? info.width : Infinity;
                 shouldStretchCross = true;
               }
             }
           } else {
             // 非 flex 元素：处理 stretch
-            if (!isRow && info.element.width === undefined && align === "stretch") {
+            const childProps = getElementLayoutProps(info.element);
+            if (!isRow && childProps.width === undefined && align === "stretch") {
               minWidth = maxWidth = crossAxisSize - info.margin.left - info.margin.right;
             }
-            if (isRow && info.element.height === undefined && align === "stretch") {
+            if (isRow && childProps.height === undefined && align === "stretch") {
               minHeight = maxHeight = crossAxisSize - info.margin.top - info.margin.bottom;
             }
           }
 
-          const childNode = computeLayout(
+          const childNode = computeLayoutImpl(
             info.element,
             ctx,
             {
@@ -508,12 +590,12 @@ export function computeLayout(
 
       // 如果容器的尺寸是 auto 且启用了 wrap，需要根据实际内容更新容器尺寸
       // 这是因为在布局开始时计算的 intrinsic 尺寸可能不包含 flex 子元素的实际换行
-      if (wrap && element.height === undefined && isRow) {
+      if (wrap && boxElement.height === undefined && isRow) {
         const actualContentHeight = crossOffset;
         const actualHeight = actualContentHeight + padding.top + padding.bottom;
         node.layout.height = actualHeight;
         node.layout.contentHeight = actualContentHeight;
-      } else if (wrap && element.width === undefined && !isRow) {
+      } else if (wrap && boxElement.width === undefined && !isRow) {
         const actualContentWidth = crossOffset;
         const actualWidth = actualContentWidth + padding.left + padding.right;
         node.layout.width = actualWidth;
@@ -526,7 +608,7 @@ export function computeLayout(
         // 收集所有子节点的实际交叉轴尺寸
         let maxChildCrossSize = 0;
         for (const childNode of node.children) {
-          const childMargin = normalizeSpacing(childNode.element.margin);
+          const childMargin = getElementMargin(childNode.element);
           if (isRow) {
             const childOuterHeight = childNode.layout.height + childMargin.top + childMargin.bottom;
             maxChildCrossSize = Math.max(maxChildCrossSize, childOuterHeight);
@@ -537,13 +619,13 @@ export function computeLayout(
         }
 
         // 如果容器的交叉轴尺寸是 auto，更新它
-        if (isRow && element.height === undefined) {
+        if (isRow && boxElement.height === undefined) {
           const actualHeight = maxChildCrossSize + padding.top + padding.bottom;
           if (actualHeight > node.layout.height) {
             node.layout.height = actualHeight;
             node.layout.contentHeight = maxChildCrossSize;
           }
-        } else if (!isRow && element.width === undefined) {
+        } else if (!isRow && boxElement.width === undefined) {
           const actualWidth = maxChildCrossSize + padding.left + padding.right;
           if (actualWidth > node.layout.width) {
             node.layout.width = actualWidth;
@@ -557,47 +639,14 @@ export function computeLayout(
         node.children.reverse();
       }
     }
-  } else if (element.type === "transform") {
-    // Transform: 布局单个子元素
-    const child = (element as any).children;
-    if (child) {
-      const childMargin = normalizeSpacing(child.margin);
-      const childNode = computeLayout(
-        child,
-        ctx,
-        {
-          minWidth: 0,
-          maxWidth: contentWidth,
-          minHeight: 0,
-          maxHeight: contentHeight,
-        },
-        contentX,
-        contentY
-      );
-
-      node.children.push(childNode);
-
-      // 如果 Transform 的尺寸是 auto，根据子元素尺寸更新
-      if (element.width === undefined) {
-        const childOuterWidth = childNode.layout.width + childMargin.left + childMargin.right;
-        const actualWidth = childOuterWidth + padding.left + padding.right;
-        node.layout.width = actualWidth;
-        node.layout.contentWidth = childOuterWidth;
-      }
-
-      if (element.height === undefined) {
-        const childOuterHeight = childNode.layout.height + childMargin.top + childMargin.bottom;
-        const actualHeight = childOuterHeight + padding.top + padding.bottom;
-        node.layout.height = actualHeight;
-        node.layout.contentHeight = childOuterHeight;
-      }
-    }
-  } else if (element.type === "customdraw") {
+  } else if (layoutElement.type === "customdraw") {
     // CustomDraw: 布局单个子元素（如果存在）
-    const child = (element as any).children;
+    const child = layoutElement.children;
     if (child) {
-      const childMargin = normalizeSpacing(child.margin);
-      const childNode = computeLayout(
+      // child can be any Element including Transform, which will be unwrapped in computeLayoutImpl
+      // For margin access, we need to cast since Transform elements are handled at the start
+      const childMargin = normalizeSpacing((child as LayoutElement).margin);
+      const childNode = computeLayoutImpl(
         child,
         ctx,
         {
@@ -613,14 +662,14 @@ export function computeLayout(
       node.children.push(childNode);
 
       // 如果 CustomDraw 的尺寸是 auto，根据子元素尺寸更新
-      if (element.width === undefined) {
+      if (layoutElement.width === undefined) {
         const childOuterWidth = childNode.layout.width + childMargin.left + childMargin.right;
         const actualWidth = childOuterWidth + padding.left + padding.right;
         node.layout.width = actualWidth;
         node.layout.contentWidth = childOuterWidth;
       }
 
-      if (element.height === undefined) {
+      if (layoutElement.height === undefined) {
         const childOuterHeight = childNode.layout.height + childMargin.top + childMargin.bottom;
         const actualHeight = childOuterHeight + padding.top + padding.bottom;
         node.layout.height = actualHeight;
