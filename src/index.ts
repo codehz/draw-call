@@ -42,6 +42,7 @@ export type {
   CustomDrawElement,
   CustomDrawProps,
   Element,
+  LayoutElement,
   ProxiedCanvasContextOptions,
   RichTextElement,
   RichTextProps,
