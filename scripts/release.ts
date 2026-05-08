@@ -18,7 +18,9 @@ const browserBundles = await build({
   treeshake: true,
   hash: false,
   shims: false,
-  inlineOnly: false,
+  deps: {
+    onlyBundle: false,
+  },
   plugins: [
     {
       name: "replace-napi-rs-canvas",
@@ -45,7 +47,9 @@ const nodeBundles = await build({
   clean: false, // 不清除目录，追加到 dist
   treeshake: true,
   hash: false,
-  external: ["@napi-rs/canvas"],
+  deps: {
+    neverBundle: ["@napi-rs/canvas"],
+  },
   outDir: "dist/node",
 });
 
