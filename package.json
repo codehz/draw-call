@@ -1,7 +1,32 @@
 {
   "name": "@codehz/draw-call",
-  "module": "src/index.ts",
+  "version": "0.5.2",
   "type": "module",
+  "main": "./dist/node/index.cjs",
+  "module": "./dist/node/index.mjs",
+  "types": "./dist/node/index.d.mts",
+  "exports": {
+    ".": {
+      "browser": {
+        "types": "./dist/browser/index.d.ts",
+        "import": "./dist/browser/index.js",
+        "require": "./dist/browser/index.cjs"
+      },
+      "bun": {
+        "types": "./dist/node/index.d.mts",
+        "import": "./dist/node/index.mjs"
+      },
+      "types": "./dist/node/index.d.mts",
+      "import": "./dist/node/index.mjs",
+      "require": "./dist/node/index.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "examples",
+    "README.md",
+    "LICENSE"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/codehz/draw-call.git"
@@ -41,6 +66,5 @@
   },
   "optionalDependencies": {
     "@napi-rs/canvas": "^1.0.0"
-  },
-  "version": "0.5.2"
+  }
 }
