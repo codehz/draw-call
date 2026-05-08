@@ -14,23 +14,44 @@ export interface MeasureContext {
   measureText(text: string, font: FontProps): MeasureTextResult;
 }
 
+const MEASURE_CACHE_LIMIT = 256;
+
 // 创建基于 Canvas 的测量上下文
 export function createCanvasMeasureContext(ctx: CanvasRenderingContext2D): MeasureContext {
+  const cache = new Map<string, MeasureTextResult>();
+  let lastFontString: string | null = null;
+
   return {
     measureText(text: string, font: FontProps) {
-      ctx.font = buildFontString(font);
-      // 使用 middle 基线测量，与渲染阶段保持一致
-      ctx.textBaseline = "middle";
+      const fontString = buildFontString(font);
+      const key = fontString + "\x00" + text;
+      const hit = cache.get(key);
+      if (hit !== undefined) {
+        cache.delete(key);
+        cache.set(key, hit);
+        return hit;
+      }
+      if (fontString !== lastFontString) {
+        ctx.font = fontString;
+        ctx.textBaseline = "middle";
+        lastFontString = fontString;
+      }
       const metrics = ctx.measureText(text);
       const height = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
       const fontSize = font.size || 16;
-      return {
+      const result: MeasureTextResult = {
         width: metrics.width,
         height: height || fontSize,
         offset: (metrics.actualBoundingBoxAscent - metrics.actualBoundingBoxDescent) / 2,
         ascent: metrics.actualBoundingBoxAscent,
         descent: metrics.actualBoundingBoxDescent,
       };
+      if (cache.size >= MEASURE_CACHE_LIMIT) {
+        const oldest = cache.keys().next().value;
+        if (oldest !== undefined) cache.delete(oldest);
+      }
+      cache.set(key, result);
+      return result;
     },
   };
 }

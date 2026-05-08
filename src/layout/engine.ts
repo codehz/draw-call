@@ -179,7 +179,14 @@ function computeLayoutImpl(
   // 处理富文本元素的行
   if (layoutElement.type === "richtext") {
     const lineHeight = layoutElement.lineHeight ?? 1.2;
-    let lines = wrapRichText(ctx, layoutElement.spans, contentWidth, lineHeight);
+    const elementStyle = {
+      font: layoutElement.font,
+      color: layoutElement.color,
+      background: layoutElement.background,
+      underline: layoutElement.underline,
+      strikethrough: layoutElement.strikethrough,
+    };
+    let lines = wrapRichText(ctx, layoutElement.spans, contentWidth, lineHeight, elementStyle);
 
     if (layoutElement.maxLines && lines.length > layoutElement.maxLines) {
       lines = lines.slice(0, layoutElement.maxLines);
