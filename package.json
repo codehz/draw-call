@@ -1,6 +1,6 @@
 {
   "name": "@codehz/draw-call",
-  "version": "0.5.3",
+  "version": "0.6.0",
   "type": "module",
   "main": "./dist/node/index.cjs",
   "module": "./dist/node/index.mjs",
