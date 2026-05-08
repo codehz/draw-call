@@ -20,13 +20,14 @@ const SimpleRect = CustomDraw({
   width: 150,
   height: 80,
   draw(ctx, { width, height }) {
-    ctx.fillStyle = "#667eea";
-    ctx.fillRect(0, 0, width, height);
-    ctx.fillStyle = "#000000";
-    ctx.font = "bold 16px sans-serif";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText("Simple Rect", width / 2, height / 2);
+    const canvas = ctx.canvas;
+    canvas.fillStyle = "#667eea";
+    canvas.fillRect(0, 0, width, height);
+    canvas.fillStyle = "#000000";
+    canvas.font = "bold 16px sans-serif";
+    canvas.textAlign = "center";
+    canvas.textBaseline = "middle";
+    canvas.fillText("Simple Rect", width / 2, height / 2);
   },
 });
 
@@ -35,20 +36,21 @@ const RotatedRect = CustomDraw({
   width: 150,
   height: 80,
   draw(ctx, { width, height }) {
+    const canvas = ctx.canvas;
     // save/restore 会自动平衡，即使不显式调用也能正确恢复
     ctx.save();
     ctx.translate(width / 2, height / 2);
     ctx.rotate((Math.PI / 4) * 0.3); // 15 度
-    ctx.fillStyle = "#764ba2";
-    ctx.fillRect(-width / 2, -height / 2, width, height);
+    canvas.fillStyle = "#764ba2";
+    canvas.fillRect(-width / 2, -height / 2, width, height);
     ctx.restore();
 
     // 恢复后可以正常绘制
-    ctx.fillStyle = "#000000";
-    ctx.font = "16px sans-serif";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText("Rotated", width / 2, height / 2);
+    canvas.fillStyle = "#000000";
+    canvas.font = "16px sans-serif";
+    canvas.textAlign = "center";
+    canvas.textBaseline = "middle";
+    canvas.fillText("Rotated", width / 2, height / 2);
   },
 });
 
@@ -57,24 +59,25 @@ const CircleProgress = CustomDraw({
   width: 140,
   height: 140,
   draw(ctx, { width, height, inner }) {
+    const canvas = ctx.canvas;
     const centerX = width / 2;
     const centerY = height / 2;
     const radius = Math.min(width, height) / 2 - 8;
 
     // 绘制背景圆
-    ctx.strokeStyle = "rgba(0, 0, 0, 0.1)";
-    ctx.lineWidth = 8;
-    ctx.beginPath();
-    ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
-    ctx.stroke();
+    canvas.strokeStyle = "rgba(0, 0, 0, 0.1)";
+    canvas.lineWidth = 8;
+    canvas.beginPath();
+    canvas.arc(centerX, centerY, radius, 0, Math.PI * 2);
+    canvas.stroke();
 
     // 绘制进度圆（65% 完成）
     const percentage = 65;
-    ctx.strokeStyle = "#ff6b6b";
-    ctx.lineCap = "round";
-    ctx.beginPath();
-    ctx.arc(centerX, centerY, radius, -Math.PI / 2, -Math.PI / 2 + (percentage / 100) * Math.PI * 2);
-    ctx.stroke();
+    canvas.strokeStyle = "#ff6b6b";
+    canvas.lineCap = "round";
+    canvas.beginPath();
+    canvas.arc(centerX, centerY, radius, -Math.PI / 2, -Math.PI / 2 + (percentage / 100) * Math.PI * 2);
+    canvas.stroke();
 
     // 调用 inner() 在中央渲染子元素（百分比文本）
     inner?.();
@@ -99,14 +102,15 @@ const StarShape = CustomDraw({
   width: 150,
   height: 150,
   draw(ctx, { width, height }) {
+    const canvas = ctx.canvas;
     const centerX = width / 2;
     const centerY = height / 2;
     const points = 5;
     const outerRadius = Math.min(width, height) / 2 - 5;
     const innerRadius = outerRadius * 0.4;
 
-    ctx.fillStyle = "#ffd93d";
-    ctx.beginPath();
+    canvas.fillStyle = "#ffd93d";
+    canvas.beginPath();
 
     for (let i = 0; i < points * 2; i++) {
       const radius = i % 2 === 0 ? outerRadius : innerRadius;
@@ -115,19 +119,19 @@ const StarShape = CustomDraw({
       const y = centerY + radius * Math.sin(angle);
 
       if (i === 0) {
-        ctx.moveTo(x, y);
+        canvas.moveTo(x, y);
       } else {
-        ctx.lineTo(x, y);
+        canvas.lineTo(x, y);
       }
     }
 
-    ctx.closePath();
-    ctx.fill();
+    canvas.closePath();
+    canvas.fill();
 
     // 描边
-    ctx.strokeStyle = "#fa8c16";
-    ctx.lineWidth = 2;
-    ctx.stroke();
+    canvas.strokeStyle = "#fa8c16";
+    canvas.lineWidth = 2;
+    canvas.stroke();
   },
 });
 
@@ -246,7 +250,7 @@ const layout = canvas.render(
           }),
           Text({
             content:
-              "CustomDraw 支持直接调用 Canvas API。内部的 save/restore 会自动平衡，transform 也会自动相对处理。使用 inner() 方法可以在自定义绘制中渲染子元素。",
+              "CustomDraw 提供受控的 transform/save/restore 能力，并通过 ctx.canvas 暴露原生 Canvas API。使用 inner() 方法可以在自定义绘制中渲染子元素。",
             font: { size: 12, family: "unifont" },
             color: "#1890ff",
             wrap: true,

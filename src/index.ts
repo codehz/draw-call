@@ -39,11 +39,12 @@ export type {
 export type {
   BoxElement,
   BoxProps,
+  CustomDrawContext,
   CustomDrawElement,
+  CustomDrawOptions,
   CustomDrawProps,
   Element,
   LayoutElement,
-  ProxiedCanvasContextOptions,
   RichTextElement,
   RichTextProps,
   RichTextSpan,

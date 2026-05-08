@@ -244,7 +244,7 @@ Transform({
 
 ### CustomDraw
 
-自定义绘制组件，提供原生 Canvas 上下文进行自定义绘制。
+自定义绘制组件，提供受控的绘制上下文。原生 Canvas API 可通过 `ctx.canvas` 访问，`save`/`restore`/transform 由 `CustomDrawContext` 管理。
 
 ```typescript
 CustomDraw({
@@ -252,12 +252,12 @@ CustomDraw({
   height: 100,
   draw: (ctx, options) => {
     // 使用原生 Canvas API 进行绘制
-    ctx.fillStyle = "#667eea";
-    ctx.fillRect(10, 10, 180, 80);
-    ctx.fillStyle = "#ffffff";
-    ctx.font = "bold 16px sans-serif";
-    ctx.textAlign = "center";
-    ctx.fillText("Custom Draw", 100, 60);
+    ctx.canvas.fillStyle = "#667eea";
+    ctx.canvas.fillRect(10, 10, 180, 80);
+    ctx.canvas.fillStyle = "#ffffff";
+    ctx.canvas.font = "bold 16px sans-serif";
+    ctx.canvas.textAlign = "center";
+    ctx.canvas.fillText("Custom Draw", 100, 60);
   },
 });
 ```

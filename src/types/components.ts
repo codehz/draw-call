@@ -1,11 +1,25 @@
+import type { DOMMatrix } from "@/compat";
 import type { Border, Color, FontProps, Shadow, StrokeProps } from "@/types/base";
 import type { ContainerLayoutProps, LayoutProps } from "@/types/layout";
 
 // 元素类型标识
 export type ElementType = "box" | "text" | "richtext" | "image" | "svg" | "stack" | "transform" | "customdraw";
 
-// CustomDraw 代理上下文选项
-export interface ProxiedCanvasContextOptions {
+export interface CustomDrawContext {
+  readonly canvas: CanvasRenderingContext2D;
+  save(): void;
+  restore(): void;
+  getTransform(): DOMMatrix;
+  setTransform(transform?: DOMMatrix | [number, number, number, number, number, number]): void;
+  resetTransform(): void;
+  translate(x: number, y: number): void;
+  rotate(angle: number): void;
+  scale(x: number, y?: number): void;
+  transform(a: number, b: number, c: number, d: number, e: number, f: number): void;
+}
+
+// CustomDraw 绘制选项
+export interface CustomDrawOptions {
   inner?: () => void;
   width: number;
   height: number;
@@ -297,7 +311,7 @@ export interface TransformElement extends ElementBase, TransformProps {
 
 // CustomDraw 组件属性
 export interface CustomDrawProps extends LayoutProps {
-  draw: (ctx: CanvasRenderingContext2D, options: ProxiedCanvasContextOptions) => void;
+  draw: (ctx: CustomDrawContext, options: CustomDrawOptions) => void;
   children?: Element;
 }
 

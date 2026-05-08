@@ -1,4 +1,4 @@
-export type { CustomDrawProps, ProxiedCanvasContextOptions } from "@/types/components";
+export type { CustomDrawContext, CustomDrawOptions, CustomDrawProps } from "@/types/components";
 export { Box } from "./Box";
 export { CustomDraw } from "./CustomDraw";
 export { Image } from "./Image";

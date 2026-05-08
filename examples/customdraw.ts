@@ -23,6 +23,7 @@ function PieChart(data: Array<{ label: string; value: number; color: string }>) 
     width: 200,
     height: 200,
     draw(ctx, { width, height }) {
+      const canvas = ctx.canvas;
       const centerX = width / 2;
       const centerY = height / 2;
       const radius = Math.min(width, height) / 2 - 5;
@@ -33,17 +34,17 @@ function PieChart(data: Array<{ label: string; value: number; color: string }>) 
         const sliceAngle = (item.value / total) * Math.PI * 2;
 
         // 绘制扇形
-        ctx.beginPath();
-        ctx.moveTo(centerX, centerY);
-        ctx.arc(centerX, centerY, radius, currentAngle, currentAngle + sliceAngle);
-        ctx.closePath();
-        ctx.fillStyle = item.color;
-        ctx.fill();
+        canvas.beginPath();
+        canvas.moveTo(centerX, centerY);
+        canvas.arc(centerX, centerY, radius, currentAngle, currentAngle + sliceAngle);
+        canvas.closePath();
+        canvas.fillStyle = item.color;
+        canvas.fill();
 
         // 绘制边框
-        ctx.strokeStyle = "#ffffff";
-        ctx.lineWidth = 2;
-        ctx.stroke();
+        canvas.strokeStyle = "#ffffff";
+        canvas.lineWidth = 2;
+        canvas.stroke();
 
         currentAngle += sliceAngle;
       }
@@ -57,25 +58,26 @@ function GridBackground() {
     width: 100,
     height: 100,
     draw(ctx, { width, height }) {
+      const canvas = ctx.canvas;
       const gridSize = 20;
 
-      ctx.strokeStyle = "rgba(200, 200, 200, 0.3)";
-      ctx.lineWidth = 1;
+      canvas.strokeStyle = "rgba(200, 200, 200, 0.3)";
+      canvas.lineWidth = 1;
 
       // 绘制垂直线
       for (let x = 0; x <= width; x += gridSize) {
-        ctx.beginPath();
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, height);
-        ctx.stroke();
+        canvas.beginPath();
+        canvas.moveTo(x, 0);
+        canvas.lineTo(x, height);
+        canvas.stroke();
       }
 
       // 绘制水平线
       for (let y = 0; y <= height; y += gridSize) {
-        ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(width, y);
-        ctx.stroke();
+        canvas.beginPath();
+        canvas.moveTo(0, y);
+        canvas.lineTo(width, y);
+        canvas.stroke();
       }
     },
   });
@@ -87,30 +89,31 @@ function ProgressRing(percentage: number, color: string) {
     width: 120,
     height: 120,
     draw(ctx, { inner, width, height }) {
+      const canvas = ctx.canvas;
       const centerX = width / 2;
       const centerY = height / 2;
       const radius = Math.min(width, height) / 2 - 8;
 
       // 绘制背景圆
-      ctx.strokeStyle = "rgba(0, 0, 0, 0.1)";
-      ctx.lineWidth = 8;
-      ctx.beginPath();
-      ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
-      ctx.stroke();
+      canvas.strokeStyle = "rgba(0, 0, 0, 0.1)";
+      canvas.lineWidth = 8;
+      canvas.beginPath();
+      canvas.arc(centerX, centerY, radius, 0, Math.PI * 2);
+      canvas.stroke();
 
       // 绘制进度圆
       const endAngle = (percentage / 100) * Math.PI * 2 - Math.PI / 2;
-      ctx.strokeStyle = color;
-      ctx.lineCap = "round";
-      ctx.beginPath();
-      ctx.arc(centerX, centerY, radius, -Math.PI / 2, endAngle);
-      ctx.stroke();
+      canvas.strokeStyle = color;
+      canvas.lineCap = "round";
+      canvas.beginPath();
+      canvas.arc(centerX, centerY, radius, -Math.PI / 2, endAngle);
+      canvas.stroke();
 
       // 绘制百分比文本的背景
       ctx.save();
-      ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
-      ctx.globalAlpha = 0.1;
-      ctx.fillRect(centerX - 30, centerY - 20, 60, 40);
+      canvas.fillStyle = "rgba(0, 0, 0, 0.5)";
+      canvas.globalAlpha = 0.1;
+      canvas.fillRect(centerX - 30, centerY - 20, 60, 40);
       ctx.restore();
 
       inner?.();
@@ -139,6 +142,7 @@ function LineChart() {
     width: 300,
     height: 150,
     draw(ctx, { width, height }) {
+      const canvas = ctx.canvas;
       const padding = 10;
       const graphWidth = width - padding * 2;
       const graphHeight = height - padding * 2;
@@ -147,61 +151,61 @@ function LineChart() {
       const pointSpacing = graphWidth / (data.length - 1);
 
       // 绘制网格线
-      ctx.strokeStyle = "rgba(200, 200, 200, 0.2)";
-      ctx.lineWidth = 1;
+      canvas.strokeStyle = "rgba(200, 200, 200, 0.2)";
+      canvas.lineWidth = 1;
       for (let i = 0; i <= 4; i++) {
         const y = padding + (graphHeight / 4) * i;
-        ctx.beginPath();
-        ctx.moveTo(padding, y);
-        ctx.lineTo(width - padding, y);
-        ctx.stroke();
+        canvas.beginPath();
+        canvas.moveTo(padding, y);
+        canvas.lineTo(width - padding, y);
+        canvas.stroke();
       }
 
       // 绘制折线
-      ctx.strokeStyle = "#667eea";
-      ctx.lineWidth = 2;
-      ctx.beginPath();
+      canvas.strokeStyle = "#667eea";
+      canvas.lineWidth = 2;
+      canvas.beginPath();
 
       for (let i = 0; i < data.length; i++) {
         const x = padding + i * pointSpacing;
         const y = height - padding - (data[i] / maxValue) * graphHeight;
 
         if (i === 0) {
-          ctx.moveTo(x, y);
+          canvas.moveTo(x, y);
         } else {
-          ctx.lineTo(x, y);
+          canvas.lineTo(x, y);
         }
       }
 
-      ctx.stroke();
+      canvas.stroke();
 
       // 绘制数据点
-      ctx.fillStyle = "#667eea";
+      canvas.fillStyle = "#667eea";
       for (let i = 0; i < data.length; i++) {
         const x = padding + i * pointSpacing;
         const y = height - padding - (data[i] / maxValue) * graphHeight;
 
-        ctx.beginPath();
-        ctx.arc(x, y, 3, 0, Math.PI * 2);
-        ctx.fill();
+        canvas.beginPath();
+        canvas.arc(x, y, 3, 0, Math.PI * 2);
+        canvas.fill();
       }
 
       // 绘制阴影
       ctx.save();
-      ctx.globalAlpha = 0.2;
-      ctx.fillStyle = "#667eea";
-      ctx.beginPath();
-      ctx.moveTo(padding, height - padding);
+      canvas.globalAlpha = 0.2;
+      canvas.fillStyle = "#667eea";
+      canvas.beginPath();
+      canvas.moveTo(padding, height - padding);
 
       for (let i = 0; i < data.length; i++) {
         const x = padding + i * pointSpacing;
         const y = height - padding - (data[i] / maxValue) * graphHeight;
-        ctx.lineTo(x, y);
+        canvas.lineTo(x, y);
       }
 
-      ctx.lineTo(width - padding, height - padding);
-      ctx.closePath();
-      ctx.fill();
+      canvas.lineTo(width - padding, height - padding);
+      canvas.closePath();
+      canvas.fill();
       ctx.restore();
     },
   });
@@ -224,7 +228,7 @@ const layout = canvas.render(
       }),
 
       Text({
-        content: "直接调用 Canvas API 进行自定义绘制，同时支持可选的子元素",
+        content: "通过 ctx.canvas 调用原生 Canvas API，同时支持受控 transform 和可选子元素",
         font: { size: 14, family: "unifont" },
         color: "#666666",
       }),
@@ -235,7 +239,7 @@ const layout = canvas.render(
         gap: 10,
         children: [
           Text({
-            content: "1. 网格背景 + 直接 Canvas 绘制",
+            content: "1. 网格背景 + ctx.canvas 绘制",
             font: { size: 16, weight: "bold", family: "unifont" },
             color: "#666666",
           }),

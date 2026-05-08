@@ -1,5 +1,5 @@
 import type { DOMMatrix } from "@/compat";
-import { createProxiedCanvasContext } from "@/render/components/ProxiedCanvasContext";
+import { createCustomDrawContext } from "@/render/components/CustomDrawContext";
 import { renderNode } from "@/render/index";
 import type { CustomDrawElement } from "@/types/components";
 import type { LayoutNode } from "@/types/layout";
@@ -20,8 +20,7 @@ export function renderCustomDraw(ctx: CanvasRenderingContext2D, node: LayoutNode
   // 保存初始的 transform 矩阵
   const baseTransform = ctx.getTransform();
 
-  // 创建 ProxiedCanvasContext 代理对象
-  const proxyCtx = createProxiedCanvasContext(ctx, baseTransform as DOMMatrix);
+  const customCtx = createCustomDrawContext(ctx, baseTransform as DOMMatrix);
 
   // 定义 inner 函数，当调用时，如果存在子元素，进行渲染
   const inner = () => {
@@ -33,15 +32,13 @@ export function renderCustomDraw(ctx: CanvasRenderingContext2D, node: LayoutNode
     }
   };
 
-  // 调用 element.draw() 方法并传递代理上下文和选项
-  element.draw(proxyCtx, {
+  element.draw(customCtx, {
     inner,
     width: node.layout.contentWidth,
     height: node.layout.contentHeight,
   });
 
-  // 调用代理对象的 destroy() 方法完成清理
-  (proxyCtx as any).destroy();
+  customCtx.destroy();
 
   // 恢复 Canvas 状态
   ctx.restore();
