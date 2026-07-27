@@ -112,4 +112,46 @@ describe("CustomDraw component", () => {
     expect(transform.f).toBe(0);
     expect(ctx.globalAlpha).toBe(1);
   });
+
+  test("should auto size from single child including child margin", () => {
+    const canvas = createCanvas({ width: 200, height: 200 });
+    const node = canvas.render(
+      CustomDraw({
+        draw() {},
+        children: Box({
+          width: 40,
+          height: 30,
+          margin: 8,
+          background: "#0f0",
+        }),
+      })
+    );
+
+    expect(node.element.type).toBe("customdraw");
+    expect(node.children).toHaveLength(1);
+    expect(node.layout.width).toBe(56);
+    expect(node.layout.height).toBe(46);
+    expect(node.children[0].layout.x).toBe(8);
+    expect(node.children[0].layout.y).toBe(8);
+  });
+
+  test("should place child inside padding content box", () => {
+    const canvas = createCanvas({ width: 200, height: 200 });
+    const node = canvas.render(
+      CustomDraw({
+        width: 100,
+        height: 80,
+        padding: 12,
+        draw() {},
+        children: Box({ width: 20, height: 10, background: "#00f" }),
+      })
+    );
+
+    expect(node.layout.contentX).toBe(12);
+    expect(node.layout.contentY).toBe(12);
+    expect(node.layout.contentWidth).toBe(76);
+    expect(node.layout.contentHeight).toBe(56);
+    expect(node.children[0].layout.x).toBe(12);
+    expect(node.children[0].layout.y).toBe(12);
+  });
 });

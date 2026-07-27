@@ -1170,4 +1170,192 @@ describe("Box component", () => {
       expect(node.children[1].layout.x).toBe(52);
     });
   });
+
+  describe("Margin", () => {
+    test("should offset children by their margin in row", () => {
+      const canvas = createCanvas({ width: 300, height: 100 });
+      const node = canvas.render(
+        Box({
+          width: 300,
+          height: 100,
+          direction: "row",
+          children: [
+            Box({ width: 40, height: 40, margin: 10, background: "#f00" }),
+            Box({ width: 40, height: 40, margin: { left: 5, right: 5, top: 0, bottom: 0 }, background: "#0f0" }),
+          ],
+        })
+      );
+
+      expect(node.children[0].layout.x).toBe(10);
+      expect(node.children[0].layout.y).toBe(10);
+      // first outer = 40 + 20 margin = 60, second starts at 60 + 5 left margin
+      expect(node.children[1].layout.x).toBe(65);
+      expect(node.children[1].layout.y).toBe(0);
+    });
+
+    test("should include child margins in auto size", () => {
+      const canvas = createCanvas({ width: 400, height: 400 });
+      const node = canvas.render(
+        Box({
+          direction: "row",
+          children: [
+            Box({ width: 50, height: 30, margin: 10, background: "#f00" }),
+            Box({ width: 40, height: 20, margin: { top: 5, bottom: 5, left: 0, right: 0 }, background: "#0f0" }),
+          ],
+        })
+      );
+
+      // widths: (50+20) + 40 = 110, heights: max(30+20, 20+10) = 50
+      expect(node.layout.width).toBe(110);
+      expect(node.layout.height).toBe(50);
+    });
+  });
+
+  describe("Direction reverse", () => {
+    test("should layout children in row-reverse order positions", () => {
+      const canvas = createCanvas({ width: 200, height: 80 });
+      const node = canvas.render(
+        Box({
+          width: 200,
+          height: 80,
+          direction: "row-reverse",
+          children: [
+            Box({ width: 40, height: 40, background: "#f00" }),
+            Box({ width: 40, height: 40, background: "#0f0" }),
+            Box({ width: 40, height: 40, background: "#00f" }),
+          ],
+        })
+      );
+
+      // 当前语义：反转子项顺序后仍从主轴起点排布，再恢复 children 源顺序
+      // 打包组靠左，源顺序第一个子项在打包组右侧
+      expect(node.children[0].layout.x).toBe(80);
+      expect(node.children[1].layout.x).toBe(40);
+      expect(node.children[2].layout.x).toBe(0);
+      expect((node.children[0].element as { background?: string }).background).toBe("#f00");
+      expect((node.children[2].element as { background?: string }).background).toBe("#00f");
+    });
+
+    test("should layout children in column-reverse order positions", () => {
+      const canvas = createCanvas({ width: 80, height: 200 });
+      const node = canvas.render(
+        Box({
+          width: 80,
+          height: 200,
+          direction: "column-reverse",
+          children: [
+            Box({ width: 40, height: 40, background: "#f00" }),
+            Box({ width: 40, height: 40, background: "#0f0" }),
+          ],
+        })
+      );
+
+      expect(node.children[0].layout.y).toBe(40);
+      expect(node.children[1].layout.y).toBe(0);
+    });
+  });
+
+  describe("alignSelf", () => {
+    test("should override parent align for a single child", () => {
+      const canvas = createCanvas({ width: 200, height: 100 });
+      const node = canvas.render(
+        Box({
+          width: 200,
+          height: 100,
+          direction: "row",
+          align: "start",
+          children: [
+            Box({ width: 40, height: 20, background: "#f00" }),
+            Box({ width: 40, height: 20, alignSelf: "end", background: "#0f0" }),
+            Box({ width: 40, height: 20, alignSelf: "center", background: "#00f" }),
+          ],
+        })
+      );
+
+      expect(node.children[0].layout.y).toBe(0);
+      expect(node.children[1].layout.y).toBe(80);
+      expect(node.children[2].layout.y).toBe(40);
+    });
+  });
+
+  describe("Justify space-around and space-evenly", () => {
+    test("should handle space-around in row", () => {
+      const canvas = createCanvas({ width: 300, height: 80 });
+      const node = canvas.render(
+        Box({
+          width: 300,
+          height: 80,
+          direction: "row",
+          justify: "space-around",
+          children: [
+            Box({ width: 50, height: 40, background: "#f00" }),
+            Box({ width: 50, height: 40, background: "#0f0" }),
+            Box({ width: 50, height: 40, background: "#00f" }),
+          ],
+        })
+      );
+
+      // free = 150, each spacing = 50, start = 25, gap between = 50
+      expect(node.children[0].layout.x).toBe(25);
+      expect(node.children[1].layout.x).toBe(125);
+      expect(node.children[2].layout.x).toBe(225);
+    });
+
+    test("should handle space-evenly in row", () => {
+      const canvas = createCanvas({ width: 300, height: 80 });
+      const node = canvas.render(
+        Box({
+          width: 300,
+          height: 80,
+          direction: "row",
+          justify: "space-evenly",
+          children: [
+            Box({ width: 50, height: 40, background: "#f00" }),
+            Box({ width: 50, height: 40, background: "#0f0" }),
+            Box({ width: 50, height: 40, background: "#00f" }),
+          ],
+        })
+      );
+
+      // free = 150, spacing = 37.5
+      expect(node.children[0].layout.x).toBeCloseTo(37.5, 1);
+      expect(node.children[1].layout.x).toBeCloseTo(125, 1);
+      expect(node.children[2].layout.x).toBeCloseTo(212.5, 1);
+    });
+  });
+
+  describe("Nested container contract", () => {
+    test("should preserve nested box element types and order", () => {
+      const canvas = createCanvas({ width: 200, height: 200 });
+      const node = canvas.render(
+        Box({
+          width: 200,
+          height: 200,
+          padding: 10,
+          direction: "column",
+          gap: 8,
+          children: [
+            Box({ width: 50, height: 20, background: "#f00" }),
+            Box({
+              direction: "row",
+              gap: 4,
+              children: [
+                Box({ width: 20, height: 20, background: "#0f0" }),
+                Box({ width: 20, height: 20, background: "#00f" }),
+              ],
+            }),
+          ],
+        })
+      );
+
+      expect(node.element.type).toBe("box");
+      expect(node.children).toHaveLength(2);
+      expect(node.children[0].layout.x).toBe(10);
+      expect(node.children[0].layout.y).toBe(10);
+      expect(node.children[1].layout.x).toBe(10);
+      expect(node.children[1].layout.y).toBe(38);
+      expect(node.children[1].children).toHaveLength(2);
+      expect(node.children[1].children[1].layout.x).toBe(34);
+    });
+  });
 });

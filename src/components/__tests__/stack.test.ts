@@ -102,4 +102,57 @@ describe("Stack alignment", () => {
     expect(tree.children[0].layout.x).toBe(0);
     expect(tree.children[0].layout.y).toBe(0);
   });
+
+  test("should include child margin when aligning to center", () => {
+    const canvas = createCanvas({ width: 200, height: 200 });
+    const node = canvas.render(
+      Stack({
+        width: 200,
+        height: 200,
+        align: "center",
+        justify: "center",
+        children: [Box({ width: 40, height: 20, margin: 10, background: "#f00" })],
+      })
+    );
+
+    // outer = 60x40, center offsets = (200-60)/2=70, (200-40)/2=80, then + margin
+    expect(node.children[0].layout.x).toBe(80);
+    expect(node.children[0].layout.y).toBe(90);
+  });
+
+  test("should stack multiple children at aligned origin", () => {
+    const canvas = createCanvas({ width: 100, height: 100 });
+    const node = canvas.render(
+      Stack({
+        width: 100,
+        height: 100,
+        align: "end",
+        justify: "start",
+        children: [
+          Box({ width: 40, height: 20, background: "#f00" }),
+          Box({ width: 20, height: 40, background: "#0f0" }),
+        ],
+      })
+    );
+
+    expect(node.children[0].layout.x).toBe(60);
+    expect(node.children[0].layout.y).toBe(0);
+    expect(node.children[1].layout.x).toBe(80);
+    expect(node.children[1].layout.y).toBe(0);
+  });
+
+  test("should auto size to largest child including margin", () => {
+    const canvas = createCanvas({ width: 300, height: 300 });
+    const node = canvas.render(
+      Stack({
+        children: [
+          Box({ width: 30, height: 10, margin: 5, background: "#f00" }),
+          Box({ width: 50, height: 40, background: "#0f0" }),
+        ],
+      })
+    );
+
+    expect(node.layout.width).toBe(50);
+    expect(node.layout.height).toBe(40);
+  });
 });

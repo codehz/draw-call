@@ -102,4 +102,43 @@ describe("RichText", () => {
     );
     expect(true).toBe(true);
   });
+
+  test("should expose richLines layout data", () => {
+    const canvas = createCanvas({ width: 240, height: 120 });
+    const node = canvas.render(
+      RichText({
+        width: 200,
+        spans: [
+          { text: "Hello ", color: "#333", font: { size: 16 } },
+          { text: "World", color: "#f00", font: { size: 16, weight: "bold" } },
+        ],
+      })
+    );
+
+    expect(node.element.type).toBe("richtext");
+    expect(node.richLines).toBeDefined();
+    expect(node.richLines!.length).toBeGreaterThan(0);
+    expect(node.richLines![0].segments.length).toBeGreaterThan(0);
+    expect(node.richLines![0].width).toBeGreaterThan(0);
+  });
+
+  test("should clamp richLines by maxLines", () => {
+    const canvas = createCanvas({ width: 100, height: 200 });
+    const node = canvas.render(
+      RichText({
+        width: 80,
+        maxLines: 2,
+        spans: [
+          {
+            text: "This is a long rich text paragraph that should wrap into several lines for maxLines testing",
+            color: "#333",
+            font: { size: 14 },
+          },
+        ],
+      })
+    );
+
+    expect(node.richLines).toBeDefined();
+    expect(node.richLines!.length).toBeLessThanOrEqual(2);
+  });
 });
