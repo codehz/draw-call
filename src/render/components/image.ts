@@ -4,6 +4,7 @@ import { roundRectPath } from "@/render/utils/shapes";
 import { normalizeBorderRadius } from "@/types/base";
 import type { ImageElement } from "@/types/components";
 import type { LayoutNode } from "@/types/layout";
+import { getImageNaturalSize, resolveCropRect } from "@/utils/imageSource";
 
 // 绘制图片
 export function renderImage(ctx: CanvasRenderingContext2D, node: LayoutNode): void {
@@ -35,9 +36,12 @@ export function renderImage(ctx: CanvasRenderingContext2D, node: LayoutNode): vo
     ctx.clip();
   }
 
-  // 获取图片尺寸
-  const imgWidth = "naturalWidth" in src ? src.naturalWidth : "width" in src ? +src.width : 0;
-  const imgHeight = "naturalHeight" in src ? src.naturalHeight : "height" in src ? +src.height : 0;
+  // 获取图片尺寸与源矩形（crop 优先）
+  const { width: imgWidth, height: imgHeight } = getImageNaturalSize(src);
+  const cropRect = element.crop ? resolveCropRect(element.crop, imgWidth, imgHeight) : null;
+  const sourceWidth = cropRect?.sw ?? imgWidth;
+  const sourceHeight = cropRect?.sh ?? imgHeight;
+  const canDraw = sourceWidth > 0 && sourceHeight > 0 && (!element.crop || cropRect !== null);
 
   // 计算绘制区域
   const fit = element.fit ?? "fill";
@@ -46,8 +50,8 @@ export function renderImage(ctx: CanvasRenderingContext2D, node: LayoutNode): vo
   let drawWidth = width;
   let drawHeight = height;
 
-  if (fit !== "fill" && imgWidth > 0 && imgHeight > 0) {
-    const imgAspect = imgWidth / imgHeight;
+  if (canDraw && fit !== "fill" && sourceWidth > 0 && sourceHeight > 0) {
+    const imgAspect = sourceWidth / sourceHeight;
     const boxAspect = width / height;
 
     let scale = 1;
@@ -55,15 +59,15 @@ export function renderImage(ctx: CanvasRenderingContext2D, node: LayoutNode): vo
     switch (fit) {
       case "contain":
         // 图片完全显示在容器内
-        scale = imgAspect > boxAspect ? width / imgWidth : height / imgHeight;
+        scale = imgAspect > boxAspect ? width / sourceWidth : height / sourceHeight;
         break;
       case "cover":
         // 图片覆盖整个容器
-        scale = imgAspect > boxAspect ? height / imgHeight : width / imgWidth;
+        scale = imgAspect > boxAspect ? height / sourceHeight : width / sourceWidth;
         break;
       case "scale-down":
         // 类似 contain，但不放大
-        scale = Math.min(1, imgAspect > boxAspect ? width / imgWidth : height / imgHeight);
+        scale = Math.min(1, imgAspect > boxAspect ? width / sourceWidth : height / sourceHeight);
         break;
       case "none":
         // 保持原始尺寸
@@ -71,8 +75,8 @@ export function renderImage(ctx: CanvasRenderingContext2D, node: LayoutNode): vo
         break;
     }
 
-    drawWidth = imgWidth * scale;
-    drawHeight = imgHeight * scale;
+    drawWidth = sourceWidth * scale;
+    drawHeight = sourceHeight * scale;
 
     // 计算位置
     const position = element.position ?? {};
@@ -115,7 +119,13 @@ export function renderImage(ctx: CanvasRenderingContext2D, node: LayoutNode): vo
   }
 
   // 绘制图片
-  ctx.drawImage(src, drawX, drawY, drawWidth, drawHeight);
+  if (canDraw) {
+    if (cropRect) {
+      ctx.drawImage(src, cropRect.sx, cropRect.sy, cropRect.sw, cropRect.sh, drawX, drawY, drawWidth, drawHeight);
+    } else {
+      ctx.drawImage(src, drawX, drawY, drawWidth, drawHeight);
+    }
+  }
 
   // 清除阴影
   if (element.shadow) {

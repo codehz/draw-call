@@ -175,13 +175,15 @@ RichText({
 
 ### Image
 
-图片组件，支持多种适配模式。
+图片组件，支持多种适配模式，以及源图像素裁剪。
 
 ```typescript
 Image({
   src: imageBitmap,
   width: 200,
   height: 150,
+  // 源图像素裁剪（先 crop，再按 fit/position 绘制到布局框）
+  crop: { x: 10, y: 20, width: 100, height: 80 },
   fit: "cover", // contain | cover | fill | none | scale-down
   position: { x: "center", y: "center" },
   border: { radius: 8 },

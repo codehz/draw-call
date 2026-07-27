@@ -90,9 +90,19 @@ export interface RichTextElement extends ElementBase, RichTextProps {
   type: "richtext";
 }
 
+// Image 源图裁剪区域（像素坐标）
+export interface ImageCrop {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
 // Image 组件属性
 export interface ImageProps extends LayoutProps {
   src: ImageBitmap | CanvasImageSource;
+  /** 源图像素裁剪区域；先 crop 再按 fit/position 绘制到布局框 */
+  crop?: ImageCrop;
   fit?: "contain" | "cover" | "fill" | "none" | "scale-down";
   position?: {
     x?: "left" | "center" | "right" | number;

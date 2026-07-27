@@ -1,5 +1,6 @@
 import type { MeasureContext } from "@/layout/utils/measure";
 import type { Element, ImageElement } from "@/types/components";
+import { getImageNaturalSize, resolveCropRect } from "@/utils/imageSource";
 
 /**
  * 测量 Image 元素的固有尺寸
@@ -19,13 +20,19 @@ export function measureImageSize(
     };
   }
 
-  // 如果没有指定尺寸，尝试从图片源获取自然尺寸
   const src = imageElement.src;
   if (src) {
-    const imgWidth = "naturalWidth" in src ? src.naturalWidth : "width" in src ? +src.width : 0;
-    const imgHeight = "naturalHeight" in src ? src.naturalHeight : "height" in src ? +src.height : 0;
+    const { width: imgWidth, height: imgHeight } = getImageNaturalSize(src);
 
-    // 如果图片有自然尺寸，返回自然尺寸
+    // 有 crop 时使用钳制后的裁剪区域作为固有尺寸
+    if (imageElement.crop && imgWidth > 0 && imgHeight > 0) {
+      const rect = resolveCropRect(imageElement.crop, imgWidth, imgHeight);
+      if (rect) {
+        return { width: rect.sw, height: rect.sh };
+      }
+    }
+
+    // 回退到图片自然尺寸
     if (imgWidth > 0 && imgHeight > 0) {
       return { width: imgWidth, height: imgHeight };
     }

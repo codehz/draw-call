@@ -267,4 +267,132 @@ describe("Image component", () => {
     expect(node.children[0].layout.width).toBe(150);
     expect(node.children[0].layout.height).toBe(75);
   });
+
+  test("should pass through crop prop", () => {
+    const sourceCanvas = createCanvas({ width: 100, height: 100 });
+    const crop = { x: 10, y: 20, width: 40, height: 50 };
+    const image = Image({
+      src: sourceCanvas.canvas,
+      width: 100,
+      height: 100,
+      crop,
+    });
+    expect(image.crop).toEqual(crop);
+  });
+
+  test("should use crop size as intrinsic size when width/height omitted", () => {
+    const sourceCanvas = createCanvas({ width: 200, height: 100 });
+    const canvas = createCanvas({ width: 400, height: 300 });
+    const node = canvas.render(
+      Box({
+        width: 400,
+        height: 300,
+        direction: "column",
+        align: "start",
+        children: [
+          Image({
+            src: sourceCanvas.canvas,
+            crop: { x: 20, y: 10, width: 80, height: 40 },
+          }),
+        ],
+      })
+    );
+
+    expect(node.children[0].layout.width).toBe(80);
+    expect(node.children[0].layout.height).toBe(40);
+  });
+
+  test("should clamp out-of-bounds crop for intrinsic size", () => {
+    const sourceCanvas = createCanvas({ width: 100, height: 100 });
+    const canvas = createCanvas({ width: 400, height: 300 });
+    const node = canvas.render(
+      Box({
+        width: 400,
+        height: 300,
+        direction: "column",
+        align: "start",
+        children: [
+          Image({
+            src: sourceCanvas.canvas,
+            // x 负值、width 超出右边界 → clamp 到 [0,100]x[0,100] 内 70x50
+            crop: { x: -10, y: 0, width: 80, height: 50 },
+          }),
+        ],
+      })
+    );
+
+    expect(node.children[0].layout.width).toBe(70);
+    expect(node.children[0].layout.height).toBe(50);
+  });
+
+  test("should render image with crop and fit modes", () => {
+    const canvas = createCanvas({ width: 200, height: 200 });
+    const sourceCanvas = createCanvas({ width: 100, height: 100 });
+    const sourceCtx = sourceCanvas.getContext();
+    sourceCtx.fillStyle = "#e74c3c";
+    sourceCtx.fillRect(0, 0, 50, 50);
+    sourceCtx.fillStyle = "#3498db";
+    sourceCtx.fillRect(50, 0, 50, 50);
+    sourceCtx.fillStyle = "#2ecc71";
+    sourceCtx.fillRect(0, 50, 50, 50);
+    sourceCtx.fillStyle = "#f1c40f";
+    sourceCtx.fillRect(50, 50, 50, 50);
+
+    const crop = { x: 50, y: 0, width: 50, height: 50 };
+
+    const fillNode = canvas.render(
+      Image({
+        src: sourceCanvas.canvas,
+        width: 100,
+        height: 100,
+        crop,
+        fit: "fill",
+      })
+    );
+    expect(fillNode.layout.width).toBe(100);
+    expect(fillNode.layout.height).toBe(100);
+
+    const containNode = canvas.render(
+      Image({
+        src: sourceCanvas.canvas,
+        width: 100,
+        height: 80,
+        crop,
+        fit: "contain",
+      })
+    );
+    expect(containNode.layout.width).toBe(100);
+    expect(containNode.layout.height).toBe(80);
+
+    const coverNode = canvas.render(
+      Image({
+        src: sourceCanvas.canvas,
+        width: 100,
+        height: 80,
+        crop,
+        fit: "cover",
+      })
+    );
+    expect(coverNode.layout.width).toBe(100);
+    expect(coverNode.layout.height).toBe(80);
+  });
+
+  test("should skip drawing when crop is fully outside image", () => {
+    const canvas = createCanvas({ width: 100, height: 100 });
+    const sourceCanvas = createCanvas({ width: 50, height: 50 });
+    const sourceCtx = sourceCanvas.getContext();
+    sourceCtx.fillStyle = "#ff0000";
+    sourceCtx.fillRect(0, 0, 50, 50);
+
+    const node = canvas.render(
+      Image({
+        src: sourceCanvas.canvas,
+        width: 50,
+        height: 50,
+        crop: { x: 100, y: 100, width: 20, height: 20 },
+      })
+    );
+    expect(node.layout.width).toBe(50);
+    expect(node.layout.height).toBe(50);
+  });
 });
