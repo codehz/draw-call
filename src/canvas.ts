@@ -4,6 +4,7 @@ import { createRawCanvas } from "@/compat";
 import { computeLayout } from "@/layout/engine";
 import { createCanvasMeasureContext } from "@/layout/utils/measure";
 import { renderNode } from "@/render";
+import { normalizeSpacing } from "@/types/base";
 import type { LayoutElement } from "@/types/components";
 import type { LayoutNode } from "@/types/layout";
 
@@ -92,9 +93,11 @@ export function createCanvas<T extends HTMLCanvasElement | OffscreenCanvas | Can
         maxHeight: height,
       });
       if (options.fitContent) {
-        // 根据内容调整画布大小
-        const contentWidth = layoutTree.layout.width;
-        const contentHeight = layoutTree.layout.height;
+        // 根据内容 + 根节点 margin 调整画布大小
+        // layout 已含 border-box；根 margin 使节点原点偏移，画布需覆盖四边 margin
+        const rootMargin = normalizeSpacing(element.margin);
+        const contentWidth = layoutTree.layout.width + rootMargin.left + rootMargin.right;
+        const contentHeight = layoutTree.layout.height + rootMargin.top + rootMargin.bottom;
         if (canvas.width !== contentWidth * pixelRatio || canvas.height !== contentHeight * pixelRatio) {
           canvas.width = contentWidth * pixelRatio;
           canvas.height = contentHeight * pixelRatio;

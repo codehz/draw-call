@@ -3,8 +3,8 @@ import { wrapRichText } from "@/layout/components/richtext";
 import type { MeasureContext } from "@/layout/utils/measure";
 import { truncateText, wrapText } from "@/layout/utils/measure";
 import { applyOffset } from "@/layout/utils/offset";
-import type { NormalizedSpacing } from "@/types/base";
-import { normalizeSpacing } from "@/types/base";
+import type { Border, NormalizedSpacing } from "@/types/base";
+import { getBorderWidth, normalizeSpacing } from "@/types/base";
 import type { Element, LayoutElement } from "@/types/components";
 import type { ComputedLayout, LayoutConstraints, LayoutNode } from "@/types/layout";
 import { resolveSize, sizeNeedsParent } from "@/types/layout";
@@ -95,6 +95,10 @@ function computeLayoutImpl(
   const layoutElement = element;
   const margin = normalizeSpacing(layoutElement.margin);
   const padding = normalizeSpacing("padding" in layoutElement ? layoutElement.padding : undefined);
+  // border-box：width/height 含 border，content 区再减 border
+  const borderWidth = getBorderWidth(
+    "border" in layoutElement ? (layoutElement.border as Border | undefined) : undefined
+  );
 
   // 计算可用空间（减去 margin）
   const availableWidth = constraints.maxWidth - margin.left - margin.right;
@@ -103,7 +107,7 @@ function computeLayoutImpl(
   // 测量固有尺寸
   const intrinsic = measureIntrinsicSize(layoutElement, ctx, availableWidth);
 
-  // 解析宽高
+  // 解析宽高（数值 width/height 视为 border-box 总值）
   // 当 minWidth === maxWidth 时，说明父容器（Flex）强制了宽度，应该直接使用约束值
   let width =
     constraints.minWidth === constraints.maxWidth && constraints.minWidth > 0
@@ -124,11 +128,11 @@ function computeLayoutImpl(
   const actualX = x + margin.left;
   const actualY = y + margin.top;
 
-  // 内容区域
-  const contentX = actualX + padding.left;
-  const contentY = actualY + padding.top;
-  const contentWidth = width - padding.left - padding.right;
-  const contentHeight = height - padding.top - padding.bottom;
+  // 内容区域 = border-box − border − padding
+  const contentX = actualX + borderWidth + padding.left;
+  const contentY = actualY + borderWidth + padding.top;
+  const contentWidth = Math.max(0, width - borderWidth * 2 - padding.left - padding.right);
+  const contentHeight = Math.max(0, height - borderWidth * 2 - padding.top - padding.bottom);
 
   const layout: ComputedLayout = {
     x: actualX,

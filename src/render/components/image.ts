@@ -1,3 +1,4 @@
+import { strokeInsetBorder } from "@/render/utils/border";
 import { resolveColor } from "@/render/utils/colors";
 import { applyShadow, clearShadow } from "@/render/utils/shadows";
 import { roundRectPath } from "@/render/utils/shapes";
@@ -6,10 +7,10 @@ import type { ImageElement } from "@/types/components";
 import type { LayoutNode } from "@/types/layout";
 import { getImageNaturalSize, resolveCropRect } from "@/utils/imageSource";
 
-// 绘制图片
+// 绘制图片（图像绘入 content box；边框内缩绘制在 border-box 内）
 export function renderImage(ctx: CanvasRenderingContext2D, node: LayoutNode): void {
   const element = node.element as ImageElement;
-  const { x, y, width, height } = node.layout;
+  const { x, y, width, height, contentX, contentY, contentWidth, contentHeight } = node.layout;
 
   // 获取图片源
   const src = element.src;
@@ -25,7 +26,7 @@ export function renderImage(ctx: CanvasRenderingContext2D, node: LayoutNode): vo
     applyShadow(ctx, element.shadow);
   }
 
-  // 处理边框圆角裁剪
+  // 处理边框圆角裁剪（裁剪整个 border-box）
   const border = element.border;
   const radius = normalizeBorderRadius(border?.radius);
   const hasRadius = radius.some((r) => r > 0);
@@ -43,31 +44,31 @@ export function renderImage(ctx: CanvasRenderingContext2D, node: LayoutNode): vo
   const sourceHeight = cropRect?.sh ?? imgHeight;
   const canDraw = sourceWidth > 0 && sourceHeight > 0 && (!element.crop || cropRect !== null);
 
-  // 计算绘制区域
+  // 计算绘制区域（基于 content box）
   const fit = element.fit ?? "fill";
-  let drawX = x;
-  let drawY = y;
-  let drawWidth = width;
-  let drawHeight = height;
+  let drawX = contentX;
+  let drawY = contentY;
+  let drawWidth = contentWidth;
+  let drawHeight = contentHeight;
 
-  if (canDraw && fit !== "fill" && sourceWidth > 0 && sourceHeight > 0) {
+  if (canDraw && fit !== "fill" && sourceWidth > 0 && sourceHeight > 0 && contentWidth > 0 && contentHeight > 0) {
     const imgAspect = sourceWidth / sourceHeight;
-    const boxAspect = width / height;
+    const boxAspect = contentWidth / contentHeight;
 
     let scale = 1;
 
     switch (fit) {
       case "contain":
-        // 图片完全显示在容器内
-        scale = imgAspect > boxAspect ? width / sourceWidth : height / sourceHeight;
+        // 图片完全显示在内容区内
+        scale = imgAspect > boxAspect ? contentWidth / sourceWidth : contentHeight / sourceHeight;
         break;
       case "cover":
-        // 图片覆盖整个容器
-        scale = imgAspect > boxAspect ? height / sourceHeight : width / sourceWidth;
+        // 图片覆盖整个内容区
+        scale = imgAspect > boxAspect ? contentHeight / sourceHeight : contentWidth / sourceWidth;
         break;
       case "scale-down":
         // 类似 contain，但不放大
-        scale = Math.min(1, imgAspect > boxAspect ? width / sourceWidth : height / sourceHeight);
+        scale = Math.min(1, imgAspect > boxAspect ? contentWidth / sourceWidth : contentHeight / sourceHeight);
         break;
       case "none":
         // 保持原始尺寸
@@ -85,41 +86,41 @@ export function renderImage(ctx: CanvasRenderingContext2D, node: LayoutNode): vo
 
     // 水平位置
     if (typeof posX === "number") {
-      drawX = x + posX;
+      drawX = contentX + posX;
     } else {
       switch (posX) {
         case "left":
-          drawX = x;
+          drawX = contentX;
           break;
         case "center":
-          drawX = x + (width - drawWidth) / 2;
+          drawX = contentX + (contentWidth - drawWidth) / 2;
           break;
         case "right":
-          drawX = x + width - drawWidth;
+          drawX = contentX + contentWidth - drawWidth;
           break;
       }
     }
 
     // 垂直位置
     if (typeof posY === "number") {
-      drawY = y + posY;
+      drawY = contentY + posY;
     } else {
       switch (posY) {
         case "top":
-          drawY = y;
+          drawY = contentY;
           break;
         case "center":
-          drawY = y + (height - drawHeight) / 2;
+          drawY = contentY + (contentHeight - drawHeight) / 2;
           break;
         case "bottom":
-          drawY = y + height - drawHeight;
+          drawY = contentY + contentHeight - drawHeight;
           break;
       }
     }
   }
 
   // 绘制图片（可临时覆盖 imageSmoothingEnabled，绘制后 restore）
-  if (canDraw) {
+  if (canDraw && contentWidth > 0 && contentHeight > 0) {
     const overrideSmoothing = element.imageSmoothingEnabled !== undefined;
     if (overrideSmoothing) {
       ctx.save();
@@ -147,16 +148,10 @@ export function renderImage(ctx: CanvasRenderingContext2D, node: LayoutNode): vo
     ctx.restore();
   }
 
-  // 绘制边框
+  // 绘制边框（内缩，完全落在 border-box 内）
   if (border && border.width && border.width > 0) {
     ctx.strokeStyle = border.color ? resolveColor(ctx, border.color, x, y, width, height) : "#000";
-    ctx.lineWidth = border.width;
-    if (hasRadius) {
-      roundRectPath(ctx, x, y, width, height, radius);
-      ctx.stroke();
-    } else {
-      ctx.strokeRect(x, y, width, height);
-    }
+    strokeInsetBorder(ctx, x, y, width, height, border.width, border.radius);
   }
 
   // 恢复透明度

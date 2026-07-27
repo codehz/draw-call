@@ -1,3 +1,4 @@
+import { strokeInsetBorder } from "@/render/utils/border";
 import { resolveColor } from "@/render/utils/colors";
 import { applyShadow, clearShadow } from "@/render/utils/shadows";
 import { roundRectPath } from "@/render/utils/shapes";
@@ -5,7 +6,7 @@ import { normalizeBorderRadius } from "@/types/base";
 import type { BoxElement, StackElement } from "@/types/components";
 import type { LayoutNode } from "@/types/layout";
 
-// 绘制 Box 背景和边框
+// 绘制 Box 背景和边框（border-box：背景铺满 width×height，边框内缩绘制）
 export function renderBox(ctx: CanvasRenderingContext2D, node: LayoutNode): void {
   const element = node.element as BoxElement | StackElement;
   const { x, y, width, height } = node.layout;
@@ -24,7 +25,7 @@ export function renderBox(ctx: CanvasRenderingContext2D, node: LayoutNode): void
     applyShadow(ctx, element.shadow);
   }
 
-  // 绘制背景
+  // 绘制背景（铺满 border-box）
   if (element.background) {
     ctx.fillStyle = resolveColor(ctx, element.background, x, y, width, height);
     if (hasRadius) {
@@ -36,16 +37,10 @@ export function renderBox(ctx: CanvasRenderingContext2D, node: LayoutNode): void
     clearShadow(ctx);
   }
 
-  // 绘制边框
+  // 绘制边框（内缩，完全落在 border-box 内）
   if (border && border.width && border.width > 0) {
     ctx.strokeStyle = border.color ? resolveColor(ctx, border.color, x, y, width, height) : "#000";
-    ctx.lineWidth = border.width;
-    if (hasRadius) {
-      roundRectPath(ctx, x, y, width, height, radius);
-      ctx.stroke();
-    } else {
-      ctx.strokeRect(x, y, width, height);
-    }
+    strokeInsetBorder(ctx, x, y, width, height, border.width, border.radius);
   }
 
   // 恢复透明度

@@ -1105,4 +1105,69 @@ describe("Box component", () => {
       expect(wrapContainer.layout.height).toBeCloseTo(55, 0);
     });
   });
+
+  describe("border-box sizing", () => {
+    test("fixed size should include border and shrink content", () => {
+      const canvas = createCanvas({ width: 200, height: 200 });
+      const node = canvas.render(
+        Box({
+          width: 100,
+          height: 100,
+          padding: 10,
+          border: { width: 5, color: "#000" },
+          background: "#fff",
+        })
+      );
+
+      expect(node.layout.width).toBe(100);
+      expect(node.layout.height).toBe(100);
+      // content = 100 - border×2 - padding×2 = 100 - 10 - 20 = 70
+      expect(node.layout.contentWidth).toBe(70);
+      expect(node.layout.contentHeight).toBe(70);
+      expect(node.layout.contentX).toBe(15); // border 5 + padding 10
+      expect(node.layout.contentY).toBe(15);
+    });
+
+    test("auto size should include border and padding", () => {
+      const canvas = createCanvas({ width: 300, height: 300 });
+      const node = canvas.render(
+        Box({
+          padding: 10,
+          border: { width: 5, color: "#000" },
+          background: "#fff",
+          children: [Box({ width: 50, height: 50, background: "#f00" })],
+        })
+      );
+
+      // 50 + padding 20 + border 10 = 80
+      expect(node.layout.width).toBe(80);
+      expect(node.layout.height).toBe(80);
+      expect(node.layout.contentWidth).toBe(50);
+      expect(node.layout.contentHeight).toBe(50);
+      expect(node.children[0].layout.x).toBe(15);
+      expect(node.children[0].layout.y).toBe(15);
+    });
+
+    test("children should layout inside content box after border", () => {
+      const canvas = createCanvas({ width: 300, height: 200 });
+      const node = canvas.render(
+        Box({
+          width: 200,
+          height: 100,
+          padding: 8,
+          border: { width: 4, color: "#333" },
+          direction: "row",
+          children: [
+            Box({ width: 40, height: 20, background: "#f00" }),
+            Box({ width: 40, height: 20, background: "#0f0" }),
+          ],
+        })
+      );
+
+      // content origin = border 4 + padding 8 = 12
+      expect(node.children[0].layout.x).toBe(12);
+      expect(node.children[0].layout.y).toBe(12);
+      expect(node.children[1].layout.x).toBe(52);
+    });
+  });
 });

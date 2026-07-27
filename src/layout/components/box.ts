@@ -1,5 +1,5 @@
 import type { MeasureContext } from "@/layout/utils/measure";
-import { normalizeSpacing } from "@/types/base";
+import { getBorderWidth, normalizeSpacing } from "@/types/base";
 import type { BoxElement, Element } from "@/types/components";
 
 type ChildSize = {
@@ -22,15 +22,20 @@ function getElementMargin(element: Element) {
 function calcEffectiveSize(
   element: BoxElement,
   padding: { left: number; right: number; top: number; bottom: number },
+  borderWidth: number,
   availableWidth: number
 ): { width: number; height: number } {
+  // 数值 width/height 为 border-box，内容区再减 border 与 padding
   const effectiveWidth =
     typeof element.width === "number"
-      ? element.width - padding.left - padding.right
+      ? Math.max(0, element.width - borderWidth * 2 - padding.left - padding.right)
       : availableWidth > 0
         ? availableWidth
         : 0;
-  const effectiveHeight = typeof element.height === "number" ? element.height - padding.top - padding.bottom : 0;
+  const effectiveHeight =
+    typeof element.height === "number"
+      ? Math.max(0, element.height - borderWidth * 2 - padding.top - padding.bottom)
+      : 0;
   return { width: effectiveWidth, height: effectiveHeight };
 }
 
@@ -39,6 +44,7 @@ function collectChildSizes(
   ctx: MeasureContext,
   availableWidth: number,
   padding: { left: number; right: number; top: number; bottom: number },
+  borderWidth: number,
   measureChild: (el: Element, ctx: MeasureContext, width: number) => { width: number; height: number }
 ): ChildSize[] {
   const childSizes: ChildSize[] = [];
@@ -47,7 +53,7 @@ function collectChildSizes(
     const childSize = measureChild(
       child,
       ctx,
-      availableWidth - padding.left - padding.right - childMargin.left - childMargin.right
+      availableWidth - borderWidth * 2 - padding.left - padding.right - childMargin.left - childMargin.right
     );
     childSizes.push({
       width: childSize.width,
@@ -116,6 +122,7 @@ export function measureBoxSize(
   measureChild: (el: Element, ctx: MeasureContext, width: number) => { width: number; height: number }
 ): { width: number; height: number } {
   const padding = normalizeSpacing(element.padding);
+  const borderWidth = getBorderWidth(element.border);
   const gap = element.gap ?? 0;
   const direction = element.direction ?? "row";
   const wrap = element.wrap ?? false;
@@ -127,17 +134,22 @@ export function measureBoxSize(
   const children = element.children ?? [];
 
   // 计算可用于换行计算的宽度/高度
-  // element.width/height 是总尺寸（包含 padding）
-  const { width: effectiveWidth, height: effectiveHeight } = calcEffectiveSize(element, padding, availableWidth);
+  // element.width/height 是 border-box 总尺寸（含 border + padding + content）
+  const { width: effectiveWidth, height: effectiveHeight } = calcEffectiveSize(
+    element,
+    padding,
+    borderWidth,
+    availableWidth
+  );
 
   // 如果启用了 wrap 且有可用宽度，需要模拟换行来计算正确的高度
   if (wrap && isRow && effectiveWidth > 0) {
-    const childSizes = collectChildSizes(children, ctx, availableWidth, padding, measureChild);
+    const childSizes = collectChildSizes(children, ctx, availableWidth, padding, borderWidth, measureChild);
     const wrapped = measureWrappedContent(childSizes, gap, effectiveWidth, true);
     contentWidth = wrapped.width;
     contentHeight = wrapped.height;
   } else if (wrap && !isRow && effectiveHeight > 0) {
-    const childSizes = collectChildSizes(children, ctx, availableWidth, padding, measureChild);
+    const childSizes = collectChildSizes(children, ctx, availableWidth, padding, borderWidth, measureChild);
     const wrapped = measureWrappedContent(childSizes, gap, effectiveHeight, false);
     contentWidth = wrapped.width;
     contentHeight = wrapped.height;
@@ -149,7 +161,7 @@ export function measureBoxSize(
       const childSize = measureChild(
         child,
         ctx,
-        availableWidth - padding.left - padding.right - childMargin.left - childMargin.right
+        availableWidth - borderWidth * 2 - padding.left - padding.right - childMargin.left - childMargin.right
       );
 
       if (isRow) {
@@ -164,9 +176,9 @@ export function measureBoxSize(
     }
   }
 
-  // 如果明确设置了数值尺寸，优先使用
-  const intrinsicWidth = contentWidth + padding.left + padding.right;
-  const intrinsicHeight = contentHeight + padding.top + padding.bottom;
+  // 固有尺寸 = content + padding + border（border-box）
+  const intrinsicWidth = contentWidth + padding.left + padding.right + borderWidth * 2;
+  const intrinsicHeight = contentHeight + padding.top + padding.bottom + borderWidth * 2;
 
   return {
     width: typeof element.width === "number" ? element.width : intrinsicWidth,

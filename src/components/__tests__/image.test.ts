@@ -168,8 +168,35 @@ describe("Image component", () => {
         border: { width: 2, color: "#333" },
       })
     );
+    // width/height 为 border-box；content 区因 border 收缩
     expect(node.layout.width).toBe(100);
     expect(node.layout.height).toBe(100);
+    expect(node.layout.contentWidth).toBe(96);
+    expect(node.layout.contentHeight).toBe(96);
+    expect(node.layout.contentX).toBe(2);
+    expect(node.layout.contentY).toBe(2);
+  });
+
+  test("image auto size should include border and padding", () => {
+    const canvas = createCanvas({ width: 300, height: 300 });
+    const sourceCanvas = createCanvas({ width: 50, height: 40 });
+    const sourceCtx = sourceCanvas.getContext();
+    sourceCtx.fillStyle = "#9b59b6";
+    sourceCtx.fillRect(0, 0, 50, 40);
+
+    const node = canvas.render(
+      Image({
+        src: sourceCanvas.canvas,
+        padding: 5,
+        border: { width: 3, color: "#333" },
+      })
+    );
+
+    // 自然尺寸 50×40 + padding 10 + border 6
+    expect(node.layout.width).toBe(66);
+    expect(node.layout.height).toBe(56);
+    expect(node.layout.contentWidth).toBe(50);
+    expect(node.layout.contentHeight).toBe(40);
   });
 
   test("should render image as child of Box", () => {

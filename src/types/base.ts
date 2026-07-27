@@ -167,3 +167,14 @@ export function normalizeBorderRadius(
   }
   return value;
 }
+
+// 辅助函数：获取边框宽度（当前仅支持单边宽）
+export function getBorderWidth(border?: Border): number {
+  return border?.width ?? 0;
+}
+
+// 辅助函数：将边框宽度规范化为四边 insets（border-box 用）
+export function getBorderInsets(border?: Border): NormalizedSpacing {
+  const width = getBorderWidth(border);
+  return { top: width, right: width, bottom: width, left: width };
+}

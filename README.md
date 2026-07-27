@@ -270,14 +270,16 @@ CustomDraw({
 
 ### 尺寸
 
+盒模型采用 CSS **border-box**：`width` / `height` 包含 border 与 padding，内容区为 `width − border×2 − padding`。边框完全绘制在元素框内。
+
 ```typescript
-// 固定像素值
+// 固定像素值（border-box 总值）
 width: 100;
 
 // 百分比
 width: "50%";
 
-// 自动计算
+// 自动计算（内容 + padding + border）
 width: "auto";
 
 // 填充可用空间
@@ -306,6 +308,8 @@ background: radialGradient({ startX: 0.5, startY: 0.5, endRadius: 0.5 }, "#667ee
 ```
 
 ### 边框
+
+边框计入 `width`/`height`，并以内缩方式绘制（不向外溢出）。背景铺满整个 border-box，边框叠在背景之上。
 
 ```typescript
 border: {
@@ -336,6 +340,26 @@ margin: 10
 // 分别设置
 padding: { top: 10, right: 20, bottom: 10, left: 20 }
 margin: { top: 5, right: 10, bottom: 5, left: 10 }
+```
+
+创建画布时设置 `fitContent: true`，画布逻辑尺寸会按内容自适应，并包含**最外层元素的 margin**。
+
+```typescript
+const canvas = createCanvas({
+  width: 400,
+  height: 300,
+  fitContent: true,
+});
+
+// 画布最终约为 120×70（100×50 内容 + 四边 margin 10）
+canvas.render(
+  Box({
+    width: 100,
+    height: 50,
+    margin: 10,
+    background: "#fff",
+  })
+);
 ```
 
 ## 📐 布局
