@@ -1,5 +1,6 @@
-import { Box, createCanvas, Image } from "@/index";
 import { describe, expect, test } from "bun:test";
+
+import { Box, createCanvas, Image } from "@/index";
 
 describe("Image component", () => {
   test("should create image element", () => {

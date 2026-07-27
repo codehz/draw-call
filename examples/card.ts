@@ -1,10 +1,11 @@
+import { GlobalFonts } from "@napi-rs/canvas";
+import { fileURLToPath } from "bun";
+
 /**
  * 示例：使用 draw-call 绘制一个卡片
  * 运行: bun examples/card.ts
  */
 import { Box, createCanvas, linearGradient, printLayout, Svg, svg, Text } from "@/index";
-import { GlobalFonts } from "@napi-rs/canvas";
-import { fileURLToPath } from "bun";
 
 GlobalFonts.registerFromPath(fileURLToPath(import.meta.resolve("@fontpkg/unifont/unifont-15.0.01.ttf")), "unifont");
 

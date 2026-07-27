@@ -1,5 +1,6 @@
-import { Text } from "@/index";
 import { describe, expect, test } from "bun:test";
+
+import { Text } from "@/index";
 
 describe("Text component", () => {
   test("should create text element", () => {

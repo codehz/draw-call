@@ -1,5 +1,6 @@
-import { Box, createCanvas, RichText } from "@/index";
 import { describe, expect, test } from "bun:test";
+
+import { Box, createCanvas, RichText } from "@/index";
 
 describe("RichText", () => {
   test("should render rich text with multiple spans", () => {

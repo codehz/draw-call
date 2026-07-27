@@ -1,5 +1,6 @@
-import { createCanvas } from "@/index";
 import { describe, expect, test } from "bun:test";
+
+import { createCanvas } from "@/index";
 
 describe("createCanvas", () => {
   test("should create canvas with specified dimensions", () => {

@@ -1,10 +1,11 @@
+import type { Canvas } from "@napi-rs/canvas";
+
 import { createRawCanvas } from "@/compat";
 import { computeLayout } from "@/layout/engine";
 import { createCanvasMeasureContext } from "@/layout/utils/measure";
 import { renderNode } from "@/render";
 import type { LayoutElement } from "@/types/components";
 import type { LayoutNode } from "@/types/layout";
-import type { Canvas } from "@napi-rs/canvas";
 
 export interface CanvasOptions<
   T extends HTMLCanvasElement | OffscreenCanvas | Canvas = HTMLCanvasElement | OffscreenCanvas | Canvas,

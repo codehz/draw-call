@@ -1,6 +1,7 @@
+import { describe, expect, test } from "bun:test";
+
 import { Box, createCanvas, Stack, Text } from "@/index";
 import { computeLayout, createCanvasMeasureContext } from "@/layout";
-import { describe, expect, test } from "bun:test";
 
 describe("Stack component", () => {
   test("should create stack element", () => {

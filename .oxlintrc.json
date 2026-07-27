@@ -1,0 +1,12 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "ignorePatterns": ["dist/**", "node_modules/**", "coverage/**"],
+  "globals": {
+    "Bun": "readonly"
+  },
+  "rules": {
+    "no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }],
+    "no-unused-private-class-members": "error",
+    "typescript/consistent-type-imports": "error"
+  }
+}

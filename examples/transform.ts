@@ -1,11 +1,12 @@
+import { GlobalFonts } from "@napi-rs/canvas";
+import { fileURLToPath } from "bun";
+
 /**
  * 示例：演示 Transform 组件的基础属性
  * 展示移动（translate）、旋转（rotate）、放大（scale）等变换效果
  * 运行: bun examples/transform.ts
  */
 import { Box, createCanvas, printLayout, Text, Transform } from "@/index";
-import { GlobalFonts } from "@napi-rs/canvas";
-import { fileURLToPath } from "bun";
 
 GlobalFonts.registerFromPath(fileURLToPath(import.meta.resolve("@fontpkg/unifont/unifont-15.0.01.ttf")), "unifont");
 

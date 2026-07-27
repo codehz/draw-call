@@ -123,8 +123,8 @@ bun run format
 
 项目使用 Husky 和 lint-staged，在提交前自动运行：
 
-- Prettier 格式化
-- ESLint 检查和修复
+- Oxfmt 格式化
+- Oxlint 检查和修复
 
 ### 构建和发布
 

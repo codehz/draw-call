@@ -1,7 +1,8 @@
+import { describe, expect, test } from "bun:test";
+
 import { wrapRichText } from "@/layout/components/richtext";
 import type { MeasureContext } from "@/layout/utils/measure";
 import type { RichTextElement, RichTextSpan } from "@/types/components";
-import { describe, expect, test } from "bun:test";
 
 /**
  * 创建一个简单的 mock MeasureContext 用于测试

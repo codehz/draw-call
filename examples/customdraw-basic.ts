@@ -1,11 +1,12 @@
+import { GlobalFonts } from "@napi-rs/canvas";
+import { fileURLToPath } from "bun";
+
 /**
  * 示例：CustomDraw 基础用法
  * 展示如何使用 CustomDraw 进行简单的自定义绘制
  * 运行: bun examples/customdraw-basic.ts
  */
 import { Box, createCanvas, CustomDraw, printLayout, Text } from "@/index";
-import { GlobalFonts } from "@napi-rs/canvas";
-import { fileURLToPath } from "bun";
 
 GlobalFonts.registerFromPath(fileURLToPath(import.meta.resolve("@fontpkg/unifont/unifont-15.0.01.ttf")), "unifont");
 

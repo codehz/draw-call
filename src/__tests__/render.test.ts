@@ -1,5 +1,6 @@
-import { Box, createCanvas, Svg, svg, Text } from "@/index";
 import { describe, expect, test } from "bun:test";
+
+import { Box, createCanvas, Svg, svg, Text } from "@/index";
 
 describe("render", () => {
   test("should render simple box", () => {

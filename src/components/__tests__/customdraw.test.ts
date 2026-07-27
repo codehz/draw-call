@@ -1,5 +1,6 @@
-import { Box, createCanvas, CustomDraw } from "@/index";
 import { describe, expect, test } from "bun:test";
+
+import { Box, createCanvas, CustomDraw } from "@/index";
 
 describe("CustomDraw component", () => {
   test("should expose native canvas through ctx.canvas", () => {
