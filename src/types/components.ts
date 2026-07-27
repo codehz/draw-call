@@ -135,12 +135,12 @@ export interface SvgStyleProps {
 export interface SvgTransformProps {
   transform?: {
     translate?: [number, number];
-    /** 旋转角度（弧度）或 [angle(弧度), cx, cy](绕点旋转) */
+    /** 旋转角度（度）或 [angle(度), cx, cy](绕点旋转) */
     rotate?: number | [number, number, number]; // angle 或 [angle, cx, cy]
     scale?: number | [number, number];
-    /** 水平偏移角度（弧度） */
+    /** 水平倾斜角度（度） */
     skewX?: number;
-    /** 垂直偏移角度（弧度） */
+    /** 垂直倾斜角度（度） */
     skewY?: number;
     matrix?: [number, number, number, number, number, number];
   };
@@ -289,12 +289,12 @@ export interface StackElement extends ElementBase, StackProps {
 // 简易对象形式
 interface TransformSimpleObject {
   translate?: [number, number];
-  /** 旋转角度（弧度）或 [angle(弧度), cx, cy](绕点旋转) */
+  /** 旋转角度（度）或 [angle(度), cx, cy](绕点旋转) */
   rotate?: number | [number, number, number];
   scale?: number | [number, number];
-  /** 水平偏移角度（弧度） */
+  /** 水平倾斜角度（度） */
   skewX?: number;
-  /** 垂直偏移角度（弧度） */
+  /** 垂直倾斜角度（度） */
   skewY?: number;
 }
 
@@ -314,7 +314,7 @@ export type TransformValue = TransformSimpleObject | DOMMatrix2DInit | [number, 
 // Transform 组件属性
 export interface TransformProps {
   children: Element;
-  /** 变换值（rotate/skew 使用弧度） */
+  /** 变换值（rotate/skew 使用度） */
   transform?: TransformValue;
   /** 变换原点，默认为 [0, 0]（左上角） */
   transformOrigin?: [number | string, number | string];

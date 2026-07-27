@@ -20,9 +20,7 @@ describe("Transform component", () => {
   });
 });
 
-// 当前布局实现会解包 Transform，导致变换渲染失效。
-// 阶段四修复后移除 skip。
-describe.skip("Transform layout contract", () => {
+describe("Transform layout contract", () => {
   test("should keep Transform wrapper node in layout tree", () => {
     const canvas = createCanvas({ width: 120, height: 120 });
     const node = canvas.render(

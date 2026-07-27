@@ -1,7 +1,7 @@
 import type { LayoutChild } from "@/layout/arrange/types";
 import { measureIntrinsicSize } from "@/layout/measure";
 import { createAxisConfig } from "@/layout/utils/axis";
-import { getElementLayoutProps, getElementMargin } from "@/layout/utils/element";
+import { getElementLayoutProps, getElementMargin, getElementPadding } from "@/layout/utils/element";
 import { groupFlexLines, lineCrossSize, lineMainSize, resolveMainAxisPlacement } from "@/layout/utils/flex";
 import type { MeasureContext } from "@/layout/utils/measure";
 import type { NormalizedSpacing } from "@/types/base";
@@ -214,7 +214,7 @@ export function arrangeBox(node: LayoutNode, ctx: MeasureContext, layoutChild: L
       );
 
       if (shouldStretchCross && info.flex > 0) {
-        const childPadding = normalizeSpacing("padding" in info.element ? info.element.padding : undefined);
+        const childPadding = getElementPadding(info.element);
 
         if (isRow && childNode.layout.height < info.height) {
           childNode.layout.height = info.height;

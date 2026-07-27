@@ -34,55 +34,38 @@ export function unwrapLayoutElement(element: Element): LayoutElement {
 }
 
 /**
- * 安全获取元素 margin；Transform 无自身 margin，返回零间距。
+ * 安全获取元素 margin；Transform 透传到实际布局子元素。
  */
 export function getElementMargin(element: Element): NormalizedSpacing {
-  if (element.type === "transform") {
-    return { ...ZERO_SPACING };
-  }
-  return normalizeSpacing(element.margin);
+  const layoutElement = unwrapLayoutElement(element);
+  return normalizeSpacing(layoutElement.margin);
 }
 
 /**
- * 安全获取布局属性；Transform 这些属性为 undefined。
+ * 安全获取布局属性；Transform 透传到实际布局子元素。
  */
 export function getElementLayoutProps(element: Element): ElementLayoutProps {
-  if (element.type === "transform") {
-    return {
-      width: undefined,
-      height: undefined,
-      flex: undefined,
-      minWidth: undefined,
-      maxWidth: undefined,
-      minHeight: undefined,
-      maxHeight: undefined,
-      alignSelf: undefined,
-    };
-  }
+  const layoutElement = unwrapLayoutElement(element);
   return {
-    width: element.width,
-    height: element.height,
-    flex: element.flex,
-    minWidth: element.minWidth,
-    maxWidth: element.maxWidth,
-    minHeight: element.minHeight,
-    maxHeight: element.maxHeight,
-    alignSelf: element.alignSelf,
+    width: layoutElement.width,
+    height: layoutElement.height,
+    flex: layoutElement.flex,
+    minWidth: layoutElement.minWidth,
+    maxWidth: layoutElement.maxWidth,
+    minHeight: layoutElement.minHeight,
+    maxHeight: layoutElement.maxHeight,
+    alignSelf: layoutElement.alignSelf,
   };
 }
 
 export function getElementPadding(element: Element): NormalizedSpacing {
-  if (element.type === "transform") {
-    return { ...ZERO_SPACING };
-  }
-  return normalizeSpacing("padding" in element ? element.padding : undefined);
+  const layoutElement = unwrapLayoutElement(element);
+  return normalizeSpacing("padding" in layoutElement ? layoutElement.padding : undefined);
 }
 
 export function getElementBorderWidth(element: Element): number {
-  if (element.type === "transform") {
-    return 0;
-  }
-  return getBorderWidth("border" in element ? (element.border as Border | undefined) : undefined);
+  const layoutElement = unwrapLayoutElement(element);
+  return getBorderWidth("border" in layoutElement ? (layoutElement.border as Border | undefined) : undefined);
 }
 
 export function outerWidth(size: number, margin: NormalizedSpacing): number {

@@ -4,6 +4,7 @@ import {
   arrangeRichText,
   arrangeStack,
   arrangeText,
+  arrangeTransform,
   createBaseLayoutNode,
 } from "@/layout/arrange";
 import type { MeasureContext } from "@/layout/utils/measure";
@@ -12,8 +13,6 @@ import type { LayoutConstraints, LayoutNode } from "@/types/layout";
 
 /**
  * 类型守卫：检查 Element 是否为 LayoutElement（非 Transform）
- * 由于 Transform 元素在 computeLayoutImpl 开始时被处理，
- * 此时只应处理 LayoutElement
  */
 function assertLayoutElement(element: Element): asserts element is LayoutElement {
   if (element.type === "transform") {
@@ -45,9 +44,8 @@ function computeLayoutImpl(
   x: number = 0,
   y: number = 0
 ): LayoutNode {
-  // Transform 元素需要特殊处理：直接委托给子元素
   if (element.type === "transform") {
-    return computeLayoutImpl(element.children, ctx, constraints, x, y);
+    return arrangeTransform(element, ctx, constraints, x, y, computeLayoutImpl);
   }
 
   assertLayoutElement(element);
