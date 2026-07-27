@@ -31,9 +31,10 @@ src/
 │   ├── Transform.ts   # Transform 2D 变换组件
 │   └── CustomDraw.ts  # CustomDraw 自定义绘制组件
 ├── layout/            # 布局引擎
-│   ├── engine.ts      # 布局计算核心
-│   ├── components/    # 组件固有尺寸测量
-│   └── utils/         # 布局工具函数
+│   ├── engine.ts      # 布局计算门面（分发）
+│   ├── measure/       # 组件固有尺寸测量
+│   ├── arrange/       # 节点编排（Text/Stack/Box/Transform 等）
+│   └── utils/         # 布局工具函数（元素访问、轴向、flex 几何）
 ├── render/            # 渲染引擎
 │   ├── components/    # 组件渲染实现
 │   └── utils/         # 渲染工具函数
@@ -145,9 +146,10 @@ bun run release
 
 1. 在 `src/components/` 中创建组件文件
 2. 在 `src/types/components.ts` 中定义组件类型
-3. 在 `src/layout/components/` 中实现固有尺寸测量
-4. 在 `src/render/components/` 中实现渲染逻辑
-5. 在 `src/components/index.ts` 中导出组件
+3. 在 `src/layout/measure/` 中实现固有尺寸测量
+4. 在 `src/layout/arrange/` 中实现节点编排（如需）
+5. 在 `src/render/components/` 中实现渲染逻辑
+6. 在 `src/components/index.ts` 中导出组件
 
 ### 组件类型定义
 
@@ -175,13 +177,13 @@ interface ContainerLayoutProps extends LayoutProps {
 
 ### 布局计算
 
-布局引擎在 `src/layout/engine.ts` 中实现，遵循以下流程：
+布局引擎以 `src/layout/engine.ts` 为门面，按 Measure / Arrange 分层：
 
-1. 测量固有尺寸（`measureIntrinsicSize`）
-2. 解析宽高（`resolveSize`）
-3. 应用 min/max 约束
-4. 计算子元素布局
-5. 应用偏移和对齐
+1. 测量固有尺寸（`layout/measure` → `measureIntrinsicSize`）
+2. 解析宽高与 border-box/content-box（`createBaseLayoutNode`）
+3. 按元素类型分发到 `layout/arrange`（Text/Stack/Box/Transform 等）
+4. 容器内计算子节点布局、对齐与 auto 尺寸回写
+5. Transform 保留包装节点，布局属性透传给实际子元素
 
 ### 渲染实现
 
