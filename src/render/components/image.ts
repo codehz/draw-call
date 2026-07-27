@@ -118,12 +118,22 @@ export function renderImage(ctx: CanvasRenderingContext2D, node: LayoutNode): vo
     }
   }
 
-  // 绘制图片
+  // 绘制图片（可临时覆盖 imageSmoothingEnabled，绘制后 restore）
   if (canDraw) {
+    const overrideSmoothing = element.imageSmoothingEnabled !== undefined;
+    if (overrideSmoothing) {
+      ctx.save();
+      ctx.imageSmoothingEnabled = element.imageSmoothingEnabled!;
+    }
+
     if (cropRect) {
       ctx.drawImage(src, cropRect.sx, cropRect.sy, cropRect.sw, cropRect.sh, drawX, drawY, drawWidth, drawHeight);
     } else {
       ctx.drawImage(src, drawX, drawY, drawWidth, drawHeight);
+    }
+
+    if (overrideSmoothing) {
+      ctx.restore();
     }
   }
 

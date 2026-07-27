@@ -108,6 +108,11 @@ export interface ImageProps extends LayoutProps {
     x?: "left" | "center" | "right" | number;
     y?: "top" | "center" | "bottom" | number;
   };
+  /**
+   * 绘制时临时覆盖上下文的 imageSmoothingEnabled。
+   * 未设置时沿用画布当前平滑设置（默认不改动）。
+   */
+  imageSmoothingEnabled?: boolean;
   border?: Border;
   shadow?: Shadow;
   opacity?: number;

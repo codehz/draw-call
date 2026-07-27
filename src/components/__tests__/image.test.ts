@@ -395,4 +395,42 @@ describe("Image component", () => {
     expect(node.layout.width).toBe(50);
     expect(node.layout.height).toBe(50);
   });
+
+  test("should pass through imageSmoothingEnabled prop", () => {
+    const sourceCanvas = createCanvas({ width: 100, height: 100 });
+    const image = Image({
+      src: sourceCanvas.canvas,
+      width: 100,
+      height: 100,
+      imageSmoothingEnabled: false,
+    });
+    expect(image.imageSmoothingEnabled).toBe(false);
+  });
+
+  test("should restore imageSmoothingEnabled after draw", () => {
+    const canvas = createCanvas({
+      width: 200,
+      height: 200,
+      imageSmoothingEnabled: true,
+    });
+    const ctx = canvas.getContext();
+    expect(ctx.imageSmoothingEnabled).toBe(true);
+
+    const sourceCanvas = createCanvas({ width: 10, height: 10 });
+    const sourceCtx = sourceCanvas.getContext();
+    sourceCtx.fillStyle = "#ff0000";
+    sourceCtx.fillRect(0, 0, 10, 10);
+
+    canvas.render(
+      Image({
+        src: sourceCanvas.canvas,
+        width: 100,
+        height: 100,
+        imageSmoothingEnabled: false,
+      })
+    );
+
+    // 绘制后应恢复画布原有平滑设置
+    expect(ctx.imageSmoothingEnabled).toBe(true);
+  });
 });

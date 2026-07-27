@@ -186,6 +186,8 @@ Image({
   crop: { x: 10, y: 20, width: 100, height: 80 },
   fit: "cover", // contain | cover | fill | none | scale-down
   position: { x: "center", y: "center" },
+  // 绘制时临时关闭图片平滑（未设置则沿用画布设置）
+  imageSmoothingEnabled: false,
   border: { radius: 8 },
 });
 ```
