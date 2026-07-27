@@ -13,8 +13,8 @@ function mergeSpanStyle(
 ): Omit<RichTextSpanSegment, "text" | "width" | "height" | "ascent" | "descent" | "offset"> {
   // 深度合并 font 对象，span 的属性优先
   const mergedFont = {
-    ...(elementStyle.font || {}),
-    ...(span.font || {}),
+    ...elementStyle.font,
+    ...span.font,
   };
 
   return {

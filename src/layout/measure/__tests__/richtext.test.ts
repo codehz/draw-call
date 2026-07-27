@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 
-import { wrapRichText } from "@/layout/components/richtext";
+import { wrapRichText } from "@/layout/measure/richtext";
 import type { MeasureContext } from "@/layout/utils/measure";
 import type { RichTextElement, RichTextSpan } from "@/types/components";
 

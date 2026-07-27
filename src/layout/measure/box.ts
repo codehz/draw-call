@@ -1,3 +1,6 @@
+import { createAxisConfig } from "@/layout/utils/axis";
+import { getElementMargin } from "@/layout/utils/element";
+import { measureWrappedContentSize } from "@/layout/utils/flex";
 import type { MeasureContext } from "@/layout/utils/measure";
 import { getBorderWidth, normalizeSpacing } from "@/types/base";
 import type { BoxElement, Element } from "@/types/components";
@@ -7,17 +10,6 @@ type ChildSize = {
   height: number;
   margin: { left: number; right: number; top: number; bottom: number };
 };
-
-/**
- * 安全获取元素的 margin
- * Transform 元素没有 margin，返回默认 spacing
- */
-function getElementMargin(element: Element) {
-  if (element.type === "transform") {
-    return { top: 0, right: 0, bottom: 0, left: 0 };
-  }
-  return normalizeSpacing(element.margin);
-}
 
 function calcEffectiveSize(
   element: BoxElement,
@@ -64,54 +56,6 @@ function collectChildSizes(
   return childSizes;
 }
 
-function measureWrappedContent(
-  childSizes: ChildSize[],
-  gap: number,
-  availableMain: number,
-  isRow: boolean
-): { width: number; height: number } {
-  let currentMain = 0;
-  let currentCross = 0;
-  let totalCross = 0;
-  let maxMain = 0;
-  let lineCount = 0;
-
-  for (let i = 0; i < childSizes.length; i++) {
-    const { width, height, margin } = childSizes[i];
-    const itemMain = isRow ? width + margin.left + margin.right : height + margin.top + margin.bottom;
-    const itemCross = isRow ? height + margin.top + margin.bottom : width + margin.left + margin.right;
-
-    const needsWrap = lineCount > 0 && currentMain + gap + itemMain > availableMain;
-
-    if (needsWrap) {
-      totalCross += currentCross;
-      maxMain = Math.max(maxMain, currentMain);
-      lineCount++;
-
-      currentMain = itemMain;
-      currentCross = itemCross;
-    } else {
-      if (lineCount > 0 || i > 0) {
-        currentMain += gap;
-      }
-      currentMain += itemMain;
-      currentCross = Math.max(currentCross, itemCross);
-      if (i === 0) lineCount = 1;
-    }
-  }
-
-  if (childSizes.length > 0) {
-    totalCross += currentCross;
-    maxMain = Math.max(maxMain, currentMain);
-  }
-
-  if (lineCount > 1) {
-    totalCross += gap * (lineCount - 1);
-  }
-
-  return isRow ? { width: maxMain, height: totalCross } : { width: totalCross, height: maxMain };
-}
-
 /**
  * 测量 Box 元素的固有尺寸
  */
@@ -126,7 +70,7 @@ export function measureBoxSize(
   const gap = element.gap ?? 0;
   const direction = element.direction ?? "row";
   const wrap = element.wrap ?? false;
-  const isRow = direction === "row" || direction === "row-reverse";
+  const { isRow } = createAxisConfig(direction);
 
   let contentWidth = 0;
   let contentHeight = 0;
@@ -145,12 +89,12 @@ export function measureBoxSize(
   // 如果启用了 wrap 且有可用宽度，需要模拟换行来计算正确的高度
   if (wrap && isRow && effectiveWidth > 0) {
     const childSizes = collectChildSizes(children, ctx, availableWidth, padding, borderWidth, measureChild);
-    const wrapped = measureWrappedContent(childSizes, gap, effectiveWidth, true);
+    const wrapped = measureWrappedContentSize(childSizes, true, gap, effectiveWidth);
     contentWidth = wrapped.width;
     contentHeight = wrapped.height;
   } else if (wrap && !isRow && effectiveHeight > 0) {
     const childSizes = collectChildSizes(children, ctx, availableWidth, padding, borderWidth, measureChild);
-    const wrapped = measureWrappedContent(childSizes, gap, effectiveHeight, false);
+    const wrapped = measureWrappedContentSize(childSizes, false, gap, effectiveHeight);
     contentWidth = wrapped.width;
     contentHeight = wrapped.height;
   } else {

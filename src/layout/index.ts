@@ -1,4 +1,4 @@
-export { measureIntrinsicSize } from "./components";
+export { measureIntrinsicSize } from "./measure";
 export { computeLayout } from "./engine";
 export { layoutToString, printLayout } from "./utils";
 export { createCanvasMeasureContext, truncateText, wrapText } from "./utils/measure";

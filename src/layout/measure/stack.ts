@@ -1,17 +1,7 @@
+import { getElementMargin } from "@/layout/utils/element";
 import type { MeasureContext } from "@/layout/utils/measure";
 import { getBorderWidth, normalizeSpacing } from "@/types/base";
 import type { Element, StackElement } from "@/types/components";
-
-/**
- * 安全获取元素的 margin
- * Transform 元素没有 margin，返回默认 spacing
- */
-function getElementMargin(element: Element) {
-  if (element.type === "transform") {
-    return { top: 0, right: 0, bottom: 0, left: 0 };
-  }
-  return normalizeSpacing(element.margin);
-}
 
 /**
  * 测量 Stack 元素的固有尺寸

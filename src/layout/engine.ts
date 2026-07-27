@@ -1,5 +1,8 @@
-import { measureIntrinsicSize } from "@/layout/components";
-import { wrapRichText } from "@/layout/components/richtext";
+import { measureIntrinsicSize } from "@/layout/measure";
+import { wrapRichText } from "@/layout/measure/richtext";
+import { createAxisConfig } from "@/layout/utils/axis";
+import { getElementLayoutProps, getElementMargin } from "@/layout/utils/element";
+import { groupFlexLines, lineCrossSize, lineMainSize, resolveMainAxisPlacement } from "@/layout/utils/flex";
 import type { MeasureContext } from "@/layout/utils/measure";
 import { truncateText, wrapText } from "@/layout/utils/measure";
 import { applyOffset } from "@/layout/utils/offset";
@@ -18,47 +21,6 @@ function assertLayoutElement(element: Element): asserts element is LayoutElement
   if (element.type === "transform") {
     throw new Error("Transform elements should be handled at entry point");
   }
-}
-
-/**
- * 安全获取元素的 margin
- * Transform 元素没有 margin，返回默认 spacing
- */
-function getElementMargin(element: Element): NormalizedSpacing {
-  if (element.type === "transform") {
-    return { top: 0, right: 0, bottom: 0, left: 0 };
-  }
-  return normalizeSpacing((element as LayoutElement).margin);
-}
-
-/**
- * 安全获取元素的布局属性（width, height, flex等）
- * Transform 元素这些属性为 undefined
- */
-function getElementLayoutProps(element: Element) {
-  if (element.type === "transform") {
-    return {
-      width: undefined,
-      height: undefined,
-      flex: undefined,
-      minWidth: undefined,
-      maxWidth: undefined,
-      minHeight: undefined,
-      maxHeight: undefined,
-      alignSelf: undefined,
-    };
-  }
-  const le = element as LayoutElement;
-  return {
-    width: le.width,
-    height: le.height,
-    flex: le.flex,
-    minWidth: le.minWidth,
-    maxWidth: le.maxWidth,
-    minHeight: le.minHeight,
-    maxHeight: le.maxHeight,
-    alignSelf: le.alignSelf,
-  };
 }
 
 /**
@@ -269,8 +231,7 @@ function computeLayoutImpl(
       const align = boxElement.align ?? "stretch";
       const gap = boxElement.gap ?? 0;
       const wrap = boxElement.wrap ?? false;
-      const isRow = direction === "row" || direction === "row-reverse";
-      const isReverse = direction === "row-reverse" || direction === "column-reverse";
+      const { isRow, isReverse } = createAxisConfig(direction);
 
       const getContentMainSize = () => (isRow ? contentWidth : contentHeight);
       const getContentCrossSize = () => (isRow ? contentHeight : contentWidth);
@@ -333,38 +294,7 @@ function computeLayoutImpl(
       }
 
       // 如果启用 wrap，将子元素分组到多行/列
-      const lines: Array<typeof childInfos> = [];
-      if (wrap) {
-        let currentLine: typeof childInfos = [];
-        let currentLineSize = 0;
-        const mainAxisSize = getContentMainSize();
-
-        for (const info of childInfos) {
-          const itemSize = isRow
-            ? info.width + info.margin.left + info.margin.right
-            : info.height + info.margin.top + info.margin.bottom;
-
-          // 检查是否需要换行
-          const needsWrap = currentLine.length > 0 && currentLineSize + gap + itemSize > mainAxisSize;
-
-          if (needsWrap) {
-            // 换行
-            lines.push(currentLine);
-            currentLine = [info];
-            currentLineSize = itemSize;
-          } else {
-            currentLine.push(info);
-            currentLineSize += (currentLine.length > 1 ? gap : 0) + itemSize;
-          }
-        }
-
-        if (currentLine.length > 0) {
-          lines.push(currentLine);
-        }
-      } else {
-        // 不换行，所有元素在一行
-        lines.push(childInfos);
-      }
+      const lines = groupFlexLines(childInfos, isRow, gap, getContentMainSize(), wrap);
 
       // 计算 flex 元素的尺寸（每行分别计算）
       for (const lineInfos of lines) {
@@ -416,62 +346,13 @@ function computeLayoutImpl(
       for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
         const lineInfos = lines[lineIndex];
         // 计算该行的主轴总尺寸
-        const totalGap = lineInfos.length > 1 ? gap * (lineInfos.length - 1) : 0;
-        const totalSize =
-          lineInfos.reduce((sum, info) => {
-            return (
-              sum +
-              (isRow
-                ? info.width + info.margin.left + info.margin.right
-                : info.height + info.margin.top + info.margin.bottom)
-            );
-          }, 0) + totalGap;
-
+        const totalSize = lineMainSize(lineInfos, isRow, gap);
         const mainAxisSize = getContentMainSize();
         const freeSpace = mainAxisSize - totalSize;
-
-        let mainStart = 0;
-        let mainGap = gap;
-
-        switch (justify) {
-          case "start":
-            mainStart = 0;
-            break;
-          case "end":
-            mainStart = freeSpace;
-            break;
-          case "center":
-            mainStart = freeSpace / 2;
-            break;
-          case "space-between":
-            mainStart = 0;
-            if (lineInfos.length > 1) {
-              mainGap = gap + freeSpace / (lineInfos.length - 1);
-            }
-            break;
-          case "space-around":
-            if (lineInfos.length > 0) {
-              const spacing = freeSpace / lineInfos.length;
-              mainStart = spacing / 2;
-              mainGap = gap + spacing;
-            }
-            break;
-          case "space-evenly":
-            if (lineInfos.length > 0) {
-              const spacing = freeSpace / (lineInfos.length + 1);
-              mainStart = spacing;
-              mainGap = gap + spacing;
-            }
-            break;
-        }
+        const { mainStart, mainGap } = resolveMainAxisPlacement(justify, freeSpace, lineInfos.length, gap);
 
         // 计算该行的交叉轴尺寸
-        const lineCrossSize = lineInfos.reduce((max, info) => {
-          const itemCrossSize = isRow
-            ? info.height + info.margin.top + info.margin.bottom
-            : info.width + info.margin.left + info.margin.right;
-          return Math.max(max, itemCrossSize);
-        }, 0);
+        const lineCross = lineCrossSize(lineInfos, isRow);
 
         // 布局该行的子元素
         let mainOffset = mainStart;
@@ -480,7 +361,7 @@ function computeLayoutImpl(
         for (let i = 0; i < orderedInfos.length; i++) {
           const info = orderedInfos[i];
           const childProps = getElementLayoutProps(info.element);
-          const crossAxisSize = wrap ? lineCrossSize : getContentCrossSize();
+          const crossAxisSize = wrap ? lineCross : getContentCrossSize();
           const childCrossSize = isRow
             ? info.height + info.margin.top + info.margin.bottom
             : info.width + info.margin.left + info.margin.right;
@@ -592,7 +473,7 @@ function computeLayoutImpl(
         }
 
         // 更新交叉轴偏移（移到下一行/列）
-        crossOffset += lineCrossSize;
+        crossOffset += lineCross;
         // 行与行之间也应该有 gap（除了最后一行）
         if (lineIndex < lines.length - 1) {
           crossOffset += gap;
